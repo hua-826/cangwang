@@ -1,1285 +1,855 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="古籍书斋">
-  <title>古籍书斋</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="藏往 2.0"/>
+  <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi藏往Mi4wIiwic2hvcnRfbmFtZSI6IuW8oOW8oSIsInN0YXJ0X3VybCI6Ii4iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjRkJGOUY1IiwidGhlbWVfY29sb3IiOiIjOWIzNjJlIn0=">
+  <title>藏往 2.0｜术数典籍书斋</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <style>
-    :root {
-      --paper: #F7F3EA;
-      --paper-deep: #EFE9DC;
-      --paper-card: #FAF7F0;
-      --ink: #2A2520;
-      --ink-sub: #6F6558;
-      --ink-faint: #A39889;
-      --line: #DFD5C3;
-      --seal: #9B362E;
-      --seal-active: #7D2A23;
-      --serif: "Songti SC", "STSong", "Noto Serif SC", "PingFang SC", serif;
-      --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
-    }
+    :root{
+      --paper:#FBF9F5;
+      --paper-deep:#EAE3D6;
+      --paper-card:#FFFDFA;
+      --ink:#221E1A;
+      --ink-sub:#665C50;
+      --ink-faint:#A89C8C;
+      --line:#DDD2BF;
+      --seal:#9B362E;
+      --seal-active:#7D2A23;
+      --accent-blue:#365B9B;
 
-    html, body, div, header, main, footer, section, article, p, h1, h2, h3, input, textarea, button, span, label, select {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
+      --bg-dark:#1A1815;
+      --card-dark:#272420;
+      --ink-dark:#E8E2D7;
+      --ink-sub-dark:#A99F8F;
+      --line-dark:#3A352E;
     }
+    [data-theme="dark"]{
+      --paper:var(--bg-dark);
+      --paper-deep:var(--card-dark);
+      --paper-card:var(--card-dark);
+      --ink:var(--ink-dark);
+      --ink-sub:var(--ink-sub-dark);
+      --ink-faint:#776F63;
+      --line:var(--line-dark);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+    html,body{height:100%;background:var(--paper);color:var(--ink);font-family:"PingFang SC","Noto Serif SC",serif;overscroll-behavior-y:none;}
+    body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;}
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background-color: var(--paper);
-      color: var(--ink);
-      font-family: var(--sans);
-      overscroll-behavior-y: none;
+    /* 顶部门类导航 */
+    .cat-nav{
+      flex-shrink:0;display:flex;gap:4px;padding:calc(8px + env(safe-area-inset-top)) 12px 6px 12px;background:var(--paper);border-bottom:1px solid var(--line);overflow-x:auto;user-select:none;
     }
+    .cat-tab{
+      flex:0 0 auto;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper-card);font-size:13px;white-space:nowrap;cursor:pointer;transition:0.18s;
+    }
+    .cat-tab.active{background:var(--seal);color:#fff;border-color:var(--seal);}
 
-    body {
-      display: flex;
-      flex-direction: column;
-      height: 100dvh;
-      overflow: hidden;
+    .topbar{
+      flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;border-bottom:1px solid var(--line);background:var(--paper);user-select:none;
     }
+    .book-meta{min-width:0;flex:1;display:flex;flex-direction:column;}
+    .book-title{font-size:16px;font-weight:600;letter-spacing:0.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .book-sub{font-size:11px;color:var(--ink-sub);margin-top:2px;}
+    .top-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
 
-    .topbar {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: calc(10px + env(safe-area-inset-top)) 14px 10px 14px;
-      background: rgba(247, 243, 234, 0.96);
-      border-bottom: 1px solid var(--line);
-      user-select: none;
-      -webkit-user-select: none;
-      z-index: 20;
-    }
+    .btn{appearance:none;border:1px solid var(--line);background:var(--paper-card);color:var(--ink);font-size:13px;padding:7px 11px;border-radius:6px;cursor:pointer;transition:0.15s;}
+    .btn:active{background:var(--paper-deep);}
+    .btn-primary{background:var(--seal);border-color:var(--seal);color:#fff;font-weight:500;}
+    .btn-primary:active{background:var(--seal-active);}
+    .btn-icon{padding:7px 9px;}
 
-    .book-meta {
-      min-width: 0;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+    /* 藏书阁书架面板 */
+    .shelf-panel{
+      position:fixed;inset:0;z-index:40;background:rgba(0,0,0,0.4);display:none;align-items:flex-end;justify-content:center;
     }
+    .shelf-panel.open{display:flex;}
+    .shelf-wrap{
+      width:100%;max-width:720px;max-height:80dvh;background:var(--paper);border-radius:14px 14px 0 0;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom);
+    }
+    .shelf-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);}
+    .shelf-title{font-size:15px;font-weight:600;}
+    .shelf-body{flex:1;overflow-y:auto;padding:14px;}
+    .book-item{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;background:var(--paper-card);}
+    .book-item.active{border-color:var(--seal);background:rgba(155,54,46,0.06);}
+    .book-info{flex:1;min-width:0;}
+    .book-name{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .book-meta-small{font-size:11px;color:var(--ink-sub);margin-top:2px;}
+    .book-actions{display:flex;gap:4px;flex-shrink:0;}
 
-    .book-title {
-      font-family: var(--serif);
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--ink);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      letter-spacing: 0.04em;
-    }
+    .progress-bar{display:none;padding:8px 14px;background:var(--paper-deep);border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-sub);flex-shrink:0;}
+    .progress-bar.show{display:block;}
+    .progress-track{height:3px;background:var(--line);border-radius:2px;margin-top:6px;overflow:hidden;}
+    .progress-fill{height:100%;width:0;background:var(--seal);transition:0.15s linear;}
 
-    .book-sub {
-      font-size: 11px;
-      color: var(--ink-sub);
-      margin-top: 2px;
-    }
+    .reader-main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 16px 90px 16px;}
+    .empty-state{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--ink-sub);padding:20px;user-select:none;}
+    .empty-seal{width:46px;height:46px;border:1.5px solid var(--seal);border-radius:6px;color:var(--seal);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px;}
+    .empty-text{font-size:15px;line-height:1.8;}
 
-    .top-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
+    .book-content{max-width:700px;margin:0 auto;font-size:18px;line-height:2;letter-spacing:0.04em;user-select:text;word-break:break-word;}
+    .page-block{margin-bottom:26px;}
+    .page-divider{display:flex;align-items:center;gap:8px;margin:20px 0 12px 0;font-size:11px;color:var(--ink-faint);user-select:none;}
+    .page-divider::before,.page-divider::after{content:"";flex:1;height:1px;background:var(--line);}
+    .page-block p{margin:0 0 12px 0;text-indent:2em;}
 
-    .btn {
-      appearance: none;
-      border: 1px solid var(--line);
-      background: var(--paper-card);
-      color: var(--ink);
-      font-size: 13px;
-      padding: 7px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-family: var(--sans);
-      transition: background 0.15s, border-color 0.15s;
-    }
+    .pager{max-width:700px;margin:24px auto 8px auto;display:flex;gap:8px;align-items:center;padding-top:14px;border-top:1px solid var(--line);user-select:none;}
+    .pager select{flex:1;max-width:170px;background:var(--paper-card);border:1px solid var(--line);border-radius:6px;padding:7px 8px;font-size:13px;color:var(--ink);}
 
-    .btn:active {
-      background: var(--paper-deep);
-    }
+    /* 划词悬浮按钮 */
+    .sel-pill{position:fixed;right:14px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:35;display:none;align-items:center;gap:8px;background:var(--seal);color:#fff;border-radius:999px;padding:10px 14px;box-shadow:0 6px 18px rgba(0,0,0,0.22);cursor:pointer;}
+    .sel-pill.show{display:inline-flex;}
+    .sel-pill .badge{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:13px;}
+    .sel-pill .snippet{max-width:110px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;opacity:0.9;}
 
-    .btn-primary {
-      background: var(--seal);
-      border-color: var(--seal);
-      color: #FFFDF9;
-      font-weight: 500;
-    }
+    .ask-bar{flex-shrink:0;display:flex;gap:8px;align-items:center;padding:10px 14px calc(10px + env(safe-area-inset-bottom)) 14px;background:var(--paper);border-top:1px solid var(--line);z-index:20;}
+    .ask-input{flex:1;border:1px solid var(--line);background:var(--paper-card);color:var(--ink);border-radius:8px;padding:9px 12px;font-size:15px;outline:none;}
+    .ask-input:focus{border-color:var(--seal);}
 
-    .btn-primary:active {
-      background: var(--seal-active);
-      border-color: var(--seal-active);
-    }
+    /* AI结果弹窗 */
+    .sheet-mask{position:fixed;inset:0;background:rgba(0,0,0,0.42);z-index:50;display:none;align-items:flex-end;justify-content:center;}
+    .sheet-mask.open{display:flex;}
+    .sheet{width:100%;max-width:720px;max-height:78dvh;background:var(--paper);border-radius:14px 14px 0 0;display:flex;flex-direction:column;overflow:hidden;padding-bottom:env(safe-area-inset-bottom);}
+    .sheet-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--paper-deep);flex-shrink:0;}
+    .sheet-title{font-size:15px;font-weight:600;}
+    .sheet-body{flex:1;overflow-y:auto;padding:16px;font-size:15px;line-height:1.85;}
+    .quote-box{background:var(--paper-deep);border-left:3px solid var(--seal);padding:10px 12px;margin-bottom:14px;border-radius:0 6px 6px 0;font-size:14px;color:var(--ink-sub);}
+    .ai-out{white-space:pre-wrap;word-break:break-word;}
 
-    .btn-danger {
-      color: var(--seal);
-      border-color: rgba(155, 54, 46, 0.35);
-      background: #FCF6F5;
-    }
-
-    .progress-bar {
-      display: none;
-      flex-shrink: 0;
-      background: var(--paper-deep);
-      border-bottom: 1px solid var(--line);
-      padding: 8px 14px;
-      font-size: 12px;
-      color: var(--ink-sub);
-    }
-
-    .progress-bar.show {
-      display: block;
-    }
-
-    .progress-track {
-      height: 3px;
-      background: var(--line);
-      border-radius: 2px;
-      margin-top: 6px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--seal);
-      transition: width 0.15s linear;
-    }
-
-    .reader-main {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 20px 18px 90px 18px;
-    }
-
-    .empty-state {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      color: var(--ink-sub);
-      padding: 24px;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .empty-seal {
-      width: 44px;
-      height: 44px;
-      border: 1.5px solid var(--seal);
-      border-radius: 6px;
-      color: var(--seal);
-      font-family: var(--serif);
-      font-size: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-      letter-spacing: 0;
-    }
-
-    .empty-text {
-      font-family: var(--serif);
-      font-size: 15px;
-      line-height: 1.8;
-      margin-bottom: 18px;
-    }
-
-    .book-content {
-      max-width: 720px;
-      margin: 0 auto;
-      font-family: var(--serif);
-      font-size: 18px;
-      line-height: 2;
-      letter-spacing: 0.05em;
-      color: var(--ink);
-      user-select: text;
-      -webkit-user-select: text;
-      word-break: break-word;
-    }
-
-    .page-block {
-      margin-bottom: 28px;
-    }
-
-    .page-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 22px 0 14px 0;
-      font-family: var(--sans);
-      font-size: 11px;
-      color: var(--ink-faint);
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .page-divider::before,
-    .page-divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: var(--line);
-    }
-
-    .page-block p {
-      margin: 0 0 14px 0;
-      text-indent: 2em;
-    }
-
-    .pager {
-      max-width: 720px;
-      margin: 28px auto 12px auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding-top: 16px;
-      border-top: 1px solid var(--line);
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .pager select {
-      flex: 1;
-      max-width: 180px;
-      appearance: none;
-      background: var(--paper-card);
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      padding: 7px 10px;
-      font-size: 13px;
-      color: var(--ink);
-      text-align: center;
-      font-family: var(--sans);
-    }
-
-    .ask-bar {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px calc(10px + env(safe-area-inset-bottom)) 14px;
-      background: rgba(247, 243, 234, 0.98);
-      border-top: 1px solid var(--line);
-      z-index: 20;
-    }
-
-    .ask-input {
-      flex: 1;
-      border: 1px solid var(--line);
-      background: var(--paper-card);
-      color: var(--ink);
-      font-size: 15px;
-      padding: 9px 12px;
-      border-radius: 8px;
-      outline: none;
-      font-family: var(--sans);
-    }
-
-    .ask-input:focus {
-      border-color: var(--seal);
-    }
-
-    .translate-pill {
-      position: fixed;
-      right: 16px;
-      bottom: calc(70px + env(safe-area-inset-bottom));
-      z-index: 35;
-      display: none;
-      align-items: center;
-      gap: 8px;
-      background: var(--seal);
-      color: #FFFDF9;
-      border: none;
-      border-radius: 999px;
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      box-shadow: 0 6px 20px rgba(42, 37, 32, 0.24);
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-
-    .translate-pill.show {
-      display: inline-flex;
-    }
-
-    .translate-pill .badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: rgba(255, 253, 249, 0.2);
-      font-family: var(--serif);
-      font-size: 13px;
-    }
-
-    .translate-pill .snippet {
-      max-width: 120px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-weight: 400;
-      font-size: 12px;
-      opacity: 0.9;
-    }
-
-    .sheet-mask {
-      position: fixed;
-      inset: 0;
-      background: rgba(28, 24, 20, 0.42);
-      z-index: 50;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
-    .sheet-mask.open {
-      display: flex;
-    }
-
-    .sheet {
-      width: 100%;
-      max-width: 720px;
-      max-height: 78dvh;
-      background: var(--paper);
-      border-radius: 14px 14px 0 0;
-      border-top: 1px solid var(--line);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .sheet-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--line);
-      background: var(--paper-deep);
-      flex-shrink: 0;
-    }
-
-    .sheet-title {
-      font-family: var(--serif);
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--ink);
-    }
-
-    .sheet-body {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 16px;
-      font-size: 15px;
-      line-height: 1.85;
-      color: var(--ink);
-    }
-
-    .quote-box {
-      background: var(--paper-deep);
-      border-left: 3px solid var(--seal);
-      padding: 10px 12px;
-      margin-bottom: 14px;
-      font-family: var(--serif);
-      font-size: 14px;
-      line-height: 1.7;
-      color: var(--ink-sub);
-      border-radius: 0 6px 6px 0;
-    }
-
-    .ai-output {
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-family: var(--sans);
-    }
-
-    .settings-view {
-      position: fixed;
-      inset: 0;
-      background: var(--paper);
-      z-index: 60;
-      display: none;
-      flex-direction: column;
-    }
-
-    .settings-view.open {
-      display: flex;
-    }
-
-    .settings-body {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 16px;
-      max-width: 560px;
-      width: 100%;
-      margin: 0 auto;
-    }
-
-    .setting-block {
-      margin-bottom: 24px;
-    }
-
-    .setting-label {
-      display: block;
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      color: var(--ink);
-    }
-
-    .setting-hint {
-      font-size: 12px;
-      color: var(--ink-sub);
-      margin-top: 6px;
-      line-height: 1.6;
-    }
-
-    .key-row {
-      display: flex;
-      gap: 8px;
-    }
-
-    .key-input {
-      flex: 1;
-      border: 1px solid var(--line);
-      background: var(--paper-card);
-      color: var(--ink);
-      font-size: 14px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      outline: none;
-      font-family: monospace;
-    }
-
-    .key-input:focus {
-      border-color: var(--seal);
-    }
-
-    .divider-hr {
-      border: none;
-      border-top: 1px solid var(--line);
-      margin: 24px 0;
-    }
-
-    .toast {
-      position: fixed;
-      left: 50%;
-      top: calc(64px + env(safe-area-inset-top));
-      transform: translateX(-50%);
-      background: rgba(42, 37, 32, 0.92);
-      color: #FFFDF9;
-      padding: 8px 16px;
-      border-radius: 999px;
-      font-size: 13px;
-      z-index: 80;
-      display: none;
-      white-space: nowrap;
-    }
-
-    .toast.show {
-      display: block;
-    }
-
-    .hidden-input {
-      display: none;
-    }
+    /* 设置面板 */
+    .settings-view{position:fixed;inset:0;background:var(--paper);z-index:60;display:none;flex-direction:column;}
+    .settings-view.open{display:flex;}
+    .set-body{flex:1;overflow-y:auto;padding:18px 16px;max-width:560px;margin:0 auto;}
+    .set-block{margin-bottom:22px;}
+    .set-label{display:block;font-size:14px;font-weight:600;margin-bottom:8px;}
+    .set-hint{font-size:12px;color:var(--ink-sub);margin-top:4px;line-height:1.6;}
+    .key-row{display:flex;gap:8px;}
+    .key-inp{flex:1;border:1px solid var(--line);background:var(--paper-card);border-radius:8px;padding:10px 12px;font-family:monospace;font-size:14px;outline:none;}
+    .hr{border:none;border-top:1px solid var(--line);margin:22px 0;}
+    .toast{position:fixed;left:50%;top:calc(60px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(0,0,0,0.85);color:#fff;padding:8px 16px;border-radius:999px;font-size:13px;z-index:90;display:none;white-space:nowrap;}
+    .toast.show{display:block;}
+    .hidden-file{display:none;}
   </style>
 </head>
 <body>
+  <!-- 门类切换导航 -->
+  <div class="cat-nav">
+    <div class="cat-tab" data-cat="liuyao">六爻</div>
+    <div class="cat-tab" data-cat="bazi">八字</div>
+    <div class="cat-tab" data-cat="qimen">奇门</div>
+    <div class="cat-tab" data-cat="fengshui">风水/户型</div>
+  </div>
 
   <header class="topbar">
     <div class="book-meta">
-      <div class="book-title" id="bookTitle">古籍书斋</div>
-      <div class="book-sub" id="bookSub">未载入典籍</div>
+      <div class="book-title" id="bookTitle">藏往 2.0</div>
+      <div class="book-sub" id="bookSub">未选择典籍</div>
     </div>
     <div class="top-actions">
-      <button type="button" class="btn btn-primary" id="importBtn">导入 PDF 古籍</button>
-      <button type="button" class="btn" id="openSettingsBtn">设置</button>
+      <button class="btn" id="openShelfBtn">藏书阁</button>
+      <button class="btn btn-icon" id="themeBtn">🌙</button>
+      <button class="btn" id="openSetBtn">设置</button>
     </div>
-    <input type="file" id="pdfInput" class="hidden-input" accept=".pdf,application/pdf">
   </header>
 
   <div class="progress-bar" id="progressBar">
-    <div id="progressText">正在解析古籍...</div>
-    <div class="progress-track">
-      <div class="progress-fill" id="progressFill"></div>
-    </div>
+    <div id="progText">解析中…</div>
+    <div class="progress-track"><div class="progress-fill" id="progFill"></div></div>
   </div>
 
   <main class="reader-main" id="readerMain">
     <div class="empty-state" id="emptyState">
-      <div class="empty-seal">典</div>
-      <div class="empty-text">点击右上角导入 PDF 古籍<br>文本将自动存入本地，下次打开秒载续读</div>
+      <div class="empty-seal">藏</div>
+      <div class="empty-text">打开藏书阁导入PDF典籍<br>多本典籍保存在本地IndexedDB</div>
     </div>
     <article class="book-content" id="bookContent" style="display:none;"></article>
     <div class="pager" id="pager" style="display:none;">
-      <button type="button" class="btn" id="prevChunkBtn">上一卷段</button>
-      <select id="chunkSelect" aria-label="跳转页段"></select>
-      <button type="button" class="btn" id="nextChunkBtn">下一卷段</button>
+      <button class="btn" id="prevBtn">上一卷段</button>
+      <select id="chunkSel"></select>
+      <button class="btn" id="nextBtn">下一卷段</button>
     </div>
   </main>
 
-  <button type="button" class="translate-pill" id="translatePill">
-    <span class="badge">译</span>
-    <span>白话断语</span>
+  <button class="sel-pill" id="selPill">
+    <span class="badge">解</span>
+    <span>训诂推演</span>
     <span class="snippet" id="pillSnippet"></span>
   </button>
 
   <footer class="ask-bar">
-    <input type="text" class="ask-input" id="askInput" placeholder="问书：基于当前典籍检索条文并解答..." enterkeyhint="send">
-    <button type="button" class="btn btn-primary" id="askBtn">问书</button>
+    <input class="ask-input" id="askInput" placeholder="问书：针对当前选中典籍提问术数概念…" enterkeyhint="send">
+    <button class="btn btn-primary" id="askBtn">问书</button>
   </footer>
 
-  <div class="sheet-mask" id="sheetMask">
-    <div class="sheet" role="dialog" aria-modal="true">
+  <!-- 藏书阁书架弹窗 -->
+  <div class="shelf-panel" id="shelfPanel">
+    <div class="shelf-wrap">
+      <div class="shelf-head">
+        <div class="shelf-title">我的藏书阁（本地书架）</div>
+        <button class="btn" id="closeShelfBtn">关闭</button>
+      </div>
+      <div class="shelf-body" id="shelfBody">
+        <button class="btn btn-primary" id="importPdfBtn" style="width:100%;margin-bottom:12px;">+ 导入新PDF典籍</button>
+        <div id="bookListWrap"></div>
+      </div>
+    </div>
+  </div>
+  <input type="file" id="pdfInput" class="hidden-file" accept=".pdf,application/pdf">
+
+  <!-- AI结果弹窗 -->
+  <div class="sheet-mask" id="aiSheetMask">
+    <div class="sheet">
       <div class="sheet-head">
-        <div class="sheet-title" id="sheetTitle">解经</div>
-        <button type="button" class="btn" id="closeSheetBtn">关闭</button>
+        <div class="sheet-title" id="sheetTitle">解经推演</div>
+        <button class="btn" id="closeSheetBtn">关闭</button>
       </div>
       <div class="sheet-body">
         <div class="quote-box" id="sheetQuote" style="display:none;"></div>
-        <div class="ai-output" id="aiOutput"></div>
+        <div class="ai-out" id="aiOutput"></div>
       </div>
     </div>
   </div>
 
+  <!-- 设置面板 -->
   <section class="settings-view" id="settingsView">
     <header class="topbar">
-      <div class="book-meta">
-        <div class="book-title">设置</div>
-      </div>
-      <div class="top-actions">
-        <button type="button" class="btn" id="closeSettingsBtn">返回典籍</button>
-      </div>
+      <div class="book-meta"><div class="book-title">设置</div></div>
+      <div class="top-actions"><button class="btn" id="closeSetBtn">返回</button></div>
     </header>
-    <div class="settings-body">
-      <div class="setting-block">
-        <label class="setting-label" for="apiKeyInput">DeepSeek API Key</label>
+    <div class="set-body">
+      <div class="set-block">
+        <label class="set-label">DeepSeek API‑Key</label>
         <div class="key-row">
-          <input type="password" id="apiKeyInput" class="key-input" placeholder="sk-..." autocomplete="off" spellcheck="false">
-          <button type="button" class="btn" id="toggleKeyBtn">显示</button>
-          <button type="button" class="btn btn-primary" id="saveKeyBtn">保存</button>
+          <input type="password" class="key-inp" id="apiKeyInp" placeholder="sk‑..." autocomplete="off">
+          <button class="btn" id="toggleKeyBtn">显示</button>
+          <button class="btn btn-primary" id="saveKeyBtn">保存</button>
         </div>
-        <div class="setting-hint">仅保存在本机浏览器中，直连 DeepSeek 官方接口（deepseek-chat）。</div>
+        <div class="set-hint">密钥仅保存在本机浏览器，直连deepseek‑chat接口</div>
       </div>
-
-      <hr class="divider-hr">
-
-      <div class="setting-block">
-        <label class="setting-label">当前典籍缓存</label>
-        <div class="setting-hint" id="cacheStatusText" style="margin-bottom: 12px;">当前无缓存书籍</div>
-        <button type="button" class="btn btn-danger" id="clearCacheBtn" style="width:100%; padding:11px;">更换 / 清空当前书籍缓存</button>
+      <hr class="hr">
+      <div class="set-block">
+        <div class="set-hint">当前门类：<span id="catShow">六爻</span></div>
+        <div class="set-hint">所有典籍存储在IndexedDB浏览器本地数据库</div>
       </div>
     </div>
   </section>
 
   <div class="toast" id="toast"></div>
 
-  <script>
-    (() => {
-      if (window.pdfjsLib) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      }
+<script>
+(()=>{
+  if(window.pdfjsLib){
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+  const DB_NAME = "CangWang2DB";
+  const DB_VER = 1;
+  const STORE_BOOKS = "books";
+  const STORE_META = "meta";
 
-      const DB_NAME = 'GujiShuzhaiDB';
-      const DB_VERSION = 1;
-      const STORE_NAME = 'books';
-      const BOOK_KEY = 'currentBook';
-      const API_KEY_STORAGE = 'guji_deepseek_api_key';
-      const POS_STORAGE = 'guji_reading_pos';
-      const PAGES_PER_CHUNK = 12;
-      const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
+  const API_KEY_STORE = "cangwang_apikey";
+  const THEME_STORE = "cangwang_theme";
+  const CAT_STORE = "cangwang_current_cat";
+  const POS_PREFIX = "cangwang_pos_";
 
-      let currentBook = null;
-      let currentChunk = 0;
-      let selectedTextCache = '';
-      let activeAbortController = null;
-      let selectionTimer = null;
-      let scrollSaveTimer = null;
+  const PAGES_PER_CHUNK = 12;
+  const MAX_CONTEXT_CHARS = 28000;
+  const DEEPSEEK_URL = "https://api.deepseek.com/chat/completions";
 
-      const el = {
-        bookTitle: document.getElementById('bookTitle'),
-        bookSub: document.getElementById('bookSub'),
-        importBtn: document.getElementById('importBtn'),
-        pdfInput: document.getElementById('pdfInput'),
-        openSettingsBtn: document.getElementById('openSettingsBtn'),
-        closeSettingsBtn: document.getElementById('closeSettingsBtn'),
-        settingsView: document.getElementById('settingsView'),
-        progressBar: document.getElementById('progressBar'),
-        progressText: document.getElementById('progressText'),
-        progressFill: document.getElementById('progressFill'),
-        readerMain: document.getElementById('readerMain'),
-        emptyState: document.getElementById('emptyState'),
-        bookContent: document.getElementById('bookContent'),
-        pager: document.getElementById('pager'),
-        prevChunkBtn: document.getElementById('prevChunkBtn'),
-        nextChunkBtn: document.getElementById('nextChunkBtn'),
-        chunkSelect: document.getElementById('chunkSelect'),
-        translatePill: document.getElementById('translatePill'),
-        pillSnippet: document.getElementById('pillSnippet'),
-        askInput: document.getElementById('askInput'),
-        askBtn: document.getElementById('askBtn'),
-        sheetMask: document.getElementById('sheetMask'),
-        sheetTitle: document.getElementById('sheetTitle'),
-        sheetQuote: document.getElementById('sheetQuote'),
-        aiOutput: document.getElementById('aiOutput'),
-        closeSheetBtn: document.getElementById('closeSheetBtn'),
-        apiKeyInput: document.getElementById('apiKeyInput'),
-        toggleKeyBtn: document.getElementById('toggleKeyBtn'),
-        saveKeyBtn: document.getElementById('saveKeyBtn'),
-        cacheStatusText: document.getElementById('cacheStatusText'),
-        clearCacheBtn: document.getElementById('clearCacheBtn'),
-        toast: document.getElementById('toast')
+  let db = null;
+  let bookList = [];
+  let activeBookId = null;
+  let currentChunk = 0;
+  let selectedTextCache = "";
+  let activeAbort = null;
+  let selTimer = null;
+  let scrollTimer = null;
+  let currentCat = "liuyao";
+
+  const el = {
+    catNav:document.querySelectorAll(".cat-tab"),
+    bookTitle:document.getElementById("bookTitle"),
+    bookSub:document.getElementById("bookSub"),
+    openShelfBtn:document.getElementById("openShelfBtn"),
+    shelfPanel:document.getElementById("shelfPanel"),
+    closeShelfBtn:document.getElementById("closeShelfBtn"),
+    importPdfBtn:document.getElementById("importPdfBtn"),
+    pdfInput:document.getElementById("pdfInput"),
+    shelfBody:document.getElementById("shelfBody"),
+    bookListWrap:document.getElementById("bookListWrap"),
+    themeBtn:document.getElementById("themeBtn"),
+    openSetBtn:document.getElementById("openSetBtn"),
+    closeSetBtn:document.getElementById("closeSetBtn"),
+    settingsView:document.getElementById("settingsView"),
+    apiKeyInp:document.getElementById("apiKeyInp"),
+    toggleKeyBtn:document.getElementById("toggleKeyBtn"),
+    saveKeyBtn:document.getElementById("saveKeyBtn"),
+    catShow:document.getElementById("catShow"),
+    progressBar:document.getElementById("progressBar"),
+    progText:document.getElementById("progText"),
+    progFill:document.getElementById("progFill"),
+    readerMain:document.getElementById("readerMain"),
+    emptyState:document.getElementById("emptyState"),
+    bookContent:document.getElementById("bookContent"),
+    pager:document.getElementById("pager"),
+    prevBtn:document.getElementById("prevBtn"),
+    nextBtn:document.getElementById("nextBtn"),
+    chunkSel:document.getElementById("chunkSel"),
+    selPill:document.getElementById("selPill"),
+    pillSnippet:document.getElementById("pillSnippet"),
+    askInput:document.getElementById("askInput"),
+    askBtn:document.getElementById("askBtn"),
+    aiSheetMask:document.getElementById("aiSheetMask"),
+    sheetTitle:document.getElementById("sheetTitle"),
+    sheetQuote:document.getElementById("sheetQuote"),
+    aiOutput:document.getElementById("aiOutput"),
+    closeSheetBtn:document.getElementById("closeSheetBtn"),
+    toast:document.getElementById("toast")
+  };
+
+  function showToast(msg){
+    el.toast.textContent = msg;
+    el.toast.classList.add("show");
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=>el.toast.classList.remove("show"),2200);
+  }
+
+  // IndexedDB
+  async function openDB(){
+    return new Promise((res,rej)=>{
+      const req = indexedDB.open(DB_NAME,DB_VER);
+      req.onupgradeneeded = e=>{
+        const d = e.target.result;
+        if(!d.objectStoreNames.contains(STORE_BOOKS)) d.createObjectStore(STORE_BOOKS,{keyPath:"id"});
+        if(!d.objectStoreNames.contains(STORE_META)) d.createObjectStore(STORE_META);
       };
+      req.onsuccess=()=>{db=req.result;res(db);};
+      req.onerror=()=>rej(req.error);
+    });
+  }
 
-      function showToast(msg) {
-        el.toast.textContent = msg;
-        el.toast.classList.add('show');
-        clearTimeout(showToast._t);
-        showToast._t = setTimeout(() => el.toast.classList.remove('show'), 2200);
-      }
+  async function saveBook(bookObj){
+    const tx = db.transaction(STORE_BOOKS,"readwrite");
+    tx.objectStore(STORE_BOOKS).put(bookObj);
+    await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=rej;});
+  }
+  async function getAllBooks(){
+    const tx = db.transaction(STORE_BOOKS,"readonly");
+    return new Promise(res=>{
+      const all = [];
+      tx.objectStore(STORE_BOOKS).openCursor().onsuccess=e=>{
+        const cur = e.target.result;
+        if(cur){all.push(cur.value);cur.continue();}else res(all);
+      };
+    });
+  }
+  async function deleteBook(id){
+    const tx = db.transaction(STORE_BOOKS,"readwrite");
+    tx.objectStore(STORE_BOOKS).delete(id);
+    await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=rej;});
+  }
 
-      // IndexedDB 持久化封装
-      function openDB() {
-        return new Promise((resolve, reject) => {
-          const req = indexedDB.open(DB_NAME, DB_VERSION);
-          req.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-              db.createObjectStore(STORE_NAME);
-            }
-          };
-          req.onsuccess = () => resolve(req.result);
-          req.onerror = () => reject(req.error);
-        });
-      }
+  function saveReadingPos(bookId,chunk,scrollTop){
+    try{localStorage.setItem(POS_PREFIX+bookId,JSON.stringify({chunk,scrollTop}));}catch(e){}
+  }
+  function loadReadingPos(bookId){
+    try{
+      const raw = localStorage.getItem(POS_PREFIX+bookId);
+      return raw?JSON.parse(raw):{chunk:0,scrollTop:0};
+    }catch(e){return {chunk:0,scrollTop:0};}
+  }
+  function getApiKey(){return (localStorage.getItem(API_KEY_STORE)||"").trim();}
 
-      async function saveBookToDB(bookData) {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(STORE_NAME, 'readwrite');
-          tx.objectStore(STORE_NAME).put(bookData, BOOK_KEY);
-          tx.oncomplete = () => resolve();
-          tx.onerror = () => reject(tx.error);
-        });
-      }
+  // 主题
+  function applyTheme(mode){
+    document.documentElement.setAttribute("data-theme",mode);
+    el.themeBtn.textContent = mode==="dark"?"☀":"🌙";
+    localStorage.setItem(THEME_STORE,mode);
+  }
+  function toggleTheme(){
+    const cur = document.documentElement.getAttribute("data-theme");
+    applyTheme(cur==="dark"?"light":"dark");
+  }
 
-      async function loadBookFromDB() {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(STORE_NAME, 'readonly');
-          const req = tx.objectStore(STORE_NAME).get(BOOK_KEY);
-          req.onsuccess = () => resolve(req.result || null);
-          req.onerror = () => reject(req.error);
-        });
-      }
+  // 门类切换
+  function setCat(cat){
+    currentCat = cat;
+    localStorage.setItem(CAT_STORE,cat);
+    el.catNav.forEach(t=>t.classList.toggle("active",t.dataset.cat===cat));
+    const map = {liuyao:"六爻",bazi:"八字",qimen:"奇门",fengshui:"风水/户型"};
+    el.catShow.textContent = map[cat];
+  }
 
-      async function clearBookFromDB() {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(STORE_NAME, 'readwrite');
-          tx.objectStore(STORE_NAME).delete(BOOK_KEY);
-          tx.oncomplete = () => resolve();
-          tx.onerror = () => reject(tx.error);
-        });
-      }
+  // 渲染书架列表弹窗
+  async function renderShelf(){
+    bookList = await getAllBooks();
+    el.bookListWrap.innerHTML = "";
+    if(bookList.length===0){
+      el.bookListWrap.innerHTML = `<div style="text-align:center;color:var(--ink-sub);padding:16px">书架为空，请导入PDF典籍</div>`;
+      return;
+    }
+    bookList.forEach(book=>{
+      const div = document.createElement("div");
+      div.className = "book-item"+(book.id===activeBookId?" active":"");
+      div.innerHTML = `
+        <div class="book-info">
+          <div class="book-name">${escapeHtml(book.title)}</div>
+          <div class="book-meta-small">${book.pages.length}页 · ${book.totalChars}字 · 门类:${catName(book.cat||"liuyao")}</div>
+        </div>
+        <div class="book-actions">
+          <button class="btn select-book" data-id="${book.id}">打开</button>
+          <button class="btn btn-danger del-book" data-id="${book.id}">删除</button>
+        </div>
+      `;
+      el.bookListWrap.appendChild(div);
+    });
+    el.bookListWrap.querySelectorAll(".select-book").forEach(btn=>{
+      btn.onclick = async ()=>{
+        const bid = btn.dataset.id;
+        const bk = bookList.find(x=>x.id===bid);
+        if(!bk)return;
+        activeBookId = bid;
+        const pos = loadReadingPos(bid);
+        renderReader(bk,pos.chunk,pos.scrollTop);
+        el.shelfPanel.classList.remove("open");
+      };
+    });
+    el.bookListWrap.querySelectorAll(".del-book").forEach(btn=>{
+      btn.onclick = async ()=>{
+        const bid = btn.dataset.id;
+        if(!confirm("确定删除这本典籍？删除后本地不可恢复。"))return;
+        await deleteBook(bid);
+        localStorage.removeItem(POS_PREFIX+bid);
+        if(activeBookId===bid){
+          activeBookId=null;
+          renderReader(null,0,0);
+        }
+        await renderShelf();
+        showToast("已删除");
+      };
+    });
+  }
+  function catName(c){
+    const m = {liuyao:"六爻",bazi:"八字",qimen:"奇门",fengshui:"风水"};
+    return m[c]||"未归类";
+  }
+  function escapeHtml(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
 
-      function saveReadingPos(chunk, scrollTop) {
-        try {
-          localStorage.setItem(POS_STORAGE, JSON.stringify({ chunk, scrollTop }));
-        } catch (e) {}
-      }
+  // 阅读器渲染
+  function renderReader(book,targetChunk,targetScrollTop){
+    if(!book){
+      el.bookTitle.textContent = "藏往 2.0";
+      el.bookSub.textContent = "未选择典籍";
+      el.emptyState.style.display="flex";
+      el.bookContent.style.display="none";
+      el.pager.style.display="none";
+      el.bookContent.innerHTML="";
+      return;
+    }
+    const totalPages = book.pages.length;
+    const totalChunks = Math.max(1,Math.ceil(totalPages/PAGES_PER_CHUNK));
+    currentChunk = Math.min(Math.max(0,targetChunk||0),totalChunks-1);
+    const startIdx = Math.imul(currentChunk,PAGES_PER_CHUNK);
+    const endIdx = Math.min(totalPages,startIdx+PAGES_PER_CHUNK);
 
-      function loadReadingPos() {
-        try {
-          const raw = localStorage.getItem(POS_STORAGE);
-          return raw ? JSON.parse(raw) : { chunk: 0, scrollTop: 0 };
-        } catch (e) {
-          return { chunk: 0, scrollTop: 0 };
+    el.bookTitle.textContent = book.title;
+    el.bookSub.textContent = `第${startIdx+1}-${endIdx}页 / 共${totalPages}页【${catName(book.cat)}】`;
+    el.emptyState.style.display="none";
+    el.bookContent.style.display="block";
+    el.pager.style.display="flex";
+
+    const frag = document.createDocumentFragment();
+    for(let i=startIdx;i<endIdx;i++){
+      const p = book.pages[i];
+      const blk = document.createElement("div");
+      blk.className="page-block";
+      const divi = document.createElement("div");
+      divi.className="page-divider";
+      divi.textContent = `第${p.pageNum}页`;
+      blk.appendChild(divi);
+      const lines = p.text.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+      if(lines.length===0){
+        const pp = document.createElement("p");
+        pp.textContent="（本页无文本）";pp.style.color="var(--ink-faint)";
+        blk.appendChild(pp);
+      }else{
+        for(const ln of lines){
+          const pp = document.createElement("p");
+          pp.textContent = ln;
+          blk.appendChild(pp);
         }
       }
+      frag.appendChild(blk);
+    }
+    el.bookContent.innerHTML="";
+    el.bookContent.appendChild(frag);
 
-      function getApiKey() {
-        return (localStorage.getItem(API_KEY_STORAGE) || '').trim();
-      }
+    el.chunkSel.innerHTML="";
+    for(let c=0;c<totalChunks;c++){
+      const opt = document.createElement("option");
+      const s = Math.imul(c,PAGES_PER_CHUNK)+1;
+      const e = Math.min(totalPages,s+PAGES_PER_CHUNK-1);
+      opt.value = String(c);
+      opt.textContent = `第${s}-${e}页`;
+      if(c===currentChunk) opt.selected=true;
+      el.chunkSel.appendChild(opt);
+    }
+    el.prevBtn.disabled = currentChunk<=0;
+    el.nextBtn.disabled = currentChunk>=totalChunks-1;
+    requestAnimationFrame(()=>el.readerMain.scrollTop = targetScrollTop||0);
+  }
 
-      function updateCacheStatus() {
-        if (currentBook && currentBook.pages && currentBook.pages.length > 0) {
-          el.cacheStatusText.textContent = '已缓存：《' + currentBook.title + '》（共 ' + currentBook.pages.length + ' 页，约 ' + currentBook.totalChars + ' 字）';
-        } else {
-          el.cacheStatusText.textContent = '当前无缓存书籍';
-        }
-      }
+  function cleanLine(str){
+    let s = str.replace(/\s+/g," ").trim();
+    s = s.replace(/([\u4e00-\u9fff])\s+([\u4e00-\u9fff])/g,"$1$2");
+    return s;
+  }
 
-      // 渲染当前卷段，避免整本上千页 DOM 卡顿
-      function renderBook(book, targetChunk, targetScrollTop) {
-        currentBook = book;
-        updateCacheStatus();
-
-        if (!book || !book.pages || book.pages.length === 0) {
-          el.bookTitle.textContent = '古籍书斋';
-          el.bookSub.textContent = '未载入典籍';
-          el.emptyState.style.display = 'flex';
-          el.bookContent.style.display = 'none';
-          el.pager.style.display = 'none';
-          el.bookContent.innerHTML = '';
-          return;
-        }
-
-        const totalPages = book.pages.length;
-        const totalChunks = Math.max(1, Math.ceil(totalPages / PAGES_PER_CHUNK));
-        currentChunk = Math.min(Math.max(0, targetChunk || 0), totalChunks - 1);
-
-        const startIdx = Math.imul(currentChunk, PAGES_PER_CHUNK);
-        const endIdx = Math.min(totalPages, startIdx + PAGES_PER_CHUNK);
-
-        el.bookTitle.textContent = book.title;
-        el.bookSub.textContent = '第 ' + (startIdx + 1) + ' - ' + endIdx + ' 页 / 共 ' + totalPages + ' 页';
-
-        el.emptyState.style.display = 'none';
-        el.bookContent.style.display = 'block';
-        el.pager.style.display = 'flex';
-
-        const frag = document.createDocumentFragment();
-        for (let i = startIdx; i < endIdx; i++) {
-          const page = book.pages[i];
-          const section = document.createElement('div');
-          section.className = 'page-block';
-
-          const divider = document.createElement('div');
-          divider.className = 'page-divider';
-          divider.textContent = '第 ' + page.pageNum + ' 页';
-          section.appendChild(divider);
-
-          const lines = page.text.split(/\n+/).map(s => s.trim()).filter(Boolean);
-          if (lines.length === 0) {
-            const p = document.createElement('p');
-            p.textContent = '（本页无文本）';
-            p.style.color = 'var(--ink-faint)';
-            section.appendChild(p);
-          } else {
-            for (const line of lines) {
-              const p = document.createElement('p');
-              p.textContent = line;
-              section.appendChild(p);
-            }
+  async function parsePdf(file){
+    if(!window.pdfjsLib){showToast("PDF解析库未加载，请联网");return;}
+    el.progressBar.classList.add("show");
+    el.progText.textContent="读取PDF…";el.progFill.style.width="4%";
+    try{
+      const buf = await file.arrayBuffer();
+      const pdfDoc = await pdfjsLib.getDocument({
+        data:new Uint8Array(buf),
+        cMapUrl:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/",
+        cMapPacked:true
+      }).promise;
+      const numPages = pdfDoc.numPages;
+      const pages = [];
+      let totalChars = 0;
+      for(let p=1;p<=numPages;p++){
+        const pct = Math.max(5,Math.min(99,Math.floor((p/numPages)*100)));
+        el.progText.textContent=`解析：第${p}/${numPages}页`;
+        el.progFill.style.width = pct+"%";
+        const pg = await pdfDoc.getPage(p);
+        const ctt = await pg.getTextContent();
+        let curLine = "";
+        let lastY = null;
+        let lines = [];
+        for(const it of ctt.items){
+          const st = it.str||"";
+          if(!st) continue;
+          const y = it.transform?it.transform[5]:0;
+          const h = it.height||12;
+          if(lastY!==null && Math.abs(y-lastY)>(h/1.4)){
+            const cl = cleanLine(curLine);
+            if(cl) lines.push(cl);
+            curLine = st;
+          }else{
+            curLine+=st;
           }
-          frag.appendChild(section);
-        }
-
-        el.bookContent.innerHTML = '';
-        el.bookContent.appendChild(frag);
-
-        // 填充页段选择器
-        el.chunkSelect.innerHTML = '';
-        for (let c = 0; c < totalChunks; c++) {
-          const opt = document.createElement('option');
-          const s = Math.imul(c, PAGES_PER_CHUNK) + 1;
-          const e = Math.min(totalPages, s + PAGES_PER_CHUNK - 1);
-          opt.value = String(c);
-          opt.textContent = '第 ' + s + '-' + e + ' 页';
-          if (c === currentChunk) opt.selected = true;
-          el.chunkSelect.appendChild(opt);
-        }
-
-        el.prevChunkBtn.disabled = currentChunk <= 0;
-        el.nextChunkBtn.disabled = currentChunk >= totalChunks - 1;
-
-        requestAnimationFrame(() => {
-          el.readerMain.scrollTop = targetScrollTop || 0;
-        });
-      }
-
-      // 清洗中文 PDF 提取出的碎空格与段落
-      function cleanChineseLine(str) {
-        let s = str.replace(/\s+/g, ' ').trim();
-        s = s.replace(/([\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])\s+([\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])/g, '$1$2');
-        s = s.replace(/([\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])\s+([\u4e00-\u9fff\u3000-\u303f\uff00-\uffef])/g, '$1$2');
-        return s;
-      }
-
-      async function extractPdfFile(file) {
-        if (!window.pdfjsLib) {
-          showToast('PDF 解析库未加载，请检查网络');
-          return;
-        }
-
-        el.progressBar.classList.add('show');
-        el.progressText.textContent = '正在读取 PDF 文件...';
-        el.progressFill.style.width = '4%';
-
-        try {
-          const arrayBuffer = await file.arrayBuffer();
-          const loadingTask = pdfjsLib.getDocument({
-            data: new Uint8Array(arrayBuffer),
-            cMapUrl: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/',
-            cMapPacked: true
-          });
-
-          const pdf = await loadingTask.promise;
-          const numPages = pdf.numPages;
-          const pages = [];
-          let totalChars = 0;
-
-          for (let p = 1; p <= numPages; p++) {
-            const pct = Math.max(5, Math.min(99, Math.floor((p / numPages) / 0.01)));
-            el.progressText.textContent = '正在解析古籍：第 ' + p + ' / ' + numPages + ' 页';
-            el.progressFill.style.width = pct + '%';
-
-            const page = await pdf.getPage(p);
-            const content = await page.getTextContent();
-            let lines = [];
-            let curLine = '';
-            let lastY = null;
-
-            for (const item of content.items) {
-              const str = item.str || '';
-              if (!str) continue;
-              const y = item.transform ? item.transform[5] : 0;
-              const h = item.height || 12;
-              if (lastY !== null && Math.abs(y - lastY) > (h / 1.4)) {
-                const cleaned = cleanChineseLine(curLine);
-                if (cleaned) lines.push(cleaned);
-                curLine = str;
-              } else {
-                curLine += str;
-              }
-              lastY = y;
-              if (item.hasEOL) {
-                const cleaned = cleanChineseLine(curLine);
-                if (cleaned) lines.push(cleaned);
-                curLine = '';
-                lastY = null;
-              }
-            }
-            if (curLine.trim()) {
-              const cleaned = cleanChineseLine(curLine);
-              if (cleaned) lines.push(cleaned);
-            }
-
-            // 合并自然段：上一行未以句末标点结尾且长度较长时拼接
-            const merged = [];
-            for (const ln of lines) {
-              if (
-                merged.length > 0 &&
-                merged[merged.length - 1].length > 18 &&
-                !/[。！？；：”」』】]$/.test(merged[merged.length - 1]) &&
-                !/^(第[一二三四五六七八九十百千万0-9]+[卷篇章回节]|卷[一二三四五六七八九十0-9]+)/.test(ln)
-              ) {
-                merged[merged.length - 1] += ln;
-              } else {
-                merged.push(ln);
-              }
-            }
-
-            const pageText = merged.join('\n');
-            totalChars += pageText.length;
-            pages.push({ pageNum: p, text: pageText });
-          }
-
-          if (totalChars < 20) {
-            el.progressBar.classList.remove('show');
-            showToast('未提取到文字，该 PDF 可能是纯图片扫描版');
-            return;
-          }
-
-          const title = file.name.replace(/\.pdf$/i, '');
-          const bookData = {
-            title,
-            pages,
-            totalChars,
-            updatedAt: Date.now()
-          };
-
-          el.progressText.textContent = '正在写入本机数据库...';
-          el.progressFill.style.width = '100%';
-          await saveBookToDB(bookData);
-          saveReadingPos(0, 0);
-          renderBook(bookData, 0, 0);
-          showToast('《' + title + '》已导入并永久缓存');
-        } catch (err) {
-          console.error(err);
-          showToast('PDF 解析失败：' + (err.message || '文件异常'));
-        } finally {
-          setTimeout(() => {
-            el.progressBar.classList.remove('show');
-            el.progressFill.style.width = '0%';
-          }, 300);
-          el.pdfInput.value = '';
-        }
-      }
-
-      // 划词监听（兼容 iOS Safari 原生菜单，按钮固定在底部输入栏上方不遮挡）
-      function handleSelectionChange() {
-        clearTimeout(selectionTimer);
-        selectionTimer = setTimeout(() => {
-          const sel = window.getSelection();
-          if (!sel || sel.isCollapsed) {
-            el.translatePill.classList.remove('show');
-            return;
-          }
-          const text = sel.toString().trim();
-          if (!text || text.length < 2) {
-            el.translatePill.classList.remove('show');
-            return;
-          }
-          const anchor = sel.anchorNode;
-          if (!anchor || !el.bookContent.contains(anchor)) {
-            el.translatePill.classList.remove('show');
-            return;
-          }
-          selectedTextCache = text.slice(0, 800);
-          el.pillSnippet.textContent = '「' + selectedTextCache.slice(0, 10) + (selectedTextCache.length > 10 ? '…' : '') + '」';
-          el.translatePill.classList.add('show');
-        }, 160);
-      }
-
-      // 基于当前书籍进行本地关键词召回，严格提供原文片段给 DeepSeek
-      function retrieveBookContext(question, book) {
-        if (!book || !book.pages || book.pages.length === 0) return '';
-
-        // 整本书不超过 22000 字时直接全本注入，精准度最高
-        if (book.totalChars <= 22000) {
-          return book.pages
-            .filter(p => p.text.trim())
-            .map(p => '【第' + p.pageNum + '页】\n' + p.text)
-            .join('\n\n');
-        }
-
-        const stopWords = new Set(['什么', '怎么', '如何', '请问', '一下', '哪些', '是否', '意思', '解释', '书中', '本书', '里面', '这个', '那个', '为什么', '可以', '应该', '关于', '问题', '告诉', '一下']);
-        const cleanQ = question.replace(/[^\u4e00-\u9fffa-zA-Z0-9]/g, ' ').trim();
-        const terms = new Set();
-
-        const parts = cleanQ.split(/\s+/).filter(Boolean);
-        for (const part of parts) {
-          if (part.length >= 2 && !stopWords.has(part)) terms.add(part);
-          if (/^[\u4e00-\u9fff]+$/.test(part)) {
-            for (let len = 2; len <= 4; len++) {
-              for (let i = 0; i <= part.length - len; i++) {
-                const sub = part.slice(i, i + len);
-                if (!stopWords.has(sub)) terms.add(sub);
-              }
-            }
+          lastY = y;
+          if(it.hasEOL){
+            const cl = cleanLine(curLine);
+            if(cl) lines.push(cl);
+            curLine="";lastY=null;
           }
         }
-
-        const termList = Array.from(terms);
-        const scored = book.pages.map((p, idx) => {
-          let score = 0;
-          let matchedDistinct = 0;
-          const txt = p.text;
-          if (!txt) return { idx, page: p, score: 0 };
-
-          for (const t of termList) {
-            const firstPos = txt.indexOf(t);
-            if (firstPos !== -1) {
-              matchedDistinct += 1;
-              let count = 0;
-              let pos = firstPos;
-              while (pos !== -1 && count < 6) {
-                count += 1;
-                pos = txt.indexOf(t, pos + t.length);
-              }
-              const weight = t.length >= 3 ? 4 : 2;
-              score += Math.imul(count, weight);
-            }
-          }
-          score += Math.imul(matchedDistinct, 5);
-          return { idx, page: p, score };
-        });
-
-        scored.sort((a, b) => b.score - a.score);
-
-        const pickedIndices = new Set();
-        let charCount = 0;
-        const MAX_CHARS = 18000;
-
-        for (const item of scored) {
-          if (item.score <= 0) break;
-          if (charCount + item.page.text.length > MAX_CHARS) {
-            if (pickedIndices.size >= 3) break;
-          }
-          pickedIndices.add(item.idx);
-          charCount += item.page.text.length;
+        if(curLine.trim()){const cl=cleanLine(curLine);if(cl)lines.push(cl);}
+        const merged = [];
+        for(const ln of lines){
+          if(merged.length>0 && merged[merged.length-1].length>18
+            && !/[。！？；：”」』】]$/.test(merged[merged.length-1])
+            && !/^(第[一二三四五六七八九十百千万0-9]+[卷篇章回节]|卷[一二三四五六七八九十0-9]+)/.test(ln)){
+            merged[merged.length-1]+=ln;
+          }else merged.push(ln);
         }
-
-        // 若完全未命中关键词，退回当前阅读页段附近内容
-        if (pickedIndices.size === 0) {
-          const start = Math.imul(currentChunk, PAGES_PER_CHUNK);
-          for (let i = start; i < Math.min(book.pages.length, start + 10); i++) {
-            pickedIndices.add(i);
-          }
-        }
-
-        const ordered = Array.from(pickedIndices).sort((a, b) => a - b);
-        return ordered
-          .map(i => '【第' + book.pages[i].pageNum + '页】\n' + book.pages[i].text)
-          .join('\n\n');
+        const pt = merged.join("\n");
+        totalChars += pt.length;
+        pages.push({pageNum:p,text:pt});
       }
+      if(totalChars<20){showToast("未提取文字，PDF为图片扫描版");return;}
+      const bookId = "bk_"+Date.now()+"_"+Math.random().toString(36).slice(2);
+      const bookObj = {
+        id:bookId,
+        title:file.name.replace(/\.pdf$/i,""),
+        cat:currentCat,
+        pages,totalChars,createdAt:Date.now()
+      };
+      el.progText.textContent="写入本地数据库";el.progFill.style.width="100%";
+      await saveBook(bookObj);
+      activeBookId = bookId;
+      saveReadingPos(bookId,0,0);
+      renderReader(bookObj,0,0);
+      showToast(`《${bookObj.title}》导入成功`);
+    }catch(err){
+      console.error(err);showToast("解析失败："+(err.message||"异常"));
+    }finally{
+      setTimeout(()=>{el.progressBar.classList.remove("show");el.progFill.style.width="0%";},350);
+      el.pdfInput.value="";
+      await renderShelf();
+    }
+  }
 
-      // 直连 DeepSeek 官方流式接口
-      async function streamDeepSeek(messages) {
-        const apiKey = getApiKey();
-        if (!apiKey) {
-          el.aiOutput.textContent = '请先点击右上角「设置」填写 DeepSeek API Key。';
-          return;
-        }
-
-        if (activeAbortController) {
-          activeAbortController.abort();
-        }
-        activeAbortController = new AbortController();
-        el.aiOutput.textContent = '正在推演解读...';
-
-        try {
-          const res = await fetch(DEEPSEEK_URL, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + apiKey
-            },
-            body: JSON.stringify({
-              model: 'deepseek-chat',
-              messages,
-              temperature: 0.3,
-              stream: true
-            }),
-            signal: activeAbortController.signal
-          });
-
-          if (!res.ok) {
-            const errText = await res.text().catch(() => '');
-            if (res.status === 401) {
-              el.aiOutput.textContent = 'API Key 无效或已过期，请在设置页核对后重试。';
-            } else {
-              el.aiOutput.textContent = '请求失败（状态码 ' + res.status + '）：' + errText.slice(0, 160);
-            }
-            return;
+  // 本地检索：关键词召回，大字符上限，兜底读取附近页
+  function retrieveContext(query,book){
+    if(!book||!book.pages) return "";
+    if(book.totalChars <= MAX_CONTEXT_CHARS){
+      return book.pages.filter(p=>p.text.trim()).map(p=>`【第${p.pageNum}页】\n${p.text}`).join("\n\n");
+    }
+    const stopWords = new Set(["什么","怎么","如何","请问","一下","哪些","是否","意思","解释","书中","本书","里面","这个","那个","为什么","可以","应该","关于","问题","告诉"]);
+    const cleanQ = query.replace(/[^\u4e00-\u9fffa-zA-Z0-9]/g," ").trim();
+    const terms = new Set();
+    const parts = cleanQ.split(/\s+/).filter(Boolean);
+    for(const part of parts){
+      if(part.length>=2 && !stopWords.has(part)) terms.add(part);
+      if(/^[\u4e00-\u9fff]+$/.test(part)){
+        for(let len=2;len<=4;len++){
+          for(let i=0;i<=part.length-len;i++){
+            const sub = part.slice(i,i+len);
+            if(!stopWords.has(sub)) terms.add(sub);
           }
-
-          const reader = res.body.getReader();
-          const decoder = new TextDecoder('utf-8');
-          let buffer = '';
-          let fullText = '';
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
-
-            for (const rawLine of lines) {
-              const line = rawLine.trim();
-              if (!line || !line.startsWith('data:')) continue;
-              const payload = line.replace(/^data:\s{0,}/, '');
-              if (payload === '[DONE]') break;
-              try {
-                const json = JSON.parse(payload);
-                const delta = json.choices && json.choices[0] && json.choices[0].delta && json.choices[0].delta.content;
-                if (delta) {
-                  fullText += delta;
-                  el.aiOutput.textContent = fullText;
-                }
-              } catch (e) {}
-            }
-          }
-
-          if (!fullText) {
-            el.aiOutput.textContent = '未收到返回内容，请重试。';
-          }
-        } catch (err) {
-          if (err.name === 'AbortError') return;
-          el.aiOutput.textContent = '网络连接异常，请检查网络或代理设置后重试。';
         }
       }
-
-      function openSheet(title, quote) {
-        el.sheetTitle.textContent = title;
-        if (quote) {
-          el.sheetQuote.textContent = quote;
-          el.sheetQuote.style.display = 'block';
-        } else {
-          el.sheetQuote.style.display = 'none';
+    }
+    const termList = Array.from(terms);
+    const scored = book.pages.map((p,idx)=>{
+      let score=0,matchDist=0;
+      const txt = p.text;
+      if(!txt) return {idx,page:p,score:0};
+      for(const t of termList){
+        const pos = txt.indexOf(t);
+        if(pos!==-1){
+          matchDist++;
+          let cnt=0,pp=pos;
+          while(pp!==-1 && cnt<6){cnt++;pp=txt.indexOf(t,pp+t.length);}
+          const w = t.length>=3?4:2;
+          score += cnt*w;
         }
-        el.sheetMask.classList.add('open');
       }
-
-      function closeSheet() {
-        if (activeAbortController) {
-          activeAbortController.abort();
-          activeAbortController = null;
-        }
-        el.sheetMask.classList.remove('open');
+      score += matchDist*5;
+      return {idx,page:p,score};
+    });
+    scored.sort((a,b)=>b.score-a.score);
+    const picked = new Set();
+    let charSum = 0;
+    for(const it of scored){
+      if(it.score<=0) break;
+      if(charSum + it.page.text.length > MAX_CONTEXT_CHARS){
+        if(picked.size>=3) break;
       }
+      picked.add(it.idx);
+      charSum += it.page.text.length;
+    }
+    if(picked.size===0){
+      const st = Math.imul(currentChunk,PAGES_PER_CHUNK);
+      for(let i=st;i<Math.min(book.pages.length,st+20);i++) picked.add(i);
+    }
+    const ord = Array.from(picked).sort((a,b)=>a-b);
+    return ord.map(i=>`【第${book.pages[i].pageNum}页】\n${book.pages[i].text}`).join("\n\n");
+  }
 
-      // 事件绑定
-      el.importBtn.addEventListener('click', () => el.pdfInput.click());
-
-      el.pdfInput.addEventListener('change', (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (file) extractPdfFile(file);
+  async function streamAi(messages){
+    const key = getApiKey();
+    if(!key){el.aiOutput.textContent="请前往设置填写DeepSeek API‑Key";return;}
+    if(activeAbort) activeAbort.abort();
+    activeAbort = new AbortController();
+    el.aiOutput.textContent = "深度推演中…";
+    try{
+      const res = await fetch(DEEPSEEK_URL,{
+        method:"POST",
+        headers:{"Content‑Type":"application/json","Authorization":"Bearer "+key},
+        body:JSON.stringify({model:"deepseek‑chat",messages,temperature:0.3,stream:true}),
+        signal:activeAbort.signal
       });
-
-      el.prevChunkBtn.addEventListener('click', () => {
-        if (!currentBook || currentChunk <= 0) return;
-        renderBook(currentBook, currentChunk - 1, 0);
-        saveReadingPos(currentChunk, 0);
-      });
-
-      el.nextChunkBtn.addEventListener('click', () => {
-        if (!currentBook) return;
-        const totalChunks = Math.ceil(currentBook.pages.length / PAGES_PER_CHUNK);
-        if (currentChunk >= totalChunks - 1) return;
-        renderBook(currentBook, currentChunk + 1, 0);
-        saveReadingPos(currentChunk, 0);
-      });
-
-      el.chunkSelect.addEventListener('change', (e) => {
-        const idx = parseInt(e.target.value, 10) || 0;
-        renderBook(currentBook, idx, 0);
-        saveReadingPos(idx, 0);
-      });
-
-      el.readerMain.addEventListener('scroll', () => {
-        if (!currentBook) return;
-        clearTimeout(scrollSaveTimer);
-        scrollSaveTimer = setTimeout(() => {
-          saveReadingPos(currentChunk, el.readerMain.scrollTop);
-        }, 250);
-      }, { passive: true });
-
-      document.addEventListener('selectionchange', handleSelectionChange);
-
-      // 点击「译」执行划词翻译
-      el.translatePill.addEventListener('click', () => {
-        const text = selectedTextCache;
-        if (!text) return;
-        el.translatePill.classList.remove('show');
-        try { window.getSelection().removeAllRanges(); } catch (e) {}
-
-        const bookHint = currentBook ? '《' + currentBook.title + '》' : '古籍';
-        openSheet('划词译解', text);
-        streamDeepSeek([
-          {
-            role: 'system',
-            content: '你是精通中国传统典籍与术数古文的学者，风格极简、直白、一针见血。请针对用户选中的' + bookHint + '原文，严格按以下两段纯文本结构输出，禁止寒暄、禁止套话、禁止使用星号符号：\n【大白话翻译】\n用最接地气的现代人话把原句翻透。\n\n【断语铁律】\n提炼这段古文背后的硬性规则、成立条件、特例或实战断语，逐条简明列出。'
-          },
-          {
-            role: 'user',
-            content: '请解读这段古文：\n' + text
-          }
-        ]);
-      });
-
-      // 问书提交
-      function submitAsk() {
-        const q = el.askInput.value.trim();
-        if (!q) return;
-        if (!currentBook || !currentBook.pages || currentBook.pages.length === 0) {
-          showToast('请先导入 PDF 古籍');
-          return;
-        }
-        el.askInput.blur();
-        const context = retrieveBookContext(q, currentBook);
-        openSheet('问书：' + q, null);
-        streamDeepSeek([
-          {
-            role: 'system',
-            content: '你是严谨的古籍研读助手。你必须严格且仅依据下方提供的《' + currentBook.title + '》原文片段回答用户提问，严禁脱离本书胡编乱造或套用书外说法。请用纯文本清晰排版，禁止使用星号符号，严格按以下结构回答：\n【出处条文】\n标明页码并摘录书中最直接相关的关键原句。\n\n【解析解答】\n基于上述条文，用直白清晰的人话给出准确结论与要点。若提供的片段中确实没有直接条文，请明确指出“当前书中检索片段未见直接记载”，不要强行编造。'
-          },
-          {
-            role: 'user',
-            content: '以下是《' + currentBook.title + '》的相关原文片段：\n\n' + context + '\n\n我的问题是：' + q
-          }
-        ]);
+      if(!res.ok){
+        const errText = await res.text().catch(()=>"");
+        if(res.status===401) el.aiOutput.textContent="API‑Key无效或过期，请检查设置";
+        else el.aiOutput.textContent=`请求错误${res.status}:${errText.slice(0,180)}`;
+        return;
       }
-
-      el.askBtn.addEventListener('click', submitAsk);
-      el.askInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          submitAsk();
+      const reader = res.body.getReader();
+      const dec = new TextDecoder("utf‑8");
+      let buf="",full="";
+      while(true){
+        const {done,value}=await reader.read();
+        if(done)break;
+        buf += dec.decode(value,{stream:true});
+        const lines = buf.split("\n");
+        buf = lines.pop()||"";
+        for(const raw of lines){
+          const line = raw.trim();
+          if(!line||!line.startsWith("data:")) continue;
+          const pl = line.replace(/^data:\s*/,"");
+          if(pl==="[DONE]") break;
+          try{
+            const j = JSON.parse(pl);
+            const delta = j.choices?.[0]?.delta?.content;
+            if(delta){full+=delta;el.aiOutput.textContent=full;}
+          }catch(e){}
         }
-      });
+      }
+      if(!full) el.aiOutput.textContent="未返回内容，请重试";
+    }catch(err){
+      if(err.name==="AbortError") return;
+      el.aiOutput.textContent="网络异常，请检查网络";
+    }
+  }
 
-      el.closeSheetBtn.addEventListener('click', closeSheet);
-      el.sheetMask.addEventListener('click', (e) => {
-        if (e.target === el.sheetMask) closeSheet();
-      });
+  function openSheet(title,quote){
+    el.sheetTitle.textContent = title;
+    if(quote){el.sheetQuote.textContent=quote;el.sheetQuote.style.display="block";}
+    else el.sheetQuote.style.display="none";
+    el.aiSheetMask.classList.add("open");
+  }
+  function closeSheet(){
+    if(activeAbort){activeAbort.abort();activeAbort=null;}
+    el.aiSheetMask.classList.remove("open");
+  }
 
-      // 设置页交互
-      el.openSettingsBtn.addEventListener('click', () => {
-        el.apiKeyInput.value = getApiKey();
-        updateCacheStatus();
-        el.settingsView.classList.add('open');
-      });
+  // 划词选中文本
+  function onSelChange(){
+    clearTimeout(selTimer);
+    selTimer = setTimeout(()=>{
+      const sel = window.getSelection();
+      if(!sel||sel.isCollapsed){el.selPill.classList.remove("show");return;}
+      const txt = sel.toString().trim();
+      if(!txt||txt.length<2){el.selPill.classList.remove("show");return;}
+      if(!el.bookContent.contains(sel.anchorNode)){el.selPill.classList.remove("show");return;}
+      selectedTextCache = txt.slice(0,900);
+      el.pillSnippet.textContent = "「"+selectedTextCache.slice(0,10)+(selectedTextCache.length>10?"…":"")+"」";
+      el.selPill.classList.add("show");
+    },180);
+  }
 
-      el.closeSettingsBtn.addEventListener('click', () => {
-        el.settingsView.classList.remove('open');
-      });
+  // 划词解：训诂+铁律+例外反转
+  async function handleSelExplain(){
+    const text = selectedTextCache;
+    if(!text) return;
+    el.selPill.classList.remove("show");
+    try{window.getSelection().removeAllRanges();}catch(e){}
+    const bookHint = activeBookId?`《${(bookList.find(b=>b.id===activeBookId)||{}).title||""}》`:"";
+    openSheet("划词训诂推演",text);
+    await streamAi([
+      {role:"system",content:`你是精通术数古籍的训诂学者。针对${bookHint}选中古文，严格输出三段纯文本，禁止markdown星号，禁止寒暄：
+【白话训诂】
+做精准通俗白话翻译，解释古词古义。
 
-      el.toggleKeyBtn.addEventListener('click', () => {
-        const isPwd = el.apiKeyInput.type === 'password';
-        el.apiKeyInput.type = isPwd ? 'text' : 'password';
-        el.toggleKeyBtn.textContent = isPwd ? '隐藏' : '显示';
-      });
+【铁律】
+提炼本段的核心术数硬性规则、判断逻辑，逐条简明。
 
-      el.saveKeyBtn.addEventListener('click', () => {
-        const val = el.apiKeyInput.value.trim();
-        localStorage.setItem(API_KEY_STORAGE, val);
-        showToast(val ? 'API Key 已永久保存在本机' : 'API Key 已清空');
-      });
+【例外反转】
+写出此规则不生效的条件、反例、特殊情形。`},
+      {role:"user",content:"解读古文：\n"+text}
+    ]);
+  }
 
-      el.clearCacheBtn.addEventListener('click', async () => {
-        if (!currentBook) {
-          el.settingsView.classList.remove('open');
-          el.pdfInput.click();
-          return;
-        }
-        const ok = confirm('确定清空当前缓存的《' + currentBook.title + '》吗？清空后可直接导入新书。');
-        if (!ok) return;
-        await clearBookFromDB();
-        localStorage.removeItem(POS_STORAGE);
-        renderBook(null, 0, 0);
-        showToast('书籍缓存已清空');
-        el.settingsView.classList.remove('open');
-      });
+  // 问书：强语义prompt，不轻易返回查不到，允许语义近似匹配
+  async function submitAsk(){
+    const q = el.askInput.value.trim();
+    if(!q)return;
+    const book = bookList.find(b=>b.id===activeBookId);
+    if(!book){showToast("请先在藏书阁打开一本典籍");return;}
+    el.askInput.blur();
+    const ctx = retrieveContext(q,book);
+    openSheet(`问书：${q}`,null);
+    await streamAi([
+      {role:"system",content:`你是严谨术数典籍研读助手，仅使用下方《${book.title}》提供的原文片段作答。
+重要规则：用户提问用词经常与古籍原文不完全一模一样，**不要死抠字面字符，要做语义、概念、术数含义联想匹配**。
+如果原文没有完全一模一样的句子，但存在概念相近、原理相关条文，必须摘录近似相关条文，不允许直接说查不到。
+只有全部提供的原文片段完全不存在相关概念，才写：当前检索片段未见直接相关记载。
 
-      // 启动自动加载上次书籍和阅读进度
-      (async function init() {
-        try {
-          const savedBook = await loadBookFromDB();
-          if (savedBook) {
-            const pos = loadReadingPos();
-            renderBook(savedBook, pos.chunk, pos.scrollTop);
-          } else {
-            renderBook(null, 0, 0);
-          }
-        } catch (err) {
-          console.error(err);
-          renderBook(null, 0, 0);
-        }
-      })();
-    })();
-  </script>
+输出固定格式纯文本，不要星号markdown：
+【出处条文】
+摘录匹配或概念近似的原句，标明页码；无相关才写未见记载。
+
+【解析解答】
+基于摘录原文深度推演解读；若只有近似条文，必须写明：原文没有与提问完全一致原话，以下条文概念原理相近。
+可以综合多条相关原文做逻辑推导，不要引用本书以外外部知识。`},
+      {role:"user",content:`以下是《${book.title}》原文片段：
+${ctx}
+
+我的问题：${q}`}
+    ]);
+  }
+
+  // 事件绑定
+  el.catNav.forEach(tab=>{
+    tab.onclick = ()=>{setCat(tab.dataset.cat);};
+  });
+  el.themeBtn.onclick = toggleTheme;
+
+  el.openShelfBtn.onclick = async ()=>{await renderShelf();el.shelfPanel.classList.add("open");};
+  el.closeShelfBtn.onclick = ()=>el.shelfPanel.classList.remove("open");
+  el.importPdfBtn.onclick = ()=>el.pdfInput.click();
+  el.pdfInput.onchange = e=>{
+    const f = e.target.files&&e.target.files[0];
+    if(f) parsePdf(f);
+  };
+
+  el.prevBtn.onclick = async ()=>{
+    const bk = bookList.find(x=>x.id===activeBookId);
+    if(!bk||currentChunk<=0) return;
+    renderReader(bk,currentChunk-1,0);
+    saveReadingPos(activeBookId,currentChunk-1,0);
+  };
+  el.nextBtn.onclick = async ()=>{
+    const bk = bookList.find(x=>x.id===activeBookId);
+    if(!bk) return;
+    const totalChunks = Math.ceil(bk.pages.length/PAGES_PER_CHUNK);
+    if(currentChunk>=totalChunks-1) return;
+    renderReader(bk,currentChunk+1,0);
+    saveReadingPos(activeBookId,currentChunk+1,0);
+  };
+  el.chunkSel.onchange = async e=>{
+    const idx = parseInt(e.target.value,10)||0;
+    const bk = bookList.find(x=>x.id===activeBookId);
+    if(!bk)return;
+    renderReader(bk,idx,0);
+    saveReadingPos(activeBookId,idx,0);
+  };
+  el.readerMain.addEventListener("scroll",()=>{
+    if(!activeBookId)return;
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(()=>{
+      saveReadingPos(activeBookId,currentChunk,el.readerMain.scrollTop);
+    },250);
+  },{passive:true});
+  document.addEventListener("selectionchange",onSelChange);
+  el.selPill.onclick = handleSelExplain;
+
+  el.askBtn.onclick = submitAsk;
+  el.askInput.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){e.preventDefault();submitAsk();}
+  });
+  el.closeSheetBtn.onclick = closeSheet;
+  el.aiSheetMask.onclick = e=>{if(e.target===el.aiSheetMask) closeSheet();};
+
+  el.openSetBtn.onclick = ()=>{
+    el.apiKeyInp.value = getApiKey();
+    el.settingsView.classList.add("open");
+  };
+  el.closeSetBtn.onclick = ()=>el.settingsView.classList.remove("open");
+  el.toggleKeyBtn.onclick = ()=>{
+    const isPwd = el.apiKeyInp.type==="password";
+    el.apiKeyInp.type = isPwd?"text":"password";
+    el.toggleKeyBtn.textContent = isPwd?"隐藏":"显示";
+  };
+  el.saveKeyBtn.onclick = ()=>{
+    const val = el.apiKeyInp.value.trim();
+    localStorage.setItem(API_KEY_STORE,val);
+    showToast(val?"API‑Key已保存本机":"API‑Key已清空");
+  };
+
+  // 初始化
+  (async function init(){
+    await openDB();
+    bookList = await getAllBooks();
+    const savedCat = localStorage.getItem(CAT_STORE);
+    if(savedCat) setCat(savedCat);
+    const savedTheme = localStorage.getItem(THEME_STORE);
+    applyTheme(savedTheme||"light");
+  })();
+
+})();
+</script>
 </body>
 </html>
