@@ -1,9 +1,10 @@
-// ==================== 藏往 V6：IndexedDB、端到端加密、Cloudflare D1 同步与安全清缓存 ====================
-const DB_NAME = 'CangwangV6DB';
+// ==================== 藏往 V7：IndexedDB、端到端加密、Cloudflare D1 同步、音效引擎与侧边抽屉 ====================
+const DB_NAME = 'CangwangV6DB'; // 沿用 V6 库名，升级 V7 零丢失你已存的书籍和档案！
 const DB_VER = 1;
 let dbInst = null;
 let preparedBackupBlob = null;
 let preparedBackupName = '';
+let audioCtx = null;
 
 const STORES = ['books', 'pdfBlobs', 'chapters', 'notes', 'archives', 'chats', 'memories', 'hexCache', 'dailyDraws', 'footprints', 'meta'];
 
@@ -12,52 +13,50 @@ function openDB() {
     const req = indexedDB.open(DB_NAME, DB_VER);
     req.onupgradeneeded = e => {
       const db = e.target.result;
-      STORES.forEach(s => {
-        if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, { keyPath: 'id' });
-      });
+      STORES.forEach(s => { if (!db.objectStoreNames.contains(s)) db.createObjectStore(s, { keyPath: 'id' }); });
     };
     req.onsuccess = e => { dbInst = e.target.result; resolve(dbInst); };
     req.onerror = e => reject(e.target.error);
   });
 }
 
-function dbGet(store, id) {
-  return new Promise((res, rej) => {
-    const tx = dbInst.transaction(store, 'readonly');
-    const req = tx.objectStore(store).get(id);
-    req.onsuccess = () => res(req.result);
-    req.onerror = () => rej(req.error);
+function dbGet(store, id) { return new Promise((res, rej) => { const r = dbInst.transaction(store,'readonly').objectStore(store).get(id); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+function dbGetAll(store) { return new Promise((res, rej) => { const r = dbInst.transaction(store,'readonly').objectStore(store).getAll(); r.onsuccess = () => res(r.result || []); r.onerror = () => rej(r.error); }); }
+function dbPut(store, obj) { return new Promise((res, rej) => { const r = dbInst.transaction(store,'readwrite').objectStore(store).put(obj); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); }
+function dbDel(store, id) { return new Promise((res, rej) => { const r = dbInst.transaction(store,'readwrite').objectStore(store).delete(id); r.onsuccess = () => res(); r.onerror = () => rej(r.error); }); }
+
+// ==================== WebAudio 清脆古铜钱与竹签音效引擎（离线零延迟） ====================
+function getAudioCtx() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+  return audioCtx;
+}
+
+function playCoinClink(isSettle = false) {
+  if (state.settings.coinSound === false) return;
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  const freqs = isSettle ? [2650, 3920, 5240] : [2200 + Math.random() * 600, 3400 + Math.random() * 700];
+  freqs.forEach((f, idx) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = idx === 0 ? 'triangle' : 'sine';
+    osc.frequency.setValueAtTime(f, now);
+    osc.frequency.exponentialRampToValueAtTime(f * 0.94, now + (isSettle ? 0.28 : 0.09));
+    gain.gain.setValueAtTime(isSettle ? 0.14 : 0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + (isSettle ? 0.30 : 0.10));
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + idx * 0.012);
+    osc.stop(now + (isSettle ? 0.32 : 0.12));
   });
 }
 
-function dbGetAll(store) {
-  return new Promise((res, rej) => {
-    const tx = dbInst.transaction(store, 'readonly');
-    const req = tx.objectStore(store).getAll();
-    req.onsuccess = () => res(req.result || []);
-    req.onerror = () => rej(req.error);
-  });
-}
-
-function dbPut(store, obj) {
-  return new Promise((res, rej) => {
-    const tx = dbInst.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).put(obj);
-    req.onsuccess = () => res(req.result);
-    req.onerror = () => rej(req.error);
-  });
-}
-
-function dbDel(store, id) {
-  return new Promise((res, rej) => {
-    const tx = dbInst.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).delete(id);
-    req.onsuccess = () => res();
-    req.onerror = () => rej(req.error);
-  });
-}
-
-// ==================== 全局状态树 ====================
+// ==================== 全局状态 ====================
 const CATEGORIES = ['六爻', '八字', '梅花', '奇门', '六壬', '紫微', '风水'];
 const CANWU_ROOMS = ['六爻', '八字', '梅花', '奇门', '六壬', '紫微', '风水', '问机解梦'];
 
@@ -77,7 +76,6 @@ const state = {
   shelfView: 'grid',
   shelfSort: 'recent',
   noteSearch: '',
-  noteFolderFilter: 'all',
   editingNoteId: null,
   dictGroup: '基础知识',
   dictItemIdx: 0,
@@ -104,23 +102,12 @@ const state = {
   memories: [],
   dailyDraws: [],
   footprints: {},
-  reader: {
-    bookId: null,
-    engine: 'pdf',
-    pageNum: 1,
-    totalPages: 1,
-    chapIdx: 0,
-    textMode: 'orig',
-    barsHidden: true,
-    selText: '',
-    selHexKey: null,
-    pdfDoc: null
-  },
+  reader: { bookId: null, engine: 'pdf', pageNum: 1, totalPages: 1, textMode: 'orig', barsHidden: true, selText: '', selHexKey: null, pdfDoc: null },
   tts: { playing: false, mode: 'modern', rate: 1.0, timerId: null, queue: [], qIdx: 0 },
   settings: {
-    theme: 'cinnabar',
+    theme: 'apple',
     accent: 'red',
-    ambient: 'luopan',
+    coinSound: true,
     apiKey: '',
     baseUrl: 'https://api.deepseek.com',
     flashModel: 'deepseek-chat',
@@ -132,11 +119,11 @@ const state = {
     syncUrl: '',
     vaultPass: '',
     e2eEncrypt: true,
-    fontSize: 16.5,
-    lineHeight: 1.88,
+    fontSize: 17,
+    lineHeight: 1.9,
     fontFamily: 'songhei',
     paper: 'warm',
-    groups: ['亲人', '恋人/伴侣', '朋友', '客户', '领导/老师', '自己'],
+    groups: ['亲人', '伴侣', '朋友', '客户', '自己'],
     customPortals: [],
     tokensIn: 0,
     tokensOut: 0,
@@ -145,18 +132,9 @@ const state = {
   }
 };
 
-function uid(prefix = 'id') {
-  return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
-}
-function escapeHtml(s) {
-  return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-function formatDateKey(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
+function uid(prefix = 'id') { return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7); }
+function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function formatDateKey(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 state.calSelectedDate = formatDateKey(new Date());
 
 function showToast(msg) {
@@ -165,12 +143,10 @@ function showToast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 2600);
+  el._t = setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-async function saveSettingsMeta() {
-  await dbPut('meta', { id: 'settings', data: state.settings });
-}
+async function saveSettingsMeta() { await dbPut('meta', { id: 'settings', data: state.settings }); }
 async function markDirty() {
   state.settings.dirtySinceBackup = true;
   const dot = document.getElementById('backupDot');
@@ -183,318 +159,173 @@ async function markStudyFootprint() {
   await dbPut('footprints', { id: key, count: state.footprints[key] });
 }
 
+function openSideDrawer() {
+  document.getElementById('drawerArchCount').textContent = state.archives.length;
+  document.getElementById('drawerPrivState').textContent = state.privacyOn ? '开' : '关';
+  if (typeof getCultivationRank === 'function') {
+    document.getElementById('drawerRankText').textContent = getCultivationRank() + ' · 私人术数终端';
+  }
+  document.getElementById('sideDrawerBackdrop').classList.add('open');
+  document.getElementById('sideDrawer').classList.add('open');
+}
+function closeSideDrawer() {
+  document.getElementById('sideDrawerBackdrop').classList.remove('open');
+  document.getElementById('sideDrawer').classList.remove('open');
+}
+
 function openSheet(id) {
   if (id === 'sheet-import') document.getElementById('importCatName').textContent = state.category;
   document.getElementById(id).classList.add('open');
 }
 function closeSheet(id) { document.getElementById(id).classList.remove('open'); }
 function backdropClose(e, id) { if (e.target.id === id) closeSheet(id); }
-function openOverlay(id) {
-  document.getElementById(id).classList.add('open');
-  if (id === 'readerOverlay' || id === 'noteEditorOverlay') {
-    document.getElementById('ambientLayer').classList.add('hidden');
-  }
-}
-function closeOverlay(id) {
-  document.getElementById(id).classList.remove('open');
-  if (id === 'readerOverlay' || id === 'noteEditorOverlay') {
-    updateAmbientLayer();
-  }
-}
+function openOverlay(id) { document.getElementById(id).classList.add('open'); }
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
 
-// ==================== AES-256-GCM 本地端到端加密 ====================
+// ==================== AES-256-GCM 端到端加密与云同步 ====================
 async function deriveAesKey(passphrase, saltBytes) {
-  const enc = new TextEncoder();
-  const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: saltBytes, iterations: 100000, hash: 'SHA-256' },
-    baseKey,
-    { name: 'AES-GCM', length: 256 },
-    false,
-    ['encrypt', 'decrypt']
-  );
+  const baseKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({ name: 'PBKDF2', salt: saltBytes, iterations: 100000, hash: 'SHA-256' }, baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
 }
+function bytesToBase64(b) { let s = ''; for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s); }
+function base64ToBytes(b64) { const bin = atob(b64), a = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i); return a; }
 
-function bytesToBase64(bytes) {
-  let bin = '';
-  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
-  return btoa(bin);
-}
-function base64ToBytes(b64) {
-  const bin = atob(b64);
-  const arr = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-  return arr;
-}
-
-async function encryptPayload(jsonStr, passphrase) {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const iv = crypto.getRandomValues(new Uint8Array(12));
-  const key = await deriveAesKey(passphrase, salt);
+async function encryptPayload(jsonStr, pass) {
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveAesKey(pass, salt);
   const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(jsonStr));
-  return JSON.stringify({
-    e2e: 'AES-256-GCM',
-    s: bytesToBase64(salt),
-    iv: bytesToBase64(iv),
-    d: bytesToBase64(new Uint8Array(cipher))
-  });
+  return JSON.stringify({ e2e: 'AES-256-GCM', s: bytesToBase64(salt), iv: bytesToBase64(iv), d: bytesToBase64(new Uint8Array(cipher)) });
 }
-
-async function decryptPayload(wrappedStr, passphrase) {
+async function decryptPayload(wrappedStr, pass) {
   const obj = JSON.parse(wrappedStr);
   if (!obj.e2e) return obj;
-  const salt = base64ToBytes(obj.s);
-  const iv = base64ToBytes(obj.iv);
-  const data = base64ToBytes(obj.d);
-  const key = await deriveAesKey(passphrase, salt);
-  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+  const key = await deriveAesKey(pass, base64ToBytes(obj.s));
+  const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: base64ToBytes(obj.iv) }, key, base64ToBytes(obj.d));
   return JSON.parse(new TextDecoder().decode(plain));
 }
 
-// ==================== 双层分离打包（不含大体积 pdfBlobs，永不卡死） ====================
 async function buildTextVaultPayload() {
   return {
-    version: 'CangwangV6',
-    exportedAt: new Date().toISOString(),
-    books: await dbGetAll('books'),
-    chapters: await dbGetAll('chapters'),
-    notes: await dbGetAll('notes'),
-    archives: await dbGetAll('archives'),
-    chats: await dbGetAll('chats'),
-    memories: await dbGetAll('memories'),
-    hexCache: await dbGetAll('hexCache'),
-    dailyDraws: await dbGetAll('dailyDraws'),
-    footprints: await dbGetAll('footprints'),
-    settingsLite: {
-      theme: state.settings.theme,
-      accent: state.settings.accent,
-      ambient: state.settings.ambient,
-      groups: state.settings.groups,
-      customPortals: state.settings.customPortals,
-      myDayPillar: state.settings.myDayPillar,
-      chatRetentionDays: state.settings.chatRetentionDays
-    }
+    version: 'CangwangV7', exportedAt: new Date().toISOString(),
+    books: await dbGetAll('books'), chapters: await dbGetAll('chapters'), notes: await dbGetAll('notes'),
+    archives: await dbGetAll('archives'), chats: await dbGetAll('chats'), memories: await dbGetAll('memories'),
+    hexCache: await dbGetAll('hexCache'), dailyDraws: await dbGetAll('dailyDraws'), footprints: await dbGetAll('footprints'),
+    settingsLite: { theme: state.settings.theme, accent: state.settings.accent, groups: state.settings.groups, customPortals: state.settings.customPortals, myDayPillar: state.settings.myDayPillar }
   };
 }
-
 async function applyTextVaultPayload(data) {
   if (!data || !Array.isArray(data.archives)) throw new Error('数据格式不匹配');
   for (const st of ['books', 'chapters', 'notes', 'archives', 'chats', 'memories', 'hexCache', 'dailyDraws', 'footprints']) {
-    if (Array.isArray(data[st])) {
-      for (const it of data[st]) await dbPut(st, it);
-    }
+    if (Array.isArray(data[st])) for (const it of data[st]) await dbPut(st, it);
   }
-  if (data.settingsLite) {
-    Object.assign(state.settings, data.settingsLite);
-    await saveSettingsMeta();
-  }
-  await loadAllFromDB();
-  applyVisualTheme();
-  renderAllCurrentViews();
+  if (data.settingsLite) { Object.assign(state.settings, data.settingsLite); await saveSettingsMeta(); }
+  await loadAllFromDB(); applyVisualTheme(); renderAllCurrentViews();
 }
 
-// ==================== Cloudflare D1 同步 ====================
 async function pushToCloudD1() {
   saveGeneralSettings(true);
   const { syncUrl, vaultPass, e2eEncrypt } = state.settings;
-  if (!syncUrl || !vaultPass) return showToast('请先填入 Worker 地址和私人保险箱口令');
+  if (!syncUrl || !vaultPass) return showToast('请先填写 Worker 地址和私人保险箱口令');
   showToast('正在加密上传到 Cloudflare D1...');
   try {
-    const payload = await buildTextVaultPayload();
-    let bodyStr = JSON.stringify(payload);
+    let bodyStr = JSON.stringify(await buildTextVaultPayload());
     if (e2eEncrypt) bodyStr = await encryptPayload(bodyStr, vaultPass);
-    const resp = await fetch(syncUrl.replace(/\/$/, '') + '/sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Vault-Token': vaultPass },
-      body: JSON.stringify({ payload: bodyStr })
-    });
+    const resp = await fetch(syncUrl.replace(/\/$/, '') + '/sync', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Vault-Token': vaultPass }, body: JSON.stringify({ payload: bodyStr }) });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    state.settings.dirtySinceBackup = false;
-    state.settings.lastSyncAt = new Date().toLocaleString();
+    state.settings.dirtySinceBackup = false; state.settings.lastSyncAt = new Date().toLocaleString();
     document.getElementById('backupDot').classList.remove('show');
     await saveSettingsMeta();
-    document.getElementById('cloudSyncStatus').textContent = '上次加密同步：' + state.settings.lastSyncAt;
-    showToast('已加密同步至 Cloudflare D1 云端！');
-  } catch (e) {
-    showToast('云同步失败：' + e.message);
-  }
+    document.getElementById('cloudSyncStatus').textContent = '上次同步：' + state.settings.lastSyncAt;
+    showToast('已加密同步至 Cloudflare D1');
+  } catch (e) { showToast('云同步失败：' + e.message); }
 }
 
 async function pullFromCloudD1() {
   saveGeneralSettings(true);
   const { syncUrl, vaultPass } = state.settings;
-  if (!syncUrl || !vaultPass) return showToast('请先填入 Worker 地址和私人保险箱口令');
-  showToast('正在从云端拉回并解密...');
+  if (!syncUrl || !vaultPass) return showToast('请先填写 Worker 地址和口令');
+  showToast('正在从云端拉回解密...');
   try {
-    const resp = await fetch(syncUrl.replace(/\/$/, '') + '/sync', {
-      method: 'GET',
-      headers: { 'X-Vault-Token': vaultPass }
-    });
+    const resp = await fetch(syncUrl.replace(/\/$/, '') + '/sync', { method: 'GET', headers: { 'X-Vault-Token': vaultPass } });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const res = await resp.json();
-    if (!res.payload) return showToast('云端暂无备份数据');
-    const data = await decryptPayload(res.payload, vaultPass);
-    await applyTextVaultPayload(data);
-    state.settings.dirtySinceBackup = false;
-    document.getElementById('backupDot').classList.remove('show');
-    await saveSettingsMeta();
+    if (!res.payload) return showToast('云端暂无备份');
+    await applyTextVaultPayload(await decryptPayload(res.payload, vaultPass));
     closeSheet('sheet-settings');
-    showToast('已从 Cloudflare D1 无损恢复全部文字资产！');
-  } catch (e) {
-    showToast('拉回或解密失败（请检查口令）：' + e.message);
-  }
+    showToast('已从云端完整恢复全部文字资产');
+  } catch (e) { showToast('拉回失败（请检查口令）：' + e.message); }
 }
 
-// ==================== 修复版：两步式本地备份到 iCloud ====================
 async function prepareLocalBackup() {
-  showToast('正在打包文字资产...');
-  const payload = await buildTextVaultPayload();
-  const str = JSON.stringify(payload);
+  const str = JSON.stringify(await buildTextVaultPayload());
   preparedBackupBlob = new Blob([str], { type: 'application/json' });
-  preparedBackupName = `藏往V6备份_${formatDateKey(new Date())}.json`;
+  preparedBackupName = `藏往V7备份_${formatDateKey(new Date())}.json`;
   const btn = document.getElementById('saveBackupBtn');
-  btn.disabled = false;
-  btn.style.opacity = '1';
+  btn.disabled = false; btn.style.opacity = '1';
   document.getElementById('packBackupBtn').textContent = '已打包 (' + (str.length / 1024).toFixed(1) + ' KB)';
-  showToast('打包完成！请直接点右侧「第2步：存到 iCloud」');
+  showToast('已打包，请直接点「2. 存到 iCloud」');
 }
-
 function triggerLocalBackupSave() {
-  if (!preparedBackupBlob) return showToast('请先点第1步生成备份包');
+  if (!preparedBackupBlob) return;
   const file = new File([preparedBackupBlob], preparedBackupName, { type: 'application/json' });
-  state.settings.dirtySinceBackup = false;
-  document.getElementById('backupDot').classList.remove('show');
-  saveSettingsMeta();
-  // 同步直接触发用户手势，iOS Safari 不再拦截
+  state.settings.dirtySinceBackup = false; document.getElementById('backupDot').classList.remove('show'); saveSettingsMeta();
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    navigator.share({ files: [file], title: '藏往 V6 备份', text: '请选择“存储到文件”存入 iCloud 云盘' }).catch(() => {
-      fallbackAnchorDownload(preparedBackupBlob, preparedBackupName);
-    });
-  } else {
-    fallbackAnchorDownload(preparedBackupBlob, preparedBackupName);
-  }
+    navigator.share({ files: [file], title: '藏往备份', text: '请选择存储到文件存入 iCloud' }).catch(() => fallbackAnchorDownload(preparedBackupBlob, preparedBackupName));
+  } else fallbackAnchorDownload(preparedBackupBlob, preparedBackupName);
 }
-
 function fallbackAnchorDownload(blob, name) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = name;
-  document.body.appendChild(a);
-  a.click();
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click();
   setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 1000);
-  showToast('已触发文件下载，可存入 iCloud 云盘');
 }
-
 async function importLocalBackup(e) {
-  const f = e.target.files[0];
-  if (!f) return;
-  try {
-    const data = JSON.parse(await f.text());
-    await applyTextVaultPayload(data);
-    closeSheet('sheet-settings');
-    showToast('备份已成功恢复！');
-  } catch (err) {
-    showToast('恢复失败：' + err.message);
-  }
+  const f = e.target.files[0]; if (!f) return;
+  try { await applyTextVaultPayload(JSON.parse(await f.text())); closeSheet('sheet-settings'); showToast('备份恢复成功'); }
+  catch (err) { showToast('恢复失败：' + err.message); }
   e.target.value = '';
 }
 
-// ==================== 存储体检与安全清缓存 ====================
 async function refreshStorageStats() {
-  const box = document.getElementById('storageStatsBox');
-  if (!box) return;
+  const box = document.getElementById('storageStatsBox'); if (!box) return;
   const pdfs = await dbGetAll('pdfBlobs');
-  const pdfMB = (pdfs.reduce((a, b) => a + (b.data ? b.data.byteLength : 0), 0) / (1024 * 1024)).toFixed(2);
-  const textBytes = JSON.stringify({ a: state.archives, n: state.notes, c: state.chats, m: state.memories }).length;
-  const textKB = (textBytes / 1024).toFixed(1);
-  const oldChats = countExpiredChats();
-  box.innerHTML = `
-    <div><strong>永久珍藏区（锁定保护）：</strong>${state.books.length} 本典籍（PDF原件 ${pdfMB} MB）、${state.archives.length} 份实战卷宗、${state.notes.length} 篇笔记、${state.memories.length} 条大脑记忆（纯文字仅 ${textKB} KB）</div>
-    <div style="margin-top:4px;"><strong>可清理临时区：</strong>${oldChats} 条超过保留期且未标星的闲聊 + 临时渲染缓存</div>
-  `;
+  const pdfMB = (pdfs.reduce((a, b) => a + (b.data ? b.data.byteLength : 0), 0) / 1048576).toFixed(2);
+  const textKB = (JSON.stringify({ a: state.archives, n: state.notes, c: state.chats, m: state.memories }).length / 1024).toFixed(1);
+  box.innerHTML = `珍藏锁定区：${state.books.length} 本书（PDF ${pdfMB} MB）、${state.archives.length} 份卷宗、${state.notes.length} 篇笔记（纯文字 ${textKB} KB）`;
 }
-
-function countExpiredChats() {
-  const days = Number(state.settings.chatRetentionDays);
-  if (days === 0) return 0;
-  const cutoff = days < 0 ? Date.now() : (Date.now() - days * 86400000);
-  return state.chats.filter(t => !t.starred && (t.updatedAt || t.createdAt) < cutoff).length;
-}
-
 async function runSafeClearCache() {
-  let removed = 0;
   const days = Number(state.settings.chatRetentionDays);
+  let removed = 0;
   if (days !== 0) {
     const cutoff = days < 0 ? Date.now() : (Date.now() - days * 86400000);
     const expired = state.chats.filter(t => !t.starred && (t.updatedAt || t.createdAt) < cutoff);
-    for (const t of expired) {
-      await dbDel('chats', t.id);
-      removed++;
-    }
+    for (const t of expired) { await dbDel('chats', t.id); removed++; }
     state.chats = state.chats.filter(t => t.starred || (t.updatedAt || t.createdAt) >= cutoff);
   }
-  if (state.reader.pdfDoc) {
-    try { state.reader.pdfDoc.destroy(); } catch (e) {}
-    state.reader.pdfDoc = null;
-  }
-  preparedBackupBlob = null;
+  if (state.reader.pdfDoc) { try { state.reader.pdfDoc.destroy(); } catch (e) {} state.reader.pdfDoc = null; }
   await refreshStorageStats();
-  showToast(`安全清理完成！已释放临时缓存并清理 ${removed} 条过期未标星闲聊，珍藏资料零损失`);
+  showToast(`已清理临时缓存与 ${removed} 条过期闲聊，珍藏资料零损失`);
 }
 
-// ==================== 主题、隐私模糊与背景暗纹 ====================
 function applyVisualTheme() {
   const s = state.settings;
-  if (s.theme === 'warm') document.documentElement.removeAttribute('data-theme');
-  else document.documentElement.setAttribute('data-theme', s.theme || 'cinnabar');
+  if (s.theme === 'apple') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', s.theme || 'apple');
   document.documentElement.setAttribute('data-accent', s.accent || 'red');
-  updateAmbientLayer();
 }
-
 function setAppTheme(t) { state.settings.theme = t; applyVisualTheme(); saveSettingsMeta(); }
 function setAccentColor(a) { state.settings.accent = a; applyVisualTheme(); saveSettingsMeta(); }
-function setAmbientMode(m) { state.settings.ambient = m; updateAmbientLayer(); saveSettingsMeta(); }
-
-function updateAmbientLayer() {
-  const el = document.getElementById('ambientLayer');
-  if (!el) return;
-  const mode = state.settings.ambient || 'luopan';
-  if (mode === 'none') {
-    el.classList.add('hidden');
-    el.innerHTML = '';
-    return;
-  }
-  el.classList.remove('hidden');
-  if (mode === 'luopan') {
-    el.innerHTML = `<svg class="ambient-luopan" id="ambientSvg" viewBox="0 0 200 200" fill="none" stroke="currentColor" stroke-width="0.9">
-      <circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="78"/><circle cx="100" cy="100" r="58"/><circle cx="100" cy="100" r="36"/>
-      ${Array.from({length:24},(_,i)=>{const a=i*15*Math.PI/180;return `<line x1="${(100+58*Math.cos(a)).toFixed(1)}" y1="${(100+58*Math.sin(a)).toFixed(1)}" x2="${(100+95*Math.cos(a)).toFixed(1)}" y2="${(100+95*Math.sin(a)).toFixed(1)}"/>`;}).join('')}
-      ${Array.from({length:8},(_,i)=>{const a=i*45*Math.PI/180;return `<line x1="${(100+36*Math.cos(a)).toFixed(1)}" y1="${(100+36*Math.sin(a)).toFixed(1)}" x2="${(100+58*Math.cos(a)).toFixed(1)}" y2="${(100+58*Math.sin(a)).toFixed(1)}"/>`;}).join('')}
-    </svg>`;
-  } else if (mode === 'moon') {
-    el.innerHTML = `<svg class="ambient-moon" viewBox="0 0 120 120" fill="currentColor"><path d="M78 16A46 46 0 1 0 104 88 38 38 0 1 1 78 16z"/></svg>`;
-  } else {
-    el.innerHTML = `<div class="ambient-cloud"></div>`;
-  }
-}
-
-function pulseAmbient() {
-  const svg = document.getElementById('ambientSvg');
-  if (!svg) return;
-  svg.classList.add('pulse');
-  clearTimeout(svg._pt);
-  svg._pt = setTimeout(() => svg.classList.remove('pulse'), 1100);
-}
 
 function togglePrivacyBlur() {
   state.privacyOn = !state.privacyOn;
   document.getElementById('appShell').classList.toggle('privacy-on', state.privacyOn);
-  document.getElementById('privacyToggleBtn').classList.toggle('active', state.privacyOn);
-  showToast(state.privacyOn ? '已开启公共场合隐私模糊' : '已关闭隐私模糊');
+  const b = document.getElementById('drawerPrivState');
+  if (b) b.textContent = state.privacyOn ? '开' : '关';
+  showToast(state.privacyOn ? '已开启隐私模糊' : '已关闭隐私模糊');
 }
 
 function openSettings() {
   const s = state.settings;
+  document.getElementById('cfgCoinSound').checked = s.coinSound !== false;
   document.getElementById('cfgApiKey').value = s.apiKey || '';
   document.getElementById('cfgBaseUrl').value = s.baseUrl || 'https://api.deepseek.com';
   document.getElementById('cfgFlashModel').value = s.flashModel || 'deepseek-chat';
@@ -503,19 +334,19 @@ function openSettings() {
   document.getElementById('cfgChatRetention').value = String(s.chatRetentionDays ?? 30);
   document.getElementById('cfgRedactNames').checked = s.redactNames !== false;
   document.getElementById('cfgMyDayPillar').value = s.myDayPillar || '';
-  document.getElementById('cfgAmbientBg').value = s.ambient || 'luopan';
   document.getElementById('cfgSyncUrl').value = s.syncUrl || '';
   document.getElementById('cfgVaultPass').value = s.vaultPass || '';
   document.getElementById('cfgE2eEncrypt').checked = s.e2eEncrypt !== false;
   const est = ((s.tokensIn / 1e6) * 1.5 + (s.tokensOut / 1e6) * 5).toFixed(3);
-  document.getElementById('costStatsBox').textContent = `累计估算：输入 ${s.tokensIn} / 输出 ${s.tokensOut} tokens（约 ¥${est} 元）`;
-  document.getElementById('cloudSyncStatus').textContent = s.lastSyncAt ? '上次加密同步：' + s.lastSyncAt : '未同步过云端（支持免外币卡 Cloudflare D1）';
+  document.getElementById('costStatsBox').textContent = `累计消耗估算：输入 ${s.tokensIn} / 输出 ${s.tokensOut} tokens（约 ¥${est}）`;
+  document.getElementById('cloudSyncStatus').textContent = s.lastSyncAt ? '上次同步：' + s.lastSyncAt : '未同步云端';
   refreshStorageStats();
   openSheet('sheet-settings');
 }
 
 async function saveGeneralSettings(silent = false) {
   const s = state.settings;
+  s.coinSound = document.getElementById('cfgCoinSound').checked;
   s.apiKey = document.getElementById('cfgApiKey').value.trim();
   s.baseUrl = document.getElementById('cfgBaseUrl').value.trim() || 'https://api.deepseek.com';
   s.flashModel = document.getElementById('cfgFlashModel').value.trim() || 'deepseek-chat';
@@ -528,8 +359,5 @@ async function saveGeneralSettings(silent = false) {
   s.vaultPass = document.getElementById('cfgVaultPass').value.trim();
   s.e2eEncrypt = document.getElementById('cfgE2eEncrypt').checked;
   await saveSettingsMeta();
-  if (!silent) {
-    showToast('设置已保存');
-    if (state.mainTab === 'calendar') renderCalendarView();
-  }
+  if (!silent) { showToast('设置已保存'); if (state.mainTab === 'calendar') renderCalendarView(); }
 }

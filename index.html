@@ -6,37 +6,81 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="藏往" />
-<title>藏往 · 术数排盘、典籍与参悟智能体</title>
+<title>藏往 V7 · 极简术数排盘与参悟终端</title>
 <link rel="stylesheet" href="./style.css" />
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js" defer></script>
 </head>
 <body>
 <div class="app-shell" id="appShell">
-  <!-- 角落低透明度意境暗纹层 -->
-  <div class="ambient-layer" id="ambientLayer" aria-hidden="true"></div>
+
+  <!-- 左侧苹果风极简侧边抽屉（收纳档案、问机、百宝箱、星图与设置） -->
+  <div class="drawer-backdrop" id="sideDrawerBackdrop" onclick="closeSideDrawer()"></div>
+  <aside class="side-drawer" id="sideDrawer" aria-label="侧边导航">
+    <div class="drawer-head">
+      <div>
+        <div class="drawer-brand">藏往</div>
+        <div class="drawer-sub" id="drawerRankText">初窥境 · 私人术数终端</div>
+      </div>
+      <button class="icon-btn" onclick="closeSideDrawer()" aria-label="关闭侧栏">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+
+    <div class="drawer-section-lbl">核心工具与收纳</div>
+    <div class="drawer-menu">
+      <button class="drawer-item" onclick="closeSideDrawer();openArchivesOverlay()">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></span>
+        <span class="drawer-txt">实战档案库</span>
+        <span class="drawer-badge" id="drawerArchCount">0</span>
+      </button>
+      <button class="drawer-item" onclick="closeSideDrawer();openAskJi()">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><path d="M12 3v18"></path><path d="M7 8l5-5 5 5"></path><rect x="7" y="11" width="10" height="10" rx="2"></rect></svg></span>
+        <span class="drawer-txt">每日摇签 · 解梦问机</span>
+      </button>
+      <button class="drawer-item" onclick="closeSideDrawer();switchMainTab('methods');switchMethodsSub('tools')">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg></span>
+        <span class="drawer-txt">中文观星 · 百宝箱</span>
+      </button>
+      <button class="drawer-item" onclick="closeSideDrawer();openMindMap()">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.2"></circle><circle cx="5" cy="18" r="2.2"></circle><circle cx="19" cy="18" r="2.2"></circle><line x1="12" y1="7.2" x2="6.3" y2="16.1"></line><line x1="12" y1="7.2" x2="17.7" y2="16.1"></line><line x1="7.2" y1="18" x2="16.8" y2="18"></line></svg></span>
+        <span class="drawer-txt">藏往思想星图</span>
+      </button>
+      <button class="drawer-item" onclick="closeSideDrawer();openGlobalSearch()">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+        <span class="drawer-txt">全库秒搜</span>
+      </button>
+    </div>
+
+    <div class="drawer-section-lbl" style="margin-top:18px;">隐私与系统</div>
+    <div class="drawer-menu">
+      <button class="drawer-item" onclick="togglePrivacyBlur()">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
+        <span class="drawer-txt">一键隐私模糊</span>
+        <span class="drawer-badge" id="drawerPrivState">关</span>
+      </button>
+      <button class="drawer-item" onclick="closeSideDrawer();openSettings()">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
+        <span class="drawer-txt">外观 · 密钥 · 云同步</span>
+      </button>
+    </div>
+  </aside>
 
   <div class="views-wrap">
-    <!-- 1. 排盘主视图（起卦排盘第一 / 书架第二 / 苹果风笔记第三） -->
+    <!-- 1. 排盘主视图（视觉聚焦、层次清爽） -->
     <section class="view-page active" id="view-divine">
       <header class="top-header">
         <div class="header-row">
-          <div class="brand-title">
+          <div class="header-left">
+            <button class="icon-btn" onclick="openSideDrawer()" aria-label="菜单">
+              <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="14" y2="17"></line></svg>
+              <span class="backup-dot" id="backupDot"></span>
+            </button>
             <span class="brand-name">藏往</span>
-            <span class="brand-sub" id="brandSubText">六爻研习</span>
           </div>
           <div class="header-actions">
-            <button class="icon-btn" onclick="openAskJi()" title="每日摇签与解梦问机" aria-label="问机">
-              <svg viewBox="0 0 24 24"><path d="M12 3v18"></path><path d="M7 8l5-5 5 5"></path><rect x="7" y="11" width="10" height="10" rx="2"></rect></svg>
-            </button>
-            <button class="icon-btn" onclick="openGlobalSearch()" title="全局秒搜" aria-label="全局搜索">
+            <button class="pill-mini" onclick="openArchivesOverlay()">档案</button>
+            <button class="icon-btn" onclick="openGlobalSearch()" aria-label="搜索">
               <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            </button>
-            <button class="icon-btn" id="privacyToggleBtn" onclick="togglePrivacyBlur()" title="一键隐私模糊" aria-label="隐私模糊">
-              <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            </button>
-            <button class="icon-btn" onclick="openSettings()" title="设置与云端同步" aria-label="设置">
-              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-              <span class="backup-dot" id="backupDot"></span>
             </button>
           </div>
         </div>
@@ -44,7 +88,7 @@
         <div class="seg-wrap">
           <div class="seg-slider" id="subTabSlider"></div>
           <button class="seg-btn active" data-sub="cast" onclick="switchSubTab('cast')">起卦排盘</button>
-          <button class="seg-btn" data-sub="shelf" onclick="switchSubTab('shelf')">书架</button>
+          <button class="seg-btn" data-sub="shelf" onclick="switchSubTab('shelf')">藏书阁</button>
           <button class="seg-btn" data-sub="notes" id="notesTabLabel" onclick="switchSubTab('notes')">六爻笔记</button>
         </div>
       </header>
@@ -55,71 +99,61 @@
     <section class="view-page" id="view-calendar">
       <header class="top-header">
         <div class="header-row">
-          <div class="brand-title">
-            <span class="brand-name">万年干支历</span>
-            <span class="brand-sub" id="calHeaderSub">节气 · 宜忌 · 九星 · 应期</span>
+          <div class="header-left">
+            <button class="icon-btn" onclick="openSideDrawer()" aria-label="菜单">
+              <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="14" y2="17"></line></svg>
+            </button>
+            <span class="brand-name">干支历</span>
           </div>
-          <div style="display:flex;gap:6px;">
-            <button class="chip" onclick="openCalJumpSheet()">选年月</button>
-            <button class="chip accent" onclick="calGoToday()">今日</button>
+          <div class="header-actions">
+            <button class="pill-mini" onclick="openCalJumpSheet()">选年月</button>
+            <button class="pill-mini accent" onclick="calGoToday()">今日</button>
           </div>
         </div>
       </header>
       <div class="scroll-area" id="calendarScrollArea"></div>
     </section>
 
-    <!-- 3. 实战档案库（按门类隔离 + 自定义分组 + 完整AI卷宗） -->
-    <section class="view-page" id="view-archives">
-      <header class="top-header">
-        <div class="header-row">
-          <div class="brand-title">
-            <span class="brand-name">实战档案</span>
-            <span class="brand-sub" id="archHeaderSub">六爻卷宗库</span>
-          </div>
-          <div style="display:flex;gap:6px;">
-            <button class="chip" id="baziCompareBtn" style="display:none;" onclick="openBaziCompare()">八字合盘</button>
-            <button class="chip accent" onclick="openGroupEditor()">编辑分组</button>
-          </div>
-        </div>
-        <div class="cat-strip" id="archCatStrip"></div>
-        <div class="cat-strip" id="archGroupStrip" style="padding-top:4px;"></div>
-      </header>
-      <div class="scroll-area" id="archivesScrollArea"></div>
-    </section>
-
-    <!-- 4. 断法宝典 + 六十四卦 + 百宝箱与观星任意门 -->
+    <!-- 3. 断法宝典 + 六十四卦 + 中文观星百宝箱 -->
     <section class="view-page" id="view-methods">
       <header class="top-header">
         <div class="header-row">
-          <div class="brand-title">
-            <span class="brand-name">易库断法</span>
-            <span class="brand-sub">断法字典 · 六十四卦 · 百宝箱</span>
+          <div class="header-left">
+            <button class="icon-btn" onclick="openSideDrawer()" aria-label="菜单">
+              <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="14" y2="17"></line></svg>
+            </button>
+            <span class="brand-name">断法易库</span>
           </div>
-          <button class="chip accent" onclick="openAskJi()">摇签问机</button>
+          <div class="header-actions">
+            <button class="pill-mini accent" onclick="openAskJi()">摇签问机</button>
+          </div>
         </div>
-        <div class="seg-wrap" style="margin-top:8px;">
+        <div class="seg-wrap" style="margin-top:10px;">
           <div class="seg-slider" id="methodsSlider"></div>
           <button class="seg-btn active" data-msub="dict" onclick="switchMethodsSub('dict')">断法宝典</button>
           <button class="seg-btn" data-msub="hex" onclick="switchMethodsSub('hex')">六十四卦</button>
-          <button class="seg-btn" data-msub="tools" onclick="switchMethodsSub('tools')">百宝箱</button>
+          <button class="seg-btn" data-msub="tools" onclick="switchMethodsSub('tools')">观星百宝</button>
         </div>
       </header>
       <div class="scroll-area" id="methodsScrollArea"></div>
     </section>
 
-    <!-- 5. 参悟 AI 智能体（八大独立分舱聊天室） -->
+    <!-- 4. 参悟 AI 智能体（八大独立分舱） -->
     <section class="view-page" id="view-canwu">
       <header class="top-header">
         <div class="header-row">
-          <div class="brand-title">
+          <div class="header-left">
+            <button class="icon-btn" onclick="openSideDrawer()" aria-label="菜单">
+              <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="14" y2="17"></line></svg>
+            </button>
             <span class="brand-name">参悟</span>
-            <span class="brand-sub" id="canwuHeaderSub">六爻专属舱</span>
+            <span class="brand-sub" id="canwuHeaderSub">六爻舱</span>
           </div>
-          <div style="display:flex;gap:5px;align-items:center;">
-            <button class="chip" id="modeToggleBtn" onclick="toggleCanwuMode()">解答</button>
-            <button class="chip" onclick="openThreadDrawer()">话题</button>
-            <button class="chip accent" onclick="openBrainModal()">大脑</button>
-            <button class="icon-btn" onclick="startNewChatThread()" title="开启新话题" style="width:30px;height:30px;">
+          <div class="header-actions">
+            <button class="pill-mini" id="modeToggleBtn" onclick="toggleCanwuMode()">解答</button>
+            <button class="pill-mini" onclick="openThreadDrawer()">话题</button>
+            <button class="pill-mini accent" onclick="openBrainModal()">大脑</button>
+            <button class="icon-btn" onclick="startNewChatThread()" title="新话题">
               <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
           </div>
@@ -130,103 +164,108 @@
         <div class="chat-messages" id="chatMessages"></div>
         <button class="scroll-latest-btn" id="scrollLatestBtn" onclick="scrollChatToBottom(true)">↓ 回到最新</button>
         <div class="chat-input-bar">
-          <button class="icon-btn" onclick="startVoiceInput('chatInput')" title="语音输入" style="width:36px;height:36px;flex-shrink:0;">
+          <button class="icon-btn" onclick="startVoiceInput('chatInput')" title="语音输入">
             <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg>
           </button>
-          <textarea class="chat-input" id="chatInput" rows="1" placeholder="问参悟：查书库条文、断卦推演、跨书对比..." oninput="autoResizeInput(this)"></textarea>
+          <textarea class="chat-input" id="chatInput" rows="1" placeholder="问参悟：查古籍、断卦推演、跨书对比..." oninput="autoResizeInput(this)"></textarea>
           <button class="send-btn" id="sendBtn" onclick="sendCanwuMessage()" aria-label="发送">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           </button>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- 底部 5 栏主导航 -->
+  <!-- 底部精简 4 栏苹果风导航（核心聚焦） -->
   <nav class="bottom-nav">
     <button class="nav-item active" data-tab="divine" onclick="switchMainTab('divine')">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"></path><circle cx="12" cy="7.5" r="1"></circle><circle cx="12" cy="16.5" r="1"></circle></svg>
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"></path><circle cx="12" cy="7.5" r="0.9" fill="currentColor"></circle><circle cx="12" cy="16.5" r="0.9" fill="currentColor"></circle></svg>
       <span>排盘</span>
     </button>
     <button class="nav-item" data-tab="calendar" onclick="switchMainTab('calendar')">
-      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      <svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="16" rx="3"></rect><line x1="8" y1="2.5" x2="8" y2="6.5"></line><line x1="16" y1="2.5" x2="16" y2="6.5"></line><line x1="3.5" y1="10" x2="20.5" y2="10"></line></svg>
       <span>日历</span>
     </button>
-    <button class="nav-item" data-tab="archives" onclick="switchMainTab('archives')">
-      <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-      <span>档案</span>
-    </button>
     <button class="nav-item" data-tab="methods" onclick="switchMainTab('methods')">
-      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      <svg viewBox="0 0 24 24"><path d="M4 19a2.5 2.5 0 0 1 2.5-2.5H20"></path><path d="M6.5 3H20v18H6.5A2.5 2.5 0 0 1 4 18.5v-13A2.5 2.5 0 0 1 6.5 3z"></path></svg>
       <span>断法</span>
     </button>
     <button class="nav-item" data-tab="canwu" onclick="switchMainTab('canwu')">
-      <svg viewBox="0 0 24 24"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"></path></svg>
+      <svg viewBox="0 0 24 24"><path d="M12 2.5l2.2 6.3 6.3 2.2-6.3 2.2-2.2 6.3-2.2-6.3-6.3-2.2 6.3-2.2z"></path></svg>
       <span>参悟</span>
     </button>
   </nav>
+</div>
+
+<!-- 全屏浮层 0：实战档案库（从侧边栏或顶部快捷入口打开，不占底部栏） -->
+<div class="overlay-page" id="archivesOverlay">
+  <header class="top-header">
+    <div class="header-row">
+      <button class="btn-ghost" onclick="closeOverlay('archivesOverlay')">‹ 返回</button>
+      <span class="overlay-title" id="archHeaderSub">实战档案库</span>
+      <div style="display:flex;gap:6px;">
+        <button class="pill-mini" id="baziCompareBtn" style="display:none;" onclick="openBaziCompare()">合盘</button>
+        <button class="pill-mini accent" onclick="openGroupEditor()">分组</button>
+      </div>
+    </div>
+    <div class="cat-strip" id="archCatStrip"></div>
+    <div class="cat-strip" id="archGroupStrip" style="padding-top:4px;"></div>
+  </header>
+  <div class="scroll-area" id="archivesScrollArea" style="padding-bottom:36px;"></div>
 </div>
 
 <!-- 全屏浮层 1：排盘与断事结果卷宗页 -->
 <div class="overlay-page" id="resultOverlay">
   <header class="top-header">
     <div class="header-row">
-      <button class="btn-secondary" style="padding:6px 10px;font-size:12.5px;" onclick="closeOverlay('resultOverlay')">‹ 返回</button>
-      <span style="font-size:15px;font-weight:700;" id="resOverlayTitle">六爻断事</span>
+      <button class="btn-ghost" onclick="closeOverlay('resultOverlay')">‹ 返回</button>
+      <span class="overlay-title" id="resOverlayTitle">断事卷宗</span>
       <div style="display:flex;gap:6px;">
-        <button class="chip" onclick="exportResultPoster()">存长图</button>
-        <button class="chip accent" onclick="saveCurrentResultToArchive()">存档案</button>
+        <button class="pill-mini" onclick="exportResultPoster()">存长图</button>
+        <button class="pill-mini accent" onclick="saveCurrentResultToArchive()">存档案</button>
       </div>
     </div>
   </header>
   <div class="scroll-area" id="resultOverlayBody" style="padding-bottom:36px;"></div>
 </div>
 
-<!-- 全屏浮层 2：双引擎沉浸阅读器（1:1 原版 PDF + 文本白话 + 多语速听书） -->
+<!-- 全屏浮层 2：双引擎沉浸阅读器 -->
 <div class="overlay-page reader-shell bars-hidden" id="readerOverlay" data-paper="warm">
   <div class="reader-topbar">
-    <button class="btn-secondary" style="padding:6px 10px;font-size:12.5px;" onclick="closeReader()">‹ 返回</button>
+    <button class="btn-ghost" onclick="closeReader()">‹ 返回</button>
     <div style="flex:1;min-width:0;text-align:center;">
-      <div id="readerBookTitle" style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-      <div id="readerChapTitle" style="font-size:11px;opacity:0.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      <div id="readerBookTitle" style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      <div id="readerChapTitle" style="font-size:11.5px;opacity:0.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
     </div>
-    <button class="chip accent" id="readerEngineBtn" onclick="toggleReaderEngine()">原版</button>
+    <button class="pill-mini accent" id="readerEngineBtn" onclick="toggleReaderEngine()">原版</button>
   </div>
-
   <div class="reader-content-wrap" id="readerContentWrap" onclick="handleReaderTap(event)">
     <div id="readerPdfStage" style="display:none;text-align:center;">
-      <canvas id="pdfCanvas" style="max-width:100%;height:auto;border-radius:6px;box-shadow:0 4px 18px rgba(0,0,0,0.08);"></canvas>
-      <div id="pdfPageHint" style="font-size:11.5px;opacity:0.65;margin-top:10px;"></div>
+      <canvas id="pdfCanvas" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 4px 18px rgba(0,0,0,0.08);"></canvas>
+      <div id="pdfPageHint" style="font-size:12px;opacity:0.65;margin-top:10px;"></div>
     </div>
     <div id="readerTextStage"></div>
     <div style="display:flex;justify-content:space-between;gap:12px;margin-top:24px;padding-bottom:26px;">
-      <button class="btn-secondary" style="flex:1;" onclick="readerStep(-1)">上一页 / 章</button>
-      <button class="btn-secondary" style="flex:1;" onclick="readerStep(1)">下一页 / 章</button>
+      <button class="btn-secondary" style="flex:1;" onclick="readerStep(-1)">上一页</button>
+      <button class="btn-secondary" style="flex:1;" onclick="readerStep(1)">下一页</button>
     </div>
   </div>
-
-  <div class="reader-mini-foot">
-    <span id="readerFootLeft"></span>
-    <span id="readerFootRight"></span>
-  </div>
-
+  <div class="reader-mini-foot"><span id="readerFootLeft"></span><span id="readerFootRight"></span></div>
   <button class="reader-fab" onclick="askCanwuFromReader()">问参悟本页</button>
-
   <div class="reader-botbar">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-      <span style="font-size:11.5px;opacity:0.75;">进度</span>
-      <input type="range" id="readerRange" min="0" max="0" value="0" style="flex:1;accent-color:var(--accent);" oninput="readerJump(Number(this.value))" />
-      <span id="readerRangeText" style="font-size:11.5px;opacity:0.75;min-width:48px;text-align:right;">1/1</span>
+      <span style="font-size:12px;opacity:0.75;">进度</span>
+      <input type="range" id="readerRange" min="1" max="1" value="1" style="flex:1;accent-color:var(--accent);" oninput="readerJump(Number(this.value))" />
+      <span id="readerRangeText" style="font-size:12px;opacity:0.75;min-width:48px;text-align:right;">1/1</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;">
-      <button class="btn-secondary" style="padding:7px 2px;font-size:11.5px;" onclick="openReaderToc()">目录</button>
-      <button class="btn-secondary" style="padding:7px 2px;font-size:11.5px;" onclick="openSheet('sheet-tts')">听书</button>
-      <button class="btn-secondary" style="padding:7px 2px;font-size:11.5px;" onclick="openSheet('sheet-typo')">排版</button>
-      <button class="btn-secondary" style="padding:7px 2px;font-size:11.5px;" onclick="translateCurrentPage()">译白话</button>
-      <button class="btn-secondary" style="padding:7px 2px;font-size:11.5px;" onclick="extractCaseBlindTest()">抽例盲测</button>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+      <button class="btn-secondary" style="padding:8px 2px;font-size:12px;" onclick="openReaderToc()">目录</button>
+      <button class="btn-secondary" style="padding:8px 2px;font-size:12px;" onclick="openSheet('sheet-tts')">听书</button>
+      <button class="btn-secondary" style="padding:8px 2px;font-size:12px;" onclick="openSheet('sheet-typo')">排版</button>
+      <button class="btn-secondary" style="padding:8px 2px;font-size:12px;" onclick="translateCurrentPage()">译白话</button>
+      <button class="btn-secondary" style="padding:8px 2px;font-size:12px;" onclick="extractCaseBlindTest()">抽例盲测</button>
     </div>
   </div>
-
   <div class="sel-popover" id="selPopover">
     <button onclick="selActionAsk()">问参悟</button>
     <button onclick="selActionNote()">存笔记</button>
@@ -238,36 +277,36 @@
 <div class="overlay-page" id="noteEditorOverlay">
   <header class="top-header">
     <div class="header-row">
-      <button class="btn-secondary" style="padding:6px 10px;font-size:12.5px;" onclick="closeNoteEditor()">‹ 完成</button>
-      <span style="font-size:13.5px;font-weight:600;color:var(--text-2);" id="noteEditorMeta">六爻笔记</span>
+      <button class="btn-ghost" onclick="closeNoteEditor()">‹ 完成</button>
+      <span style="font-size:14px;font-weight:600;color:var(--text-2);" id="noteEditorMeta">六爻笔记</span>
       <div style="display:flex;gap:6px;">
-        <button class="chip" id="notePinBtn" onclick="toggleCurrentNotePin()">置顶</button>
-        <button class="chip" onclick="deleteCurrentNote()">删除</button>
+        <button class="pill-mini" id="notePinBtn" onclick="toggleCurrentNotePin()">置顶</button>
+        <button class="pill-mini" onclick="deleteCurrentNote()">删除</button>
       </div>
     </div>
   </header>
   <div class="note-toolbar">
-    <button class="chip" onclick="noteInsertChecklist()">+ 待办</button>
-    <button class="chip" onclick="noteInsertGanZhi()">+ 干支时间</button>
-    <button class="chip" onclick="noteInsertHexPicker()">+ 卦象卡</button>
-    <button class="chip" onclick="startVoiceInput('noteBodyArea')">语音速记</button>
-    <select id="noteFolderSelect" class="form-select" style="width:auto;padding:4px 8px;font-size:12px;" onchange="changeCurrentNoteFolder(this.value)"></select>
+    <button class="pill-mini" onclick="noteInsertChecklist()">+ 待办</button>
+    <button class="pill-mini" onclick="noteInsertGanZhi()">+ 干支时间</button>
+    <button class="pill-mini" onclick="noteInsertHexPicker()">+ 卦象卡</button>
+    <button class="pill-mini" onclick="startVoiceInput('noteBodyArea')">语音速记</button>
+    <select id="noteFolderSelect" class="form-select" style="width:auto;padding:4px 8px;font-size:12.5px;" onchange="changeCurrentNoteFolder(this.value)"></select>
   </div>
   <div class="note-paper">
-    <input type="text" id="noteTitleField" class="note-title-input" placeholder="标题（第一行）" oninput="scheduleNoteAutoSave()" />
+    <input type="text" id="noteTitleField" class="note-title-input" placeholder="标题" oninput="scheduleNoteAutoSave()" />
     <textarea id="noteBodyArea" class="note-body-input" placeholder="记录读经心得、断语铁律、外应灵感或待办事项..." oninput="scheduleNoteAutoSave()"></textarea>
   </div>
 </div>
 
-<!-- 全屏浮层 4：每日摇签 & 解梦观外应（问机） -->
+<!-- 全屏浮层 4：每日摇签 & 解梦观外应 -->
 <div class="overlay-page" id="askJiOverlay">
   <header class="top-header">
     <div class="header-row">
-      <button class="btn-secondary" style="padding:6px 10px;font-size:12.5px;" onclick="closeAskJi()">‹ 返回</button>
-      <span style="font-size:15px;font-weight:700;">问机 · 摇签与解梦</span>
-      <button class="chip accent" onclick="openDailyChallenge()">每日一机</button>
+      <button class="btn-ghost" onclick="closeAskJi()">‹ 返回</button>
+      <span class="overlay-title">问机 · 摇签与解梦</span>
+      <button class="pill-mini accent" onclick="openDailyChallenge()">每日一机</button>
     </div>
-    <div class="seg-wrap" style="grid-template-columns:repeat(2,1fr);margin-top:8px;">
+    <div class="seg-wrap" style="grid-template-columns:repeat(2,1fr);margin-top:10px;">
       <div class="seg-slider" id="askJiSlider" style="width:calc((100% - 6px)/2);"></div>
       <button class="seg-btn active" data-aj="draw" onclick="switchAskJiTab('draw')">每日摇签</button>
       <button class="seg-btn" data-aj="dream" onclick="switchAskJiTab('dream')">解梦 · 观外应</button>
@@ -280,9 +319,9 @@
 <div class="overlay-page" id="hexDetailOverlay">
   <header class="top-header">
     <div class="header-row">
-      <button class="btn-secondary" style="padding:6px 10px;font-size:12.5px;" onclick="closeOverlay('hexDetailOverlay')">‹ 返回</button>
-      <span style="font-size:15px;font-weight:700;" id="hexDetailTitle">卦象详解</span>
-      <button class="chip accent" onclick="askCanwuAboutHex()">问参悟</button>
+      <button class="btn-ghost" onclick="closeOverlay('hexDetailOverlay')">‹ 返回</button>
+      <span class="overlay-title" id="hexDetailTitle">卦象详解</span>
+      <button class="pill-mini accent" onclick="askCanwuAboutHex()">问参悟</button>
     </div>
   </header>
   <div class="scroll-area" id="hexDetailBody" style="padding-bottom:36px;"></div>
@@ -292,25 +331,25 @@
 <div class="overlay-page" id="globalSearchOverlay">
   <header class="top-header">
     <div class="header-row" style="gap:8px;">
-      <input type="text" id="globalSearchInput" class="form-input" style="flex:1;padding:8px 12px;" placeholder="搜全库：书页、笔记、实战档案、断法..." oninput="runGlobalSearch(this.value)" />
-      <button class="btn-secondary" style="padding:7px 12px;" onclick="closeOverlay('globalSearchOverlay')">取消</button>
+      <input type="text" id="globalSearchInput" class="form-input" style="flex:1;padding:9px 13px;" placeholder="搜全库：书页、笔记、档案、断法..." oninput="runGlobalSearch(this.value)" />
+      <button class="btn-ghost" onclick="closeOverlay('globalSearchOverlay')">取消</button>
     </div>
   </header>
   <div class="scroll-area" id="globalSearchResults" style="padding-bottom:32px;"></div>
 </div>
 
-<!-- 全屏浮层 7：思想星图（Canvas 可视化知识星系） -->
+<!-- 全屏浮层 7：思想星图 -->
 <div class="overlay-page" id="mindMapOverlay" style="background:#0A0C12;color:#EEF1F8;">
-  <header class="top-header" style="background:rgba(10,12,18,0.85);border-color:rgba(255,255,255,0.1);color:#EEF1F8;">
+  <header class="top-header" style="background:rgba(10,12,18,0.88);border-color:rgba(255,255,255,0.1);color:#EEF1F8;">
     <div class="header-row">
-      <button class="btn-secondary" style="background:rgba(255,255,255,0.12);color:#FFF;padding:6px 10px;" onclick="closeOverlay('mindMapOverlay')">‹ 返回</button>
-      <span style="font-size:15px;font-weight:700;">藏往思想星图</span>
-      <span class="chip" id="cultivationRankChip" style="background:rgba(224,106,87,0.22);color:#FF9E8D;">初窥</span>
+      <button class="btn-ghost" style="color:#FFF;" onclick="closeOverlay('mindMapOverlay')">‹ 返回</button>
+      <span class="overlay-title">藏往思想星图</span>
+      <span class="pill-mini" id="cultivationRankChip" style="background:rgba(224,106,87,0.22);color:#FF9E8D;">初窥</span>
     </div>
   </header>
   <div style="flex:1;position:relative;overflow:hidden;">
     <canvas id="mindMapCanvas" style="width:100%;height:100%;display:block;"></canvas>
-    <div id="mindMapInfo" style="position:absolute;left:16px;right:16px;bottom:calc(var(--safe-bottom) + 18px);padding:12px 14px;border-radius:14px;background:rgba(22,26,38,0.88);border:1px solid rgba(255,255,255,0.12);font-size:13px;line-height:1.55;">
+    <div id="mindMapInfo" style="position:absolute;left:16px;right:16px;bottom:calc(var(--safe-bottom) + 18px);padding:12px 14px;border-radius:14px;background:rgba(22,26,38,0.9);border:1px solid rgba(255,255,255,0.12);font-size:13.5px;line-height:1.55;">
       轻点任意星点查看你的典籍、记忆铁律与验证卦例之间的关联。
     </div>
   </div>
@@ -320,85 +359,103 @@
 <div class="overlay-page" id="baziCompareOverlay">
   <header class="top-header">
     <div class="header-row">
-      <button class="btn-secondary" style="padding:6px 10px;" onclick="closeOverlay('baziCompareOverlay')">‹ 返回</button>
-      <span style="font-size:15px;font-weight:700;">八字合盘对比</span>
-      <button class="chip accent" onclick="analyzeBaziCompareWithAI()">AI 合盘</button>
+      <button class="btn-ghost" onclick="closeOverlay('baziCompareOverlay')">‹ 返回</button>
+      <span class="overlay-title">八字合盘对比</span>
+      <button class="pill-mini accent" onclick="analyzeBaziCompareWithAI()">AI 合盘</button>
     </div>
   </header>
   <div class="scroll-area" id="baziCompareBody" style="padding-bottom:36px;"></div>
 </div>
 
-<!-- 抽屉：导入典籍 -->
+<!-- 居中弹窗：六爻指定排盘 4 选 1（完全还原清爽直观样式） -->
+<div class="center-modal-backdrop" id="yaoPickerModal" onclick="if(event.target.id==='yaoPickerModal')closeYaoPicker()">
+  <div class="center-modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <span style="width:28px;"></span>
+      <h3 style="margin:0;font-size:17px;font-weight:600;" id="yaoPickerTitle">请选择</h3>
+      <button class="icon-btn" style="background:transparent;" onclick="closeYaoPicker()" aria-label="关闭">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="yao-pick-list">
+      <button class="yao-pick-opt" onclick="selectSpecYaoVal(7)">
+        <span class="yao-pick-lbl">少阳</span>
+        <span class="yao-pick-bar yang"></span>
+        <span class="yao-pick-mark"></span>
+      </button>
+      <button class="yao-pick-opt" onclick="selectSpecYaoVal(8)">
+        <span class="yao-pick-lbl">少阴</span>
+        <span class="yao-pick-bar yin"></span>
+        <span class="yao-pick-mark"></span>
+      </button>
+      <button class="yao-pick-opt" onclick="selectSpecYaoVal(9)">
+        <span class="yao-pick-lbl">老阳</span>
+        <span class="yao-pick-bar yang"></span>
+        <span class="yao-pick-mark">○</span>
+      </button>
+      <button class="yao-pick-opt" onclick="selectSpecYaoVal(6)">
+        <span class="yao-pick-lbl">老阴</span>
+        <span class="yao-pick-bar yin"></span>
+        <span class="yao-pick-mark">×</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 抽屉们 -->
 <div class="sheet-backdrop" id="sheet-import" onclick="backdropClose(event,'sheet-import')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
     <h3 style="margin:0 0 12px;font-size:17px;">导入典籍到「<span id="importCatName">六爻</span>」</h3>
     <div class="form-field">
-      <label class="form-label">选择本地 PDF（1:1 原版排版渲染）/ TXT / MD 文件</label>
+      <label class="form-label">选择本地 PDF（1:1 原版渲染）/ TXT / MD 文件</label>
       <input type="file" id="bookFileInput" accept=".pdf,.txt,.md" class="form-input" onchange="handleBookFileSelect(event)" />
-      <div style="font-size:11.5px;color:var(--text-3);margin-top:4px;">PDF 原件完整保留卦象与段落排版，同时自动识别目录并提取坐标段落供参悟检索。</div>
     </div>
-    <div style="text-align:center;font-size:12px;color:var(--text-3);margin:10px 0;">— 或粘贴文本典籍 —</div>
-    <div class="form-field">
-      <input type="text" id="pasteBookTitle" class="form-input" placeholder="书名（如：增删卜易）" />
-    </div>
-    <div class="form-field">
-      <textarea id="pasteBookContent" class="form-textarea" placeholder="粘贴全文内容..."></textarea>
-    </div>
+    <div style="text-align:center;font-size:12.5px;color:var(--text-3);margin:10px 0;">— 或粘贴文本典籍 —</div>
+    <div class="form-field"><input type="text" id="pasteBookTitle" class="form-input" placeholder="书名（如：增删卜易）" /></div>
+    <div class="form-field"><textarea id="pasteBookContent" class="form-textarea" placeholder="粘贴全文内容..."></textarea></div>
     <button class="btn-primary" style="width:100%;" onclick="importPastedBook()">存入书架</button>
   </div>
 </div>
 
-<!-- 抽屉：书籍编辑与管理（重命名、排序、换门类、封面色、AI索引） -->
 <div class="sheet-backdrop" id="sheet-book-edit" onclick="backdropClose(event,'sheet-book-edit')">
   <div class="sheet-panel" id="bookEditPanel"></div>
 </div>
 
-<!-- 抽屉：阅读排版与纸色 -->
 <div class="sheet-backdrop" id="sheet-typo" onclick="backdropClose(event,'sheet-typo')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 14px;font-size:16px;">阅读排版与护眼纸色</h3>
+    <h3 style="margin:0 0 14px;font-size:17px;">阅读排版与护眼纸色</h3>
     <div class="form-field">
-      <label class="form-label">字号：<span id="typoSizeVal">16.5</span> px（文本模式） / PDF缩放：<span id="pdfScaleVal">1.5</span>x</label>
+      <label class="form-label">字号：<span id="typoSizeVal">17</span> px</label>
       <input type="range" min="14" max="24" step="0.5" id="typoSizeRange" style="width:100%;accent-color:var(--accent);" oninput="updateTypo('fontSize', Number(this.value))" />
     </div>
     <div class="form-field">
       <label class="form-label">行距</label>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
         <button class="btn-secondary" onclick="updateTypo('lineHeight', 1.6)">紧凑</button>
-        <button class="btn-secondary" onclick="updateTypo('lineHeight', 1.88)">舒适</button>
-        <button class="btn-secondary" onclick="updateTypo('lineHeight', 2.15)">宽松</button>
+        <button class="btn-secondary" onclick="updateTypo('lineHeight', 1.9)">舒适</button>
+        <button class="btn-secondary" onclick="updateTypo('lineHeight', 2.2)">宽松</button>
       </div>
     </div>
     <div class="form-field">
-      <label class="form-label">字体</label>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
-        <button class="btn-secondary" onclick="updateTypo('fontFamily', 'songhei')">宋黑雅致</button>
-        <button class="btn-secondary" onclick="updateTypo('fontFamily', 'song')">经典宋体</button>
-        <button class="btn-secondary" onclick="updateTypo('fontFamily', 'hei')">现代黑体</button>
-        <button class="btn-secondary" onclick="updateTypo('fontFamily', 'kai')">雅致楷体</button>
-      </div>
-    </div>
-    <div class="form-field">
-      <label class="form-label">护眼纸色（PDF 原版模式同步生效宣纸/夜读滤镜）</label>
+      <label class="form-label">护眼纸色</label>
       <div style="display:flex;justify-content:space-between;padding:4px 0;">
-        <button class="paper-dot" style="background:#FFFFFF;" onclick="updateTypo('paper','white')" title="纯白"></button>
-        <button class="paper-dot" style="background:#F0F1F4;" onclick="updateTypo('paper','gray')" title="柔灰"></button>
-        <button class="paper-dot" style="background:#F6F1E5;" onclick="updateTypo('paper','warm')" title="暖米纸"></button>
-        <button class="paper-dot" style="background:#E3EDE5;" onclick="updateTypo('paper','green')" title="豆沙绿"></button>
-        <button class="paper-dot" style="background:#26282C;" onclick="updateTypo('paper','dusk')" title="暮光灰"></button>
-        <button class="paper-dot" style="background:#0D0D0F;" onclick="updateTypo('paper','night')" title="夜读黑"></button>
+        <button class="paper-dot" style="background:#FFFFFF;" onclick="updateTypo('paper','white')"></button>
+        <button class="paper-dot" style="background:#F0F1F4;" onclick="updateTypo('paper','gray')"></button>
+        <button class="paper-dot" style="background:#F6F1E5;" onclick="updateTypo('paper','warm')"></button>
+        <button class="paper-dot" style="background:#E3EDE5;" onclick="updateTypo('paper','green')"></button>
+        <button class="paper-dot" style="background:#26282C;" onclick="updateTypo('paper','dusk')"></button>
+        <button class="paper-dot" style="background:#0D0D0F;" onclick="updateTypo('paper','night')"></button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- 抽屉：听书控制 -->
 <div class="sheet-backdrop" id="sheet-tts" onclick="backdropClose(event,'sheet-tts')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 12px;font-size:16px;">听书朗读与语速控制</h3>
+    <h3 style="margin:0 0 12px;font-size:17px;">听书朗读与语速控制</h3>
     <div class="form-field">
       <label class="form-label">朗读模式</label>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
@@ -417,14 +474,6 @@
         <button class="btn-secondary" onclick="setTtsOpt('rate',2.0)">2.0x</button>
       </div>
     </div>
-    <div class="form-field">
-      <label class="form-label">睡前定时</label>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-        <button class="btn-secondary" onclick="setTtsTimer(0)">不定时</button>
-        <button class="btn-secondary" onclick="setTtsTimer(15)">15分钟</button>
-        <button class="btn-secondary" onclick="setTtsTimer(30)">30分钟</button>
-      </div>
-    </div>
     <div style="display:flex;gap:10px;margin-top:12px;">
       <button class="btn-primary" style="flex:1;" id="ttsPlayBtn" onclick="toggleTtsPlay()">开始朗读</button>
       <button class="btn-secondary" onclick="stopTts()">停止</button>
@@ -432,27 +481,21 @@
   </div>
 </div>
 
-<!-- 抽屉：阅读目录 -->
 <div class="sheet-backdrop" id="sheet-toc" onclick="backdropClose(event,'sheet-toc')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 10px;font-size:16px;">本书目录</h3>
+    <h3 style="margin:0 0 10px;font-size:17px;">本书目录</h3>
     <div id="readerTocList"></div>
   </div>
 </div>
 
-<!-- 抽屉：日历快速跳年月 -->
 <div class="sheet-backdrop" id="sheet-cal-jump" onclick="backdropClose(event,'sheet-cal-jump')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 12px;font-size:16px;">快速跳转到指定年月</h3>
+    <h3 style="margin:0 0 12px;font-size:17px;">快速跳转年月</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-      <div>
-        <label class="form-label">年份（1900 - 2100）</label>
-        <input type="number" id="calJumpYear" class="form-input" min="1900" max="2100" />
-      </div>
-      <div>
-        <label class="form-label">月份</label>
+      <div><label class="form-label">年份</label><input type="number" id="calJumpYear" class="form-input" min="1900" max="2100" /></div>
+      <div><label class="form-label">月份</label>
         <select id="calJumpMonth" class="form-select">
           <option value="0">1月</option><option value="1">2月</option><option value="2">3月</option>
           <option value="3">4月</option><option value="4">5月</option><option value="5">6月</option>
@@ -465,45 +508,42 @@
   </div>
 </div>
 
-<!-- 抽屉：编辑档案库分组 -->
 <div class="sheet-backdrop" id="sheet-groups" onclick="backdropClose(event,'sheet-groups')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 10px;font-size:16px;">管理档案分组（「全部」固定首位）</h3>
+    <h3 style="margin:0 0 10px;font-size:17px;">管理档案分组</h3>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <input type="text" id="newGroupInput" class="form-input" placeholder="输入新分组名，如：同学、合作伙伴" />
+      <input type="text" id="newGroupInput" class="form-input" placeholder="输入新分组名，如：同事、客户" />
       <button class="btn-primary" style="flex-shrink:0;" onclick="addArchiveGroup()">添加</button>
     </div>
     <div id="groupEditList"></div>
   </div>
 </div>
 
-<!-- 抽屉：参悟历史话题 -->
 <div class="sheet-backdrop" id="sheet-threads" onclick="backdropClose(event,'sheet-threads')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <h3 style="margin:0;font-size:16px;">「<span id="threadRoomName">六爻</span>」历史话题</h3>
-      <button class="chip accent" onclick="startNewChatThread();closeSheet('sheet-threads')">+ 新话题</button>
+      <h3 style="margin:0;font-size:17px;">「<span id="threadRoomName">六爻</span>」历史话题</h3>
+      <button class="pill-mini accent" onclick="startNewChatThread();closeSheet('sheet-threads')">+ 新话题</button>
     </div>
     <div id="threadListBody"></div>
   </div>
 </div>
 
-<!-- 抽屉：参悟大脑（三层记忆 + 思想星图入口） -->
 <div class="sheet-backdrop" id="sheet-brain" onclick="backdropClose(event,'sheet-brain')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <h3 style="margin:0;font-size:17px;">参悟大脑 · 三层记忆</h3>
-      <button class="chip accent" onclick="closeSheet('sheet-brain');openMindMap()">思想星图 ›</button>
+      <button class="pill-mini accent" onclick="closeSheet('sheet-brain');openMindMap()">思想星图 ›</button>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
       <button class="btn-secondary" onclick="runCrossBookSynthesis()">跨书自悟融合</button>
       <button class="btn-secondary" onclick="runMemoryDistill()">蒸馏精简记忆</button>
     </div>
     <div class="form-field">
-      <label class="form-label">手动存入「<span id="brainCatTag">六爻</span>」常驻心法或铁律</label>
+      <label class="form-label">存入「<span id="brainCatTag">六爻</span>」常驻铁律</label>
       <div style="display:flex;gap:8px;">
         <input type="text" id="newMemInput" class="form-input" placeholder="例如：月破逢日合为合起，不可一概论废" />
         <button class="btn-primary" style="padding:8px 14px;flex-shrink:0;" onclick="addManualMemory()">存入</button>
@@ -513,62 +553,46 @@
   </div>
 </div>
 
-<!-- 抽屉：添加自定义观星 / 术数外部链接 -->
 <div class="sheet-backdrop" id="sheet-add-portal" onclick="backdropClose(event,'sheet-add-portal')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 12px;font-size:16px;">添加自定义星象 / 术数传送门</h3>
-    <div class="form-field">
-      <label class="form-label">名称</label>
-      <input type="text" id="portalNameInput" class="form-input" placeholder="例如：七政四余在线排盘" />
-    </div>
-    <div class="form-field">
-      <label class="form-label">网址 URL</label>
-      <input type="url" id="portalUrlInput" class="form-input" placeholder="https://..." />
-    </div>
-    <div class="form-field">
-      <label class="form-label">简介说明</label>
-      <input type="text" id="portalDescInput" class="form-input" placeholder="简短描述用途" />
-    </div>
+    <h3 style="margin:0 0 12px;font-size:17px;">添加自定义中文观星 / 术数链接</h3>
+    <div class="form-field"><label class="form-label">名称</label><input type="text" id="portalNameInput" class="form-input" placeholder="例如：中文星盘参考" /></div>
+    <div class="form-field"><label class="form-label">网址 URL</label><input type="url" id="portalUrlInput" class="form-input" placeholder="https://..." /></div>
+    <div class="form-field"><label class="form-label">简介</label><input type="text" id="portalDescInput" class="form-input" placeholder="简短描述用途" /></div>
     <button class="btn-primary" style="width:100%;" onclick="saveCustomPortal()">添加到百宝箱</button>
   </div>
 </div>
 
-<!-- 抽屉：全局设置、主题配色、隐私加密、云同步与安全清缓存 -->
+<!-- 设置抽屉 -->
 <div class="sheet-backdrop" id="sheet-settings" onclick="backdropClose(event,'sheet-settings')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 14px;font-size:17px;">设置 · 视觉美学 · 隐私云同步</h3>
+    <h3 style="margin:0 0 14px;font-size:18px;">设置 · 外观与云端安全</h3>
 
-    <div class="card" style="padding:12px;">
-      <div class="form-label">底色主题（6 套新中式与苹果风）</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">
-        <button class="btn-secondary" onclick="setAppTheme('warm')">素宣暖</button>
-        <button class="btn-secondary" onclick="setAppTheme('cinnabar')">故宫朱砂宣</button>
-        <button class="btn-secondary" onclick="setAppTheme('apple')">极简白</button>
-        <button class="btn-secondary" onclick="setAppTheme('cyan')">青岚灰</button>
-        <button class="btn-secondary" onclick="setAppTheme('indigo')">松烟黛青</button>
-        <button class="btn-secondary" onclick="setAppTheme('dark')">深空黑</button>
+    <div class="card">
+      <div class="form-label">界面质感主题</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;">
+        <button class="btn-secondary" onclick="setAppTheme('apple')">苹果极简白（推荐）</button>
+        <button class="btn-secondary" onclick="setAppTheme('dark')">深空暗黑</button>
+        <button class="btn-secondary" onclick="setAppTheme('warm')">素宣暖纸</button>
+        <button class="btn-secondary" onclick="setAppTheme('cyan')">青岚极简</button>
       </div>
-      <div class="form-label">自定义点睛强调色</div>
-      <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
-        <button class="accent-dot" style="background:#B43422;" onclick="setAccentColor('red')" title="朱砂红"></button>
-        <button class="accent-dot" style="background:#2A635D;" onclick="setAccentColor('teal')" title="松烟青"></button>
-        <button class="accent-dot" style="background:#2C5E8A;" onclick="setAccentColor('blue')" title="靛青蓝"></button>
-        <button class="accent-dot" style="background:#A67628;" onclick="setAccentColor('amber')" title="琥珀金"></button>
-        <button class="accent-dot" style="background:#242426;" onclick="setAccentColor('ink')" title="玄墨黑"></button>
+      <div class="form-label">点睛强调色</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <button class="accent-dot" style="background:#1D1D1F;" onclick="setAccentColor('ink')" title="炭黑"></button>
+        <button class="accent-dot" style="background:#C83B2B;" onclick="setAccentColor('red')" title="朱砂红"></button>
+        <button class="accent-dot" style="background:#0071E3;" onclick="setAccentColor('blue')" title="苹果蓝"></button>
+        <button class="accent-dot" style="background:#2A6B5C;" onclick="setAccentColor('teal')" title="青玉"></button>
+        <button class="accent-dot" style="background:#A67628;" onclick="setAccentColor('amber')" title="琥珀"></button>
       </div>
-      <div class="form-label">角落低透明度背景意境暗纹</div>
-      <select id="cfgAmbientBg" class="form-select" onchange="setAmbientMode(this.value)">
-        <option value="luopan">罗盘刻度微动流转（推荐）</option>
-        <option value="moon">农历盈亏淡墨月相</option>
-        <option value="cloud">极简水墨云气</option>
-        <option value="none">纯净留白无纹</option>
-      </select>
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-top:8px;">
+        <input type="checkbox" id="cfgCoinSound" /> 摇卦铜钱与摇签音效
+      </label>
     </div>
 
-    <div class="card" style="padding:12px;">
-      <div class="form-label">AI 接口配置与隐私保护</div>
+    <div class="card">
+      <div class="form-label">AI 接口与隐私脱敏</div>
       <div class="form-field"><input type="password" id="cfgApiKey" class="form-input" placeholder="DeepSeek API Key（sk-...）" /></div>
       <div class="form-field"><input type="text" id="cfgBaseUrl" class="form-input" placeholder="https://api.deepseek.com" /></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
@@ -576,64 +600,48 @@
         <input type="text" id="cfgProModel" class="form-input" placeholder="deepseek-reasoner" />
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-        <div>
-          <label class="form-label">对话档位</label>
-          <select id="cfgUseTier" class="form-select"><option value="flash">极速省钱档</option><option value="pro">深度思考档</option></select>
-        </div>
-        <div>
-          <label class="form-label">普通闲聊自动过期</label>
-          <select id="cfgChatRetention" class="form-select">
-            <option value="30">保留 30 天（推荐）</option>
-            <option value="7">保留 7 天</option>
-            <option value="0">永久保留</option>
-            <option value="-1">关闭即清</option>
-          </select>
-        </div>
+        <div><label class="form-label">对话档位</label><select id="cfgUseTier" class="form-select"><option value="flash">极速省钱档</option><option value="pro">深度思考档</option></select></div>
+        <div><label class="form-label">普通闲聊自动清理</label><select id="cfgChatRetention" class="form-select"><option value="30">保留 30 天</option><option value="7">保留 7 天</option><option value="0">永久保留</option><option value="-1">关闭即清</option></select></div>
       </div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:8px 0;">
-        <input type="checkbox" id="cfgRedactNames" /> 发给 AI 前自动替换真实姓名为「命主/某甲」
+      <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin:8px 0;">
+        <input type="checkbox" id="cfgRedactNames" /> 发给 AI 前自动替换真实姓名为「命主」
       </label>
       <div class="form-field" style="margin-top:8px;">
-        <label class="form-label">个人本命日柱（可选，仅存本地，用于日历天时共振）</label>
-        <input type="text" id="cfgMyDayPillar" class="form-input" placeholder="例如：甲子、丙午（留空则关闭）" />
+        <label class="form-label">个人本命日柱（仅存本地，用于日历天时共振）</label>
+        <input type="text" id="cfgMyDayPillar" class="form-input" placeholder="如：甲子、丙午（留空关闭）" />
       </div>
-      <button class="btn-primary" style="width:100%;" onclick="saveGeneralSettings()">保存全部设置</button>
-      <div id="costStatsBox" style="margin-top:8px;font-size:11.5px;color:var(--text-3);"></div>
+      <button class="btn-primary" style="width:100%;" onclick="saveGeneralSettings()">保存设置</button>
+      <div id="costStatsBox" style="margin-top:8px;font-size:12px;color:var(--text-3);"></div>
     </div>
 
-    <div class="card" style="padding:12px;">
-      <div class="form-label">端到端加密 · Cloudflare D1 私人云同步（免外币卡）</div>
-      <div class="form-field">
-        <input type="url" id="cfgSyncUrl" class="form-input" placeholder="你的 Worker 同步地址（如 https://cw-sync.xxx.workers.dev）" />
-      </div>
-      <div class="form-field">
-        <input type="password" id="cfgVaultPass" class="form-input" placeholder="私人保险箱口令（用于接口鉴权 + 本地 AES-256 加密）" />
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;margin-bottom:10px;">
-        <input type="checkbox" id="cfgE2eEncrypt" /> 开启本地 AES-256 端到端加密（云端仅存密文）
+    <div class="card">
+      <div class="form-label">Cloudflare D1 端到端加密云同步（免外币卡）</div>
+      <div class="form-field"><input type="url" id="cfgSyncUrl" class="form-input" placeholder="Worker 同步地址（https://...workers.dev）" /></div>
+      <div class="form-field"><input type="password" id="cfgVaultPass" class="form-input" placeholder="私人保险箱口令（用于鉴权 + AES-256 加密）" /></div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;margin-bottom:10px;">
+        <input type="checkbox" id="cfgE2eEncrypt" /> 开启本地 AES-256 端到端加密
       </label>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
         <button class="btn-primary" onclick="pushToCloudD1()">加密上传云端</button>
-        <button class="btn-secondary" onclick="pullFromCloudD1()">从云端拉回恢复</button>
+        <button class="btn-secondary" onclick="pullFromCloudD1()">从云端拉回</button>
       </div>
-      <div id="cloudSyncStatus" style="font-size:11.5px;color:var(--text-3);"></div>
+      <div id="cloudSyncStatus" style="font-size:12px;color:var(--text-3);"></div>
     </div>
 
-    <div class="card" style="padding:12px;">
-      <div class="form-label">两步式本地备份到 iCloud / 文件（专治苹果拦截）</div>
-      <div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px;">自动分离大体积原版 PDF，仅打包文字资产（档案、AI报告、笔记、记忆、书库索引），1 秒极速完成。</div>
+    <div class="card">
+      <div class="form-label">两步式本地备份到 iCloud / 文件</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-        <button class="btn-secondary" id="packBackupBtn" onclick="prepareLocalBackup()">第1步：生成备份包</button>
-        <button class="btn-primary" id="saveBackupBtn" onclick="triggerLocalBackupSave()" disabled style="opacity:0.45;">第2步：存到 iCloud</button>
+        <button class="btn-secondary" id="packBackupBtn" onclick="prepareLocalBackup()">1. 生成备份包</button>
+        <button class="btn-primary" id="saveBackupBtn" onclick="triggerLocalBackupSave()" disabled style="opacity:0.45;">2. 存到 iCloud</button>
       </div>
-      <button class="btn-secondary" style="width:100%;" onclick="document.getElementById('importBackupFile').click()">从 iCloud / 文件恢复备份</button>
+      <button class="btn-secondary" style="width:100%;" onclick="document.getElementById('importBackupFile').click()">从文件恢复备份</button>
       <input type="file" id="importBackupFile" accept=".json" style="display:none;" onchange="importLocalBackup(event)" />
     </div>
 
-    <div class="card" style="padding:12px;">
+    <div class="card">
       <div class="form-label">存储空间体检与安全清缓存</div>
-      <div id="storageStatsBox" style="font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:10px;">计算中...</div>
-      <button class="btn-secondary" style="width:100%;color:var(--accent);" onclick="runSafeClearCache()">一键安全清缓存（绝不删书籍、档案、笔记与记忆）</button>
+      <div id="storageStatsBox" style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:10px;">计算中...</div>
+      <button class="btn-secondary" style="width:100%;color:var(--danger);" onclick="runSafeClearCache()">一键安全清缓存（绝不删书籍、档案、笔记与记忆）</button>
     </div>
   </div>
 </div>
