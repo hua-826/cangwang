@@ -6,1269 +6,35 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="藏往" />
-<title>藏往 · 术数典籍与参悟智能体</title>
-<style>
-:root {
-  --bg: #F5F1E8;
-  --surface: #FCF9F2;
-  --surface-2: #EFE9DC;
-  --surface-glass: rgba(252, 249, 242, 0.86);
-  --border: rgba(42, 36, 30, 0.09);
-  --text: #241F1A;
-  --text-2: #6B6156;
-  --text-3: #9C9184;
-  --primary: #2A241E;
-  --primary-fg: #FCF9F2;
-  --accent: #B43422;
-  --accent-soft: rgba(180, 52, 34, 0.10);
-  --btn-bg: #EBE4D6;
-  --btn-fg: #3A3229;
-  --shadow-sm: 0 2px 8px rgba(36, 31, 26, 0.05);
-  --shadow-md: 0 8px 24px rgba(36, 31, 26, 0.08);
-  --shadow-book: 0 10px 22px -6px rgba(36, 31, 26, 0.22), 0 2px 6px rgba(36, 31, 26, 0.08);
-  --wx-wood: #2E7D5B;
-  --wx-fire: #B83B2A;
-  --wx-earth: #9C6F38;
-  --wx-metal: #9A7B2C;
-  --wx-water: #2B5E8C;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --nav-h: 62px;
-}
-
-[data-theme="apple"] {
-  --bg: #F2F2F7;
-  --surface: #FFFFFF;
-  --surface-2: #E9E9EF;
-  --surface-glass: rgba(255, 255, 255, 0.86);
-  --border: rgba(17, 17, 19, 0.08);
-  --text: #111113;
-  --text-2: #63636A;
-  --text-3: #9A9AA2;
-  --primary: #1C1C1E;
-  --primary-fg: #FFFFFF;
-  --accent: #2C5E8A;
-  --accent-soft: rgba(44, 94, 138, 0.11);
-  --btn-bg: #EAEAEE;
-  --btn-fg: #2C2C2E;
-}
-
-[data-theme="cyan"] {
-  --bg: #EDF2F1;
-  --surface: #F9FBFA;
-  --surface-2: #E1EAE8;
-  --surface-glass: rgba(249, 251, 250, 0.86);
-  --border: rgba(31, 52, 49, 0.09);
-  --text: #1B2927;
-  --text-2: #556865;
-  --text-3: #879996;
-  --primary: #213C39;
-  --primary-fg: #F9FBFA;
-  --accent: #2A635D;
-  --accent-soft: rgba(42, 99, 93, 0.11);
-  --btn-bg: #DFE9E7;
-  --btn-fg: #253D3A;
-}
-
-[data-theme="dark"] {
-  --bg: #000000;
-  --surface: #1C1C1E;
-  --surface-2: #2C2C2E;
-  --surface-glass: rgba(28, 28, 30, 0.86);
-  --border: rgba(255, 255, 255, 0.10);
-  --text: #F2F2F7;
-  --text-2: #A0A0A8;
-  --text-3: #6E6E76;
-  --primary: #F2F2F7;
-  --primary-fg: #111113;
-  --accent: #E06A57;
-  --accent-soft: rgba(224, 106, 87, 0.16);
-  --btn-bg: #2C2C2E;
-  --btn-fg: #E5E5EA;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.55);
-  --shadow-book: 0 12px 24px rgba(0, 0, 0, 0.65);
-  --wx-wood: #59B48B;
-  --wx-fire: #E86F5D;
-  --wx-earth: #CFA063;
-  --wx-metal: #D4B45E;
-  --wx-water: #639DD1;
-}
-
-:where(html, body, div, span, section, article, header, footer, nav, main, p, h1, h2, h3, h4, ul, li, button, input, textarea, select, label, a, svg) {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
-
-html, body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--bg);
-  color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden;
-  transition: background 0.32s var(--ease), color 0.32s var(--ease);
-}
-
-button, input, textarea, select {
-  font-family: inherit;
-  color: inherit;
-  outline: none;
-}
-
-button {
-  border: none;
-  background: none;
-  cursor: pointer;
-  transition: transform 0.16s var(--ease), background 0.22s var(--ease), color 0.22s var(--ease), opacity 0.2s var(--ease);
-}
-
-button:active {
-  transform: scale(0.95);
-}
-
-.app-shell {
-  position: relative;
-  width: 100%;
-  max-width: 560px;
-  height: 100%;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  background: var(--bg);
-  overflow: hidden;
-}
-
-.views-wrap {
-  position: relative;
-  flex: 1;
-  overflow: hidden;
-}
-
-.view-page {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(8px);
-  transition: opacity 0.26s var(--ease), transform 0.28s var(--ease);
-}
-
-.view-page.active {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-
-.scroll-area {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  padding: 12px 16px calc(var(--nav-h) + var(--safe-bottom) + 24px);
-}
-
-.scroll-area::-webkit-scrollbar { display: none; }
-
-/* Top Header */
-.top-header {
-  padding: calc(var(--safe-top) + 10px) 16px 8px;
-  background: var(--surface-glass);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  border-bottom: 1px solid var(--border);
-  z-index: 20;
-}
-
-.header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 36px;
-}
-
-.brand-title {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.brand-name {
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  font-family: "Songti SC", "STSong", "Noto Serif SC", Georgia, serif;
-}
-
-.brand-sub {
-  font-size: 11px;
-  color: var(--text-3);
-  letter-spacing: 0.04em;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.icon-btn {
-  position: relative;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--btn-bg);
-  color: var(--btn-fg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon-btn svg {
-  width: 18px;
-  height: 18px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.9;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.backup-dot {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #2E9B63;
-  border: 1.5px solid var(--surface);
-  display: none;
-}
-
-.backup-dot.show { display: block; }
-
-/* 7 Categories Strip */
-.cat-strip {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 10px 0 4px;
-  scrollbar-width: none;
-}
-.cat-strip::-webkit-scrollbar { display: none; }
-
-.cat-pill {
-  flex: 0 0 auto;
-  padding: 6px 13px;
-  border-radius: 999px;
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--text-2);
-  background: transparent;
-  transition: all 0.24s var(--ease);
-}
-
-.cat-pill.active {
-  background: var(--accent-soft);
-  color: var(--accent);
-  font-weight: 600;
-}
-
-/* Segmented Sub Tabs */
-.seg-wrap {
-  margin-top: 8px;
-  background: var(--surface-2);
-  border-radius: 10px;
-  padding: 3px;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  position: relative;
-}
-
-.seg-btn {
-  position: relative;
-  z-index: 2;
-  padding: 6px 4px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-2);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.seg-btn.active {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.seg-slider {
-  position: absolute;
-  top: 3px;
-  bottom: 3px;
-  left: 3px;
-  width: calc((100% - 6px) / 3);
-  background: var(--surface);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.28s var(--ease);
-  z-index: 1;
-}
-
-/* Apple Books 3-Col Gallery */
-.books-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px 14px;
-  padding-top: 6px;
-}
-
-.book-item {
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-  animation: fadeUp 0.28s var(--ease) both;
-}
-
-.book-cover {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 2 / 2.82;
-  border-radius: 5px 10px 10px 5px;
-  box-shadow: var(--shadow-book);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 12px 10px 10px 14px;
-  transition: transform 0.22s var(--ease);
-}
-
-.book-item:active .book-cover {
-  transform: scale(0.96);
-}
-
-.book-cover::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 8px;
-  background: linear-gradient(90deg, rgba(0,0,0,0.22), rgba(255,255,255,0.16) 55%, rgba(0,0,0,0.08));
-}
-
-.book-cover::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 48%, rgba(0,0,0,0.10) 100%);
-  pointer-events: none;
-}
-
-.book-cover-title {
-  position: relative;
-  z-index: 2;
-  font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
-  font-size: 13.5px;
-  font-weight: 700;
-  line-height: 1.35;
-  color: #FFFDF9;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.25);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.book-cover-foot {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 10px;
-  color: rgba(255, 253, 249, 0.85);
-}
-
-.reading-badge {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  z-index: 3;
-  padding: 2px 6px;
-  border-radius: 999px;
-  font-size: 9.5px;
-  font-weight: 600;
-  background: rgba(180, 52, 34, 0.92);
-  color: #FFFFFF;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-}
-
-.book-meta {
-  margin-top: 8px;
-  padding: 0 2px;
-}
-
-.book-name {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.book-prog {
-  margin-top: 3px;
-  font-size: 11px;
-  color: var(--text-3);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* Cards & Lists */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 14px 16px;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 12px;
-}
-
-.card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.card-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11.5px;
-  font-weight: 500;
-  background: var(--btn-bg);
-  color: var(--btn-fg);
-}
-
-.chip.accent {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border-radius: 12px;
-  background: var(--accent);
-  color: #FFFFFF;
-  font-size: 13.5px;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(180, 52, 34, 0.22);
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 9px 14px;
-  border-radius: 12px;
-  background: var(--btn-bg);
-  color: var(--btn-fg);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.empty-box {
-  text-align: center;
-  padding: 42px 20px;
-  color: var(--text-3);
-}
-
-.empty-box p {
-  margin: 8px 0 16px;
-  font-size: 13.5px;
-  line-height: 1.6;
-}
-
-/* Chapter Study List */
-.study-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 11px 0;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-}
-.study-row:last-child { border-bottom: none; }
-
-.study-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.4;
-}
-
-.study-sub {
-  margin-top: 3px;
-  font-size: 12px;
-  color: var(--text-2);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.prog-track {
-  width: 100%;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  overflow: hidden;
-  margin: 8px 0;
-}
-
-.prog-fill {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 999px;
-  transition: width 0.3s var(--ease);
-}
-
-/* Bottom 4-Tab Nav */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 560px;
-  height: calc(var(--nav-h) + var(--safe-bottom));
-  padding-bottom: var(--safe-bottom);
-  background: var(--surface-glass);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid var(--border);
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  z-index: 30;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  color: var(--text-3);
-  font-size: 11px;
-  font-weight: 500;
-}
-
-.nav-item svg {
-  width: 22px;
-  height: 22px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.75;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: transform 0.22s var(--ease);
-}
-
-.nav-item.active {
-  color: var(--accent);
-  font-weight: 600;
-}
-
-.nav-item.active svg {
-  transform: translateY(-1px) scale(1.06);
-}
-
-/* Calendar Styles */
-.cal-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.cal-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  text-align: center;
-}
-
-.cal-wk {
-  font-size: 11.5px;
-  color: var(--text-3);
-  padding: 4px 0 6px;
-}
-
-.cal-cell {
-  position: relative;
-  padding: 6px 2px 7px;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  cursor: pointer;
-  transition: background 0.2s var(--ease);
-}
-
-.cal-cell.other { opacity: 0.34; }
-.cal-cell.selected {
-  background: var(--accent);
-  color: #FFFFFF;
-}
-.cal-cell.today:not(.selected) {
-  background: var(--accent-soft);
-}
-
-.cal-day-num {
-  font-size: 14.5px;
-  font-weight: 600;
-  line-height: 1.2;
-}
-
-.cal-gz {
-  font-size: 10px;
-  opacity: 0.85;
-}
-
-.cal-study-dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--wx-wood);
-  margin-top: 2px;
-}
-.cal-cell.selected .cal-study-dot { background: #FFFFFF; }
-
-.pillars-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  text-align: center;
-  margin-top: 10px;
-}
-
-.pillar-col {
-  background: var(--bg);
-  border-radius: 12px;
-  padding: 10px 4px;
-}
-
-.pillar-lbl {
-  font-size: 11px;
-  color: var(--text-3);
-  margin-bottom: 6px;
-}
-
-.pillar-stem, .pillar-branch {
-  font-size: 20px;
-  font-weight: 700;
-  font-family: "Songti SC", "STSong", serif;
-  line-height: 1.25;
-}
-
-.pillar-hidden {
-  margin-top: 5px;
-  font-size: 10.5px;
-  color: var(--text-2);
-}
-
-.wx-木 { color: var(--wx-wood); }
-.wx-火 { color: var(--wx-fire); }
-.wx-土 { color: var(--wx-earth); }
-.wx-金 { color: var(--wx-metal); }
-.wx-水 { color: var(--wx-water); }
-
-/* Atlas: Dynamic Bagua & 64 Hexagrams */
-.bagua-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 6px 0 8px;
-}
-
-.bagua-svg {
-  width: 248px;
-  height: 248px;
-  user-select: none;
-  touch-action: none;
-}
-
-.bagua-ring-group {
-  transform-origin: 150px 150px;
-  transition: transform 0.6s var(--ease);
-}
-
-.bagua-spinning {
-  animation: slowSpin 38s linear infinite;
-}
-
-@keyframes slowSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.trigram-node {
-  cursor: pointer;
-  transition: opacity 0.2s var(--ease);
-}
-
-.hex-mini-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.hex-card-item {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 11px 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-}
-
-.hex-mini-lines {
-  width: 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex-shrink: 0;
-}
-
-.yao-bar {
-  height: 3.5px;
-  width: 100%;
-  border-radius: 2px;
-  display: flex;
-  justify-content: space-between;
-}
-.yao-bar.yang { background: var(--text); }
-.yao-bar.yin::before, .yao-bar.yin::after {
-  content: "";
-  width: 42%;
-  height: 100%;
-  border-radius: 2px;
-  background: var(--text);
-}
-
-.hex-full-row {
-  display: grid;
-  grid-template-columns: 36px 56px 1fr 48px 44px;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: var(--bg);
-  margin-bottom: 6px;
-  font-size: 13px;
-}
-
-.hex-full-row.moving {
-  background: var(--accent-soft);
-}
-
-.hex-full-bar {
-  height: 9px;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.hex-full-bar.yang {
-  background: var(--text);
-  border-radius: 3px;
-}
-
-.hex-full-bar.yin::before, .hex-full-bar.yin::after {
-  content: "";
-  width: 44%;
-  height: 100%;
-  background: var(--text);
-  border-radius: 3px;
-}
-
-.hex-full-row.moving .hex-full-bar.yang,
-.hex-full-row.moving .hex-full-bar.yin::before,
-.hex-full-row.moving .hex-full-bar.yin::after {
-  background: var(--accent);
-}
-
-/* Canwu AI Chat */
-.chat-wrap {
-  flex: 1;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.chat-messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 12px 16px 18px;
-  -webkit-overflow-scrolling: touch;
-}
-
-.msg-row {
-  margin-bottom: 14px;
-  display: flex;
-  flex-direction: column;
-  animation: fadeUp 0.22s var(--ease) both;
-}
-
-.msg-row.user { align-items: flex-end; }
-.msg-row.ai { align-items: flex-start; }
-
-.msg-bubble {
-  max-width: 90%;
-  padding: 12px 14px;
-  border-radius: 16px;
-  font-size: 14.5px;
-  line-height: 1.68;
-  word-break: break-word;
-}
-
-.msg-row.user .msg-bubble {
-  background: var(--primary);
-  color: var(--primary-fg);
-  border-bottom-right-radius: 5px;
-}
-
-.msg-row.ai .msg-bubble {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-bottom-left-radius: 5px;
-  box-shadow: var(--shadow-sm);
-}
-
-.msg-bubble strong {
-  color: var(--text);
-  font-weight: 700;
-  background: linear-gradient(transparent 66%, var(--accent-soft) 66%);
-  padding: 0 2px;
-}
-
-.ref-jump {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px 7px;
-  margin: 0 2px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  background: var(--accent-soft);
-  color: var(--accent);
-  cursor: pointer;
-}
-
-.msg-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 7px;
-}
-
-.msg-act-btn {
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 11.5px;
-  background: var(--btn-bg);
-  color: var(--btn-fg);
-}
-
-.scroll-latest-btn {
-  position: absolute;
-  right: 16px;
-  bottom: 78px;
-  padding: 7px 13px;
-  border-radius: 999px;
-  background: var(--primary);
-  color: var(--primary-fg);
-  font-size: 12px;
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(8px);
-  transition: all 0.22s var(--ease);
-  z-index: 15;
-}
-
-.scroll-latest-btn.show {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0);
-}
-
-.chat-input-bar {
-  padding: 8px 12px calc(var(--nav-h) + var(--safe-bottom) + 8px);
-  background: var(--surface-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: flex-end;
-  gap: 8px;
-}
-
-.chat-input {
-  flex: 1;
-  min-height: 40px;
-  max-height: 110px;
-  padding: 9px 14px;
-  border-radius: 20px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  font-size: 14.5px;
-  line-height: 1.4;
-  resize: none;
-}
-
-.send-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-/* Overlays & Slide-in Panels */
-.overlay-page {
-  position: fixed;
-  inset: 0;
-  max-width: 560px;
-  margin: 0 auto;
-  background: var(--bg);
-  z-index: 60;
-  display: flex;
-  flex-direction: column;
-  transform: translateX(100%);
-  transition: transform 0.34s var(--ease);
-  pointer-events: none;
-}
-
-.overlay-page.open {
-  transform: translateX(0);
-  pointer-events: auto;
-}
-
-/* Immersive Reader Themes */
-.reader-shell {
-  --r-bg: #F6F2E9;
-  --r-fg: #26211B;
-  --r-muted: #7C7368;
-  --r-bar: rgba(246, 242, 233, 0.92);
-  background: var(--r-bg);
-  color: var(--r-fg);
-}
-
-.reader-shell[data-paper="white"] { --r-bg: #FFFFFF; --r-fg: #1C1C1E; --r-muted: #7E7E85; --r-bar: rgba(255,255,255,0.92); }
-.reader-shell[data-paper="gray"]  { --r-bg: #F0F1F4; --r-fg: #23262B; --r-muted: #727780; --r-bar: rgba(240,241,244,0.92); }
-.reader-shell[data-paper="warm"]  { --r-bg: #F6F1E5; --r-fg: #2A241E; --r-muted: #7C7265; --r-bar: rgba(246,241,229,0.92); }
-.reader-shell[data-paper="green"] { --r-bg: #E3EDE5; --r-fg: #1F3025; --r-muted: #5F7566; --r-bar: rgba(227,237,229,0.92); }
-.reader-shell[data-paper="dusk"]  { --r-bg: #26282C; --r-fg: #D5D7DC; --r-muted: #8A8F99; --r-bar: rgba(38,40,44,0.92); }
-.reader-shell[data-paper="night"] { --r-bg: #0D0D0F; --r-fg: #B8B8C0; --r-muted: #6C6C74; --r-bar: rgba(18,18,20,0.94); }
-
-.reader-topbar, .reader-botbar {
-  position: absolute;
-  left: 0;
-  right: 0;
-  background: var(--r-bar);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  border-color: rgba(128, 128, 128, 0.16);
-  z-index: 20;
-  transition: transform 0.28s var(--ease), opacity 0.26s var(--ease);
-}
-
-.reader-topbar {
-  top: 0;
-  padding: calc(var(--safe-top) + 8px) 14px 10px;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.16);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.reader-botbar {
-  bottom: 0;
-  padding: 10px 14px calc(var(--safe-bottom) + 12px);
-  border-top: 1px solid rgba(128, 128, 128, 0.16);
-}
-
-.reader-shell.bars-hidden .reader-topbar {
-  transform: translateY(-110%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.reader-shell.bars-hidden .reader-botbar {
-  transform: translateY(110%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.reader-content-wrap {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: calc(var(--safe-top) + 28px) 20px calc(var(--safe-bottom) + 46px);
-}
-
-.reader-para {
-  margin: 0 0 1em;
-  text-align: justify;
-  border-radius: 8px;
-  padding: 3px 5px;
-  transition: background 0.22s var(--ease);
-}
-
-.reader-para.speaking {
-  background: var(--accent-soft);
-}
-
-.reader-modern-block {
-  margin: -0.4em 0 1.2em;
-  padding: 10px 12px;
-  border-left: 3px solid var(--accent);
-  background: rgba(128, 128, 128, 0.08);
-  border-radius: 0 10px 10px 0;
-  font-size: 0.94em;
-}
-
-.reader-mini-foot {
-  position: fixed;
-  bottom: calc(var(--safe-bottom) + 8px);
-  left: 20px;
-  right: 20px;
-  max-width: 520px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--r-muted);
-  pointer-events: none;
-  z-index: 5;
-}
-
-.reader-fab {
-  position: absolute;
-  right: 16px;
-  bottom: calc(var(--safe-bottom) + 28px);
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: var(--surface-glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
-  color: var(--accent);
-  font-size: 12.5px;
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
-  z-index: 15;
-}
-
-/* Bottom Sheet Modal */
-.sheet-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.36);
-  z-index: 80;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.24s var(--ease);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.sheet-backdrop.open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.sheet-panel {
-  width: 100%;
-  max-width: 560px;
-  max-height: 86vh;
-  background: var(--surface);
-  color: var(--text);
-  border-radius: 22px 22px 0 0;
-  padding: 10px 18px calc(var(--safe-bottom) + 20px);
-  overflow-y: auto;
-  transform: translateY(100%);
-  transition: transform 0.32s var(--ease);
-  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.16);
-}
-
-.sheet-backdrop.open .sheet-panel {
-  transform: translateY(0);
-}
-
-.sheet-handle {
-  width: 38px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--border);
-  margin: 0 auto 12px;
-}
-
-.form-field {
-  margin-bottom: 12px;
-}
-
-.form-label {
-  display: block;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-2);
-  margin-bottom: 6px;
-}
-
-.form-input, .form-textarea, .form-select {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--bg);
-  color: var(--text);
-  font-size: 14px;
-}
-
-.form-textarea {
-  min-height: 86px;
-  resize: vertical;
-  line-height: 1.5;
-}
-
-.toast {
-  position: fixed;
-  top: calc(var(--safe-top) + 18px);
-  left: 50%;
-  transform: translate(-50%, -18px);
-  background: var(--primary);
-  color: var(--primary-fg);
-  padding: 9px 16px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: var(--shadow-md);
-  opacity: 0;
-  pointer-events: none;
-  z-index: 120;
-  transition: all 0.25s var(--ease);
-  max-width: 88vw;
-  text-align: center;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translate(-50%, 0);
-}
-
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.paper-dot {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-}
-.paper-dot.active {
-  border-color: var(--accent);
-  transform: scale(1.08);
-}
-
-.sel-popover {
-  position: fixed;
-  bottom: calc(var(--safe-bottom) + 84px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--primary);
-  color: var(--primary-fg);
-  border-radius: 999px;
-  padding: 6px 10px;
-  display: none;
-  align-items: center;
-  gap: 8px;
-  box-shadow: var(--shadow-md);
-  z-index: 75;
-  font-size: 12.5px;
-}
-.sel-popover.show { display: flex; }
-.sel-popover button {
-  color: inherit;
-  padding: 4px 8px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.14);
-  font-size: 12px;
-}
-</style>
+<title>藏往 · 术数排盘、典籍与参悟智能体</title>
+<link rel="stylesheet" href="./style.css" />
+<script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js" defer></script>
 </head>
 <body>
-<div class="app-shell" id="app">
+<div class="app-shell" id="appShell">
+  <!-- 角落低透明度意境暗纹层 -->
+  <div class="ambient-layer" id="ambientLayer" aria-hidden="true"></div>
+
   <div class="views-wrap">
-    <!-- 1. 典籍主视图 -->
-    <section class="view-page active" id="view-books">
+    <!-- 1. 排盘主视图（起卦排盘第一 / 书架第二 / 苹果风笔记第三） -->
+    <section class="view-page active" id="view-divine">
       <header class="top-header">
         <div class="header-row">
           <div class="brand-title">
             <span class="brand-name">藏往</span>
-            <span class="brand-sub" id="brandSubText">六爻书房</span>
+            <span class="brand-sub" id="brandSubText">六爻研习</span>
           </div>
           <div class="header-actions">
-            <button class="icon-btn" onclick="openSheet('sheet-import')" title="导入典籍" aria-label="导入典籍">
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <button class="icon-btn" onclick="openAskJi()" title="每日摇签与解梦问机" aria-label="问机">
+              <svg viewBox="0 0 24 24"><path d="M12 3v18"></path><path d="M7 8l5-5 5 5"></path><rect x="7" y="11" width="10" height="10" rx="2"></rect></svg>
             </button>
-            <button class="icon-btn" onclick="openSettings()" title="设置与备份" aria-label="设置与备份">
+            <button class="icon-btn" onclick="openGlobalSearch()" title="全局秒搜" aria-label="全局搜索">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </button>
+            <button class="icon-btn" id="privacyToggleBtn" onclick="togglePrivacyBlur()" title="一键隐私模糊" aria-label="隐私模糊">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            </button>
+            <button class="icon-btn" onclick="openSettings()" title="设置与云端同步" aria-label="设置">
               <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
               <span class="backup-dot" id="backupDot"></span>
             </button>
@@ -1277,88 +43,122 @@ button:active {
         <div class="cat-strip" id="catStrip"></div>
         <div class="seg-wrap">
           <div class="seg-slider" id="subTabSlider"></div>
-          <button class="seg-btn active" data-sub="shelf" onclick="switchSubTab('shelf')">书架</button>
-          <button class="seg-btn" data-sub="study" onclick="switchSubTab('study')">章节精读</button>
+          <button class="seg-btn active" data-sub="cast" onclick="switchSubTab('cast')">起卦排盘</button>
+          <button class="seg-btn" data-sub="shelf" onclick="switchSubTab('shelf')">书架</button>
           <button class="seg-btn" data-sub="notes" id="notesTabLabel" onclick="switchSubTab('notes')">六爻笔记</button>
         </div>
       </header>
-      <div class="scroll-area" id="booksScrollArea"></div>
+      <div class="scroll-area" id="divineScrollArea"></div>
     </section>
 
-    <!-- 2. 学习型干支日历 -->
+    <!-- 2. 术数学习万年历 -->
     <section class="view-page" id="view-calendar">
       <header class="top-header">
         <div class="header-row">
           <div class="brand-title">
-            <span class="brand-name">干支日历</span>
-            <span class="brand-sub">月建 · 日辰 · 旬空 · 足迹</span>
+            <span class="brand-name">万年干支历</span>
+            <span class="brand-sub" id="calHeaderSub">节气 · 宜忌 · 九星 · 应期</span>
           </div>
-          <button class="chip accent" onclick="calGoToday()">回到今日</button>
+          <div style="display:flex;gap:6px;">
+            <button class="chip" onclick="openCalJumpSheet()">选年月</button>
+            <button class="chip accent" onclick="calGoToday()">今日</button>
+          </div>
         </div>
       </header>
       <div class="scroll-area" id="calendarScrollArea"></div>
     </section>
 
-    <!-- 3. 图谱（八卦动图 + 六十四卦） -->
-    <section class="view-page" id="view-atlas">
+    <!-- 3. 实战档案库（按门类隔离 + 自定义分组 + 完整AI卷宗） -->
+    <section class="view-page" id="view-archives">
       <header class="top-header">
         <div class="header-row">
           <div class="brand-title">
-            <span class="brand-name">易象图谱</span>
-            <span class="brand-sub">八卦盘 · 八宫六十四卦</span>
+            <span class="brand-name">实战档案</span>
+            <span class="brand-sub" id="archHeaderSub">六爻卷宗库</span>
           </div>
           <div style="display:flex;gap:6px;">
-            <button class="chip" id="atlasModeBagua" onclick="switchAtlasTab('bagua')">八卦动盘</button>
-            <button class="chip" id="atlasModeHex" onclick="switchAtlasTab('hex')">六十四卦</button>
+            <button class="chip" id="baziCompareBtn" style="display:none;" onclick="openBaziCompare()">八字合盘</button>
+            <button class="chip accent" onclick="openGroupEditor()">编辑分组</button>
           </div>
         </div>
+        <div class="cat-strip" id="archCatStrip"></div>
+        <div class="cat-strip" id="archGroupStrip" style="padding-top:4px;"></div>
       </header>
-      <div class="scroll-area" id="atlasScrollArea"></div>
+      <div class="scroll-area" id="archivesScrollArea"></div>
     </section>
 
-    <!-- 4. 参悟 AI 智能体 -->
+    <!-- 4. 断法宝典 + 六十四卦 + 百宝箱与观星任意门 -->
+    <section class="view-page" id="view-methods">
+      <header class="top-header">
+        <div class="header-row">
+          <div class="brand-title">
+            <span class="brand-name">易库断法</span>
+            <span class="brand-sub">断法字典 · 六十四卦 · 百宝箱</span>
+          </div>
+          <button class="chip accent" onclick="openAskJi()">摇签问机</button>
+        </div>
+        <div class="seg-wrap" style="margin-top:8px;">
+          <div class="seg-slider" id="methodsSlider"></div>
+          <button class="seg-btn active" data-msub="dict" onclick="switchMethodsSub('dict')">断法宝典</button>
+          <button class="seg-btn" data-msub="hex" onclick="switchMethodsSub('hex')">六十四卦</button>
+          <button class="seg-btn" data-msub="tools" onclick="switchMethodsSub('tools')">百宝箱</button>
+        </div>
+      </header>
+      <div class="scroll-area" id="methodsScrollArea"></div>
+    </section>
+
+    <!-- 5. 参悟 AI 智能体（八大独立分舱聊天室） -->
     <section class="view-page" id="view-canwu">
       <header class="top-header">
         <div class="header-row">
           <div class="brand-title">
             <span class="brand-name">参悟</span>
-            <span class="brand-sub" id="canwuHeaderSub">六爻专属智能体</span>
+            <span class="brand-sub" id="canwuHeaderSub">六爻专属舱</span>
           </div>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <button class="chip" id="modeToggleBtn" onclick="toggleCanwuMode()">解答模式</button>
-            <button class="chip accent" onclick="openBrainModal()">大脑记忆</button>
-            <button class="icon-btn" onclick="clearChat()" title="清空当前对话" style="width:30px;height:30px;">
-              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
+          <div style="display:flex;gap:5px;align-items:center;">
+            <button class="chip" id="modeToggleBtn" onclick="toggleCanwuMode()">解答</button>
+            <button class="chip" onclick="openThreadDrawer()">话题</button>
+            <button class="chip accent" onclick="openBrainModal()">大脑</button>
+            <button class="icon-btn" onclick="startNewChatThread()" title="开启新话题" style="width:30px;height:30px;">
+              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
           </div>
         </div>
+        <div class="cat-strip" id="canwuRoomStrip"></div>
       </header>
       <div class="chat-wrap">
         <div class="chat-messages" id="chatMessages"></div>
         <button class="scroll-latest-btn" id="scrollLatestBtn" onclick="scrollChatToBottom(true)">↓ 回到最新</button>
         <div class="chat-input-bar">
-          <textarea class="chat-input" id="chatInput" rows="1" placeholder="问参悟：查古籍依据、拆盘断事、对比书库..." oninput="autoResizeInput(this)"></textarea>
+          <button class="icon-btn" onclick="startVoiceInput('chatInput')" title="语音输入" style="width:36px;height:36px;flex-shrink:0;">
+            <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg>
+          </button>
+          <textarea class="chat-input" id="chatInput" rows="1" placeholder="问参悟：查书库条文、断卦推演、跨书对比..." oninput="autoResizeInput(this)"></textarea>
           <button class="send-btn" id="sendBtn" onclick="sendCanwuMessage()" aria-label="发送">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           </button>
         </div>
       </div>
     </section>
   </div>
 
-  <!-- 底部 4 栏主导航 -->
+  <!-- 底部 5 栏主导航 -->
   <nav class="bottom-nav">
-    <button class="nav-item active" data-tab="books" onclick="switchMainTab('books')">
-      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-      <span>典籍</span>
+    <button class="nav-item active" data-tab="divine" onclick="switchMainTab('divine')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"></path><circle cx="12" cy="7.5" r="1"></circle><circle cx="12" cy="16.5" r="1"></circle></svg>
+      <span>排盘</span>
     </button>
     <button class="nav-item" data-tab="calendar" onclick="switchMainTab('calendar')">
       <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
       <span>日历</span>
     </button>
-    <button class="nav-item" data-tab="atlas" onclick="switchMainTab('atlas')">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9"></path><circle cx="12" cy="7.5" r="1"></circle><circle cx="12" cy="16.5" r="1"></circle></svg>
-      <span>图谱</span>
+    <button class="nav-item" data-tab="archives" onclick="switchMainTab('archives')">
+      <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      <span>档案</span>
+    </button>
+    <button class="nav-item" data-tab="methods" onclick="switchMainTab('methods')">
+      <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+      <span>断法</span>
     </button>
     <button class="nav-item" data-tab="canwu" onclick="switchMainTab('canwu')">
       <svg viewBox="0 0 24 24"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"></path></svg>
@@ -1367,43 +167,63 @@ button:active {
   </nav>
 </div>
 
-<!-- 沉浸阅读器全屏浮层 -->
+<!-- 全屏浮层 1：排盘与断事结果卷宗页 -->
+<div class="overlay-page" id="resultOverlay">
+  <header class="top-header">
+    <div class="header-row">
+      <button class="btn-secondary" style="padding:6px 10px;font-size:12.5px;" onclick="closeOverlay('resultOverlay')">‹ 返回</button>
+      <span style="font-size:15px;font-weight:700;" id="resOverlayTitle">六爻断事</span>
+      <div style="display:flex;gap:6px;">
+        <button class="chip" onclick="exportResultPoster()">存长图</button>
+        <button class="chip accent" onclick="saveCurrentResultToArchive()">存档案</button>
+      </div>
+    </div>
+  </header>
+  <div class="scroll-area" id="resultOverlayBody" style="padding-bottom:36px;"></div>
+</div>
+
+<!-- 全屏浮层 2：双引擎沉浸阅读器（1:1 原版 PDF + 文本白话 + 多语速听书） -->
 <div class="overlay-page reader-shell bars-hidden" id="readerOverlay" data-paper="warm">
   <div class="reader-topbar">
     <button class="btn-secondary" style="padding:6px 10px;font-size:12.5px;" onclick="closeReader()">‹ 返回</button>
     <div style="flex:1;min-width:0;text-align:center;">
       <div id="readerBookTitle" style="font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-      <div id="readerChapTitle" style="font-size:11px;opacity:0.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      <div id="readerChapTitle" style="font-size:11px;opacity:0.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
     </div>
-    <button class="chip accent" id="readerModeBtn" onclick="cycleReaderTextMode()">原文</button>
+    <button class="chip accent" id="readerEngineBtn" onclick="toggleReaderEngine()">原版</button>
   </div>
 
   <div class="reader-content-wrap" id="readerContentWrap" onclick="handleReaderTap(event)">
-    <div id="readerTextBody"></div>
-    <div style="display:flex;justify-content:space-between;gap:12px;margin-top:26px;padding-bottom:24px;">
-      <button class="btn-secondary" style="flex:1;" onclick="readerStepChapter(-1)">上一章</button>
-      <button class="btn-secondary" style="flex:1;" onclick="readerStepChapter(1)">下一章</button>
+    <div id="readerPdfStage" style="display:none;text-align:center;">
+      <canvas id="pdfCanvas" style="max-width:100%;height:auto;border-radius:6px;box-shadow:0 4px 18px rgba(0,0,0,0.08);"></canvas>
+      <div id="pdfPageHint" style="font-size:11.5px;opacity:0.65;margin-top:10px;"></div>
+    </div>
+    <div id="readerTextStage"></div>
+    <div style="display:flex;justify-content:space-between;gap:12px;margin-top:24px;padding-bottom:26px;">
+      <button class="btn-secondary" style="flex:1;" onclick="readerStep(-1)">上一页 / 章</button>
+      <button class="btn-secondary" style="flex:1;" onclick="readerStep(1)">下一页 / 章</button>
     </div>
   </div>
 
   <div class="reader-mini-foot">
-    <span id="readerFootChap"></span>
-    <span id="readerFootProg"></span>
+    <span id="readerFootLeft"></span>
+    <span id="readerFootRight"></span>
   </div>
 
-  <button class="reader-fab" onclick="askCanwuFromReader()">参悟当前章</button>
+  <button class="reader-fab" onclick="askCanwuFromReader()">问参悟本页</button>
 
   <div class="reader-botbar">
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
       <span style="font-size:11.5px;opacity:0.75;">进度</span>
-      <input type="range" id="readerRange" min="0" max="0" value="0" style="flex:1;accent-color:var(--accent);" oninput="readerJumpChapter(Number(this.value))" />
-      <span id="readerRangeText" style="font-size:11.5px;opacity:0.75;min-width:44px;text-align:right;">1/1</span>
+      <input type="range" id="readerRange" min="0" max="0" value="0" style="flex:1;accent-color:var(--accent);" oninput="readerJump(Number(this.value))" />
+      <span id="readerRangeText" style="font-size:11.5px;opacity:0.75;min-width:48px;text-align:right;">1/1</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
-      <button class="btn-secondary" style="padding:8px 4px;font-size:12px;" onclick="openReaderToc()">目录</button>
-      <button class="btn-secondary" style="padding:8px 4px;font-size:12px;" onclick="openSheet('sheet-tts')">听书</button>
-      <button class="btn-secondary" style="padding:8px 4px;font-size:12px;" onclick="openSheet('sheet-typo')">排版</button>
-      <button class="btn-secondary" style="padding:8px 4px;font-size:12px;" onclick="translateCurrentChapter()">AI译白话</button>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;">
+      <button class="btn-secondary" style="padding:7px 2px;font-size:11.5px;" onclick="openReaderToc()">目录</button>
+      <button class="btn-secondary" style="padding:7px 2px;font-size:11.5px;" onclick="openSheet('sheet-tts')">听书</button>
+      <button class="btn-secondary" style="padding:7px 2px;font-size:11.5px;" onclick="openSheet('sheet-typo')">排版</button>
+      <button class="btn-secondary" style="padding:7px 2px;font-size:11.5px;" onclick="translateCurrentPage()">译白话</button>
+      <button class="btn-secondary" style="padding:7px 2px;font-size:11.5px;" onclick="extractCaseBlindTest()">抽例盲测</button>
     </div>
   </div>
 
@@ -1414,19 +234,49 @@ button:active {
   </div>
 </div>
 
-<!-- 章节精读详情页 -->
-<div class="overlay-page" id="chapterDetailOverlay">
+<!-- 全屏浮层 3：苹果备忘录风格沉浸编辑页 -->
+<div class="overlay-page" id="noteEditorOverlay">
   <header class="top-header">
     <div class="header-row">
-      <button class="btn-secondary" style="padding:6px 10px;font-size:12.5px;" onclick="closeOverlay('chapterDetailOverlay')">‹ 返回</button>
-      <span style="font-size:14px;font-weight:600;" id="cdHeaderTitle">章节精读</span>
-      <button class="chip accent" id="cdJumpBookBtn">跳回原书</button>
+      <button class="btn-secondary" style="padding:6px 10px;font-size:12.5px;" onclick="closeNoteEditor()">‹ 完成</button>
+      <span style="font-size:13.5px;font-weight:600;color:var(--text-2);" id="noteEditorMeta">六爻笔记</span>
+      <div style="display:flex;gap:6px;">
+        <button class="chip" id="notePinBtn" onclick="toggleCurrentNotePin()">置顶</button>
+        <button class="chip" onclick="deleteCurrentNote()">删除</button>
+      </div>
     </div>
   </header>
-  <div class="scroll-area" id="cdBody" style="padding-bottom:32px;"></div>
+  <div class="note-toolbar">
+    <button class="chip" onclick="noteInsertChecklist()">+ 待办</button>
+    <button class="chip" onclick="noteInsertGanZhi()">+ 干支时间</button>
+    <button class="chip" onclick="noteInsertHexPicker()">+ 卦象卡</button>
+    <button class="chip" onclick="startVoiceInput('noteBodyArea')">语音速记</button>
+    <select id="noteFolderSelect" class="form-select" style="width:auto;padding:4px 8px;font-size:12px;" onchange="changeCurrentNoteFolder(this.value)"></select>
+  </div>
+  <div class="note-paper">
+    <input type="text" id="noteTitleField" class="note-title-input" placeholder="标题（第一行）" oninput="scheduleNoteAutoSave()" />
+    <textarea id="noteBodyArea" class="note-body-input" placeholder="记录读经心得、断语铁律、外应灵感或待办事项..." oninput="scheduleNoteAutoSave()"></textarea>
+  </div>
 </div>
 
-<!-- 六十四卦详情页 -->
+<!-- 全屏浮层 4：每日摇签 & 解梦观外应（问机） -->
+<div class="overlay-page" id="askJiOverlay">
+  <header class="top-header">
+    <div class="header-row">
+      <button class="btn-secondary" style="padding:6px 10px;font-size:12.5px;" onclick="closeAskJi()">‹ 返回</button>
+      <span style="font-size:15px;font-weight:700;">问机 · 摇签与解梦</span>
+      <button class="chip accent" onclick="openDailyChallenge()">每日一机</button>
+    </div>
+    <div class="seg-wrap" style="grid-template-columns:repeat(2,1fr);margin-top:8px;">
+      <div class="seg-slider" id="askJiSlider" style="width:calc((100% - 6px)/2);"></div>
+      <button class="seg-btn active" data-aj="draw" onclick="switchAskJiTab('draw')">每日摇签</button>
+      <button class="seg-btn" data-aj="dream" onclick="switchAskJiTab('dream')">解梦 · 观外应</button>
+    </div>
+  </header>
+  <div class="scroll-area" id="askJiBody" style="padding-bottom:36px;"></div>
+</div>
+
+<!-- 全屏浮层 5：六十四卦详情页 -->
 <div class="overlay-page" id="hexDetailOverlay">
   <header class="top-header">
     <div class="header-row">
@@ -1438,36 +288,79 @@ button:active {
   <div class="scroll-area" id="hexDetailBody" style="padding-bottom:36px;"></div>
 </div>
 
+<!-- 全屏浮层 6：全局秒搜 -->
+<div class="overlay-page" id="globalSearchOverlay">
+  <header class="top-header">
+    <div class="header-row" style="gap:8px;">
+      <input type="text" id="globalSearchInput" class="form-input" style="flex:1;padding:8px 12px;" placeholder="搜全库：书页、笔记、实战档案、断法..." oninput="runGlobalSearch(this.value)" />
+      <button class="btn-secondary" style="padding:7px 12px;" onclick="closeOverlay('globalSearchOverlay')">取消</button>
+    </div>
+  </header>
+  <div class="scroll-area" id="globalSearchResults" style="padding-bottom:32px;"></div>
+</div>
+
+<!-- 全屏浮层 7：思想星图（Canvas 可视化知识星系） -->
+<div class="overlay-page" id="mindMapOverlay" style="background:#0A0C12;color:#EEF1F8;">
+  <header class="top-header" style="background:rgba(10,12,18,0.85);border-color:rgba(255,255,255,0.1);color:#EEF1F8;">
+    <div class="header-row">
+      <button class="btn-secondary" style="background:rgba(255,255,255,0.12);color:#FFF;padding:6px 10px;" onclick="closeOverlay('mindMapOverlay')">‹ 返回</button>
+      <span style="font-size:15px;font-weight:700;">藏往思想星图</span>
+      <span class="chip" id="cultivationRankChip" style="background:rgba(224,106,87,0.22);color:#FF9E8D;">初窥</span>
+    </div>
+  </header>
+  <div style="flex:1;position:relative;overflow:hidden;">
+    <canvas id="mindMapCanvas" style="width:100%;height:100%;display:block;"></canvas>
+    <div id="mindMapInfo" style="position:absolute;left:16px;right:16px;bottom:calc(var(--safe-bottom) + 18px);padding:12px 14px;border-radius:14px;background:rgba(22,26,38,0.88);border:1px solid rgba(255,255,255,0.12);font-size:13px;line-height:1.55;">
+      轻点任意星点查看你的典籍、记忆铁律与验证卦例之间的关联。
+    </div>
+  </div>
+</div>
+
+<!-- 全屏浮层 8：八字合盘双盘对比 -->
+<div class="overlay-page" id="baziCompareOverlay">
+  <header class="top-header">
+    <div class="header-row">
+      <button class="btn-secondary" style="padding:6px 10px;" onclick="closeOverlay('baziCompareOverlay')">‹ 返回</button>
+      <span style="font-size:15px;font-weight:700;">八字合盘对比</span>
+      <button class="chip accent" onclick="analyzeBaziCompareWithAI()">AI 合盘</button>
+    </div>
+  </header>
+  <div class="scroll-area" id="baziCompareBody" style="padding-bottom:36px;"></div>
+</div>
+
 <!-- 抽屉：导入典籍 -->
 <div class="sheet-backdrop" id="sheet-import" onclick="backdropClose(event,'sheet-import')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
     <h3 style="margin:0 0 12px;font-size:17px;">导入典籍到「<span id="importCatName">六爻</span>」</h3>
     <div class="form-field">
-      <label class="form-label">方式一：选择本地 PDF / TXT / MD 文件</label>
-      <input type="file" id="bookFileInput" accept=".txt,.md,.pdf" class="form-input" onchange="handleBookFileSelect(event)" />
-      <div style="font-size:11.5px;color:var(--text-3);margin-top:4px;">自动按章节目录切分并永久存入手机本地大容量数据库（IndexedDB）。</div>
+      <label class="form-label">选择本地 PDF（1:1 原版排版渲染）/ TXT / MD 文件</label>
+      <input type="file" id="bookFileInput" accept=".pdf,.txt,.md" class="form-input" onchange="handleBookFileSelect(event)" />
+      <div style="font-size:11.5px;color:var(--text-3);margin-top:4px;">PDF 原件完整保留卦象与段落排版，同时自动识别目录并提取坐标段落供参悟检索。</div>
     </div>
-    <div style="text-align:center;font-size:12px;color:var(--text-3);margin:10px 0;">— 或者直接粘贴正文 —</div>
+    <div style="text-align:center;font-size:12px;color:var(--text-3);margin:10px 0;">— 或粘贴文本典籍 —</div>
     <div class="form-field">
-      <label class="form-label">书名</label>
-      <input type="text" id="pasteBookTitle" class="form-input" placeholder="例如：增删卜易" />
+      <input type="text" id="pasteBookTitle" class="form-input" placeholder="书名（如：增删卜易）" />
     </div>
     <div class="form-field">
-      <label class="form-label">全文内容</label>
-      <textarea id="pasteBookContent" class="form-textarea" placeholder="粘贴古籍全文，系统自动识别章节..."></textarea>
+      <textarea id="pasteBookContent" class="form-textarea" placeholder="粘贴全文内容..."></textarea>
     </div>
-    <button class="btn-primary" style="width:100%;" onclick="importPastedBook()">确认存入书架</button>
+    <button class="btn-primary" style="width:100%;" onclick="importPastedBook()">存入书架</button>
   </div>
 </div>
 
-<!-- 抽屉：阅读排版设置 -->
+<!-- 抽屉：书籍编辑与管理（重命名、排序、换门类、封面色、AI索引） -->
+<div class="sheet-backdrop" id="sheet-book-edit" onclick="backdropClose(event,'sheet-book-edit')">
+  <div class="sheet-panel" id="bookEditPanel"></div>
+</div>
+
+<!-- 抽屉：阅读排版与纸色 -->
 <div class="sheet-backdrop" id="sheet-typo" onclick="backdropClose(event,'sheet-typo')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
     <h3 style="margin:0 0 14px;font-size:16px;">阅读排版与护眼纸色</h3>
     <div class="form-field">
-      <label class="form-label">字号：<span id="typoSizeVal">16.5</span> px</label>
+      <label class="form-label">字号：<span id="typoSizeVal">16.5</span> px（文本模式） / PDF缩放：<span id="pdfScaleVal">1.5</span>x</label>
       <input type="range" min="14" max="24" step="0.5" id="typoSizeRange" style="width:100%;accent-color:var(--accent);" oninput="updateTypo('fontSize', Number(this.value))" />
     </div>
     <div class="form-field">
@@ -1476,14 +369,6 @@ button:active {
         <button class="btn-secondary" onclick="updateTypo('lineHeight', 1.6)">紧凑</button>
         <button class="btn-secondary" onclick="updateTypo('lineHeight', 1.88)">舒适</button>
         <button class="btn-secondary" onclick="updateTypo('lineHeight', 2.15)">宽松</button>
-      </div>
-    </div>
-    <div class="form-field">
-      <label class="form-label">页边距</label>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-        <button class="btn-secondary" onclick="updateTypo('paddingX', 14)">窄</button>
-        <button class="btn-secondary" onclick="updateTypo('paddingX', 22)">适中</button>
-        <button class="btn-secondary" onclick="updateTypo('paddingX', 32)">宽</button>
       </div>
     </div>
     <div class="form-field">
@@ -1496,14 +381,14 @@ button:active {
       </div>
     </div>
     <div class="form-field">
-      <label class="form-label">护眼纸色</label>
+      <label class="form-label">护眼纸色（PDF 原版模式同步生效宣纸/夜读滤镜）</label>
       <div style="display:flex;justify-content:space-between;padding:4px 0;">
         <button class="paper-dot" style="background:#FFFFFF;" onclick="updateTypo('paper','white')" title="纯白"></button>
         <button class="paper-dot" style="background:#F0F1F4;" onclick="updateTypo('paper','gray')" title="柔灰"></button>
         <button class="paper-dot" style="background:#F6F1E5;" onclick="updateTypo('paper','warm')" title="暖米纸"></button>
         <button class="paper-dot" style="background:#E3EDE5;" onclick="updateTypo('paper','green')" title="豆沙绿"></button>
         <button class="paper-dot" style="background:#26282C;" onclick="updateTypo('paper','dusk')" title="暮光灰"></button>
-        <button class="paper-dot" style="background:#0D0D0F;" onclick="updateTypo('paper','night')" title="纯黑夜读"></button>
+        <button class="paper-dot" style="background:#0D0D0F;" onclick="updateTypo('paper','night')" title="夜读黑"></button>
       </div>
     </div>
   </div>
@@ -1513,17 +398,17 @@ button:active {
 <div class="sheet-backdrop" id="sheet-tts" onclick="backdropClose(event,'sheet-tts')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 12px;font-size:16px;">听书朗读设置</h3>
+    <h3 style="margin:0 0 12px;font-size:16px;">听书朗读与语速控制</h3>
     <div class="form-field">
-      <label class="form-label">朗读内容模式</label>
+      <label class="form-label">朗读模式</label>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-        <button class="btn-secondary" id="ttsModeModern" onclick="setTtsOpt('mode','modern')">只听白话</button>
-        <button class="btn-secondary" id="ttsModeOrig" onclick="setTtsOpt('mode','orig')">只听原文</button>
-        <button class="btn-secondary" id="ttsModeBoth" onclick="setTtsOpt('mode','both')">古今混读</button>
+        <button class="btn-secondary" onclick="setTtsOpt('mode','modern')">只听白话</button>
+        <button class="btn-secondary" onclick="setTtsOpt('mode','orig')">只听原文</button>
+        <button class="btn-secondary" onclick="setTtsOpt('mode','both')">古今混读</button>
       </div>
     </div>
     <div class="form-field">
-      <label class="form-label">语速调节：<span id="ttsRateLabel">1.0x</span></label>
+      <label class="form-label">语速：<span id="ttsRateLabel">1.0x</span></label>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
         <button class="btn-secondary" onclick="setTtsOpt('rate',0.75)">0.75x</button>
         <button class="btn-secondary" onclick="setTtsOpt('rate',1.0)">1.0x</button>
@@ -1533,15 +418,15 @@ button:active {
       </div>
     </div>
     <div class="form-field">
-      <label class="form-label">睡前定时停止</label>
+      <label class="form-label">睡前定时</label>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
         <button class="btn-secondary" onclick="setTtsTimer(0)">不定时</button>
-        <button class="btn-secondary" onclick="setTtsTimer(15)">15 分钟</button>
-        <button class="btn-secondary" onclick="setTtsTimer(30)">30 分钟</button>
+        <button class="btn-secondary" onclick="setTtsTimer(15)">15分钟</button>
+        <button class="btn-secondary" onclick="setTtsTimer(30)">30分钟</button>
       </div>
     </div>
     <div style="display:flex;gap:10px;margin-top:12px;">
-      <button class="btn-primary" style="flex:1;" id="ttsPlayBtn" onclick="toggleTtsPlay()">开始朗读本章</button>
+      <button class="btn-primary" style="flex:1;" id="ttsPlayBtn" onclick="toggleTtsPlay()">开始朗读</button>
       <button class="btn-secondary" onclick="stopTts()">停止</button>
     </div>
   </div>
@@ -1551,69 +436,74 @@ button:active {
 <div class="sheet-backdrop" id="sheet-toc" onclick="backdropClose(event,'sheet-toc')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 10px;font-size:16px;">全书目录</h3>
+    <h3 style="margin:0 0 10px;font-size:16px;">本书目录</h3>
     <div id="readerTocList"></div>
   </div>
 </div>
 
-<!-- 抽屉：新增笔记 / 实战卦例 -->
-<div class="sheet-backdrop" id="sheet-note" onclick="backdropClose(event,'sheet-note')">
+<!-- 抽屉：日历快速跳年月 -->
+<div class="sheet-backdrop" id="sheet-cal-jump" onclick="backdropClose(event,'sheet-cal-jump')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 12px;font-size:16px;">记入「<span id="noteSheetCat">六爻</span>笔记」</h3>
-    <div class="form-field">
-      <label class="form-label">类型</label>
-      <select id="noteTypeInput" class="form-select" onchange="toggleCaseFields()">
-        <option value="excerpt">经典摘录 / 断语心得</option>
-        <option value="case">实战案例 / 复盘档案</option>
-      </select>
-    </div>
-    <div class="form-field">
-      <label class="form-label">标题 / 核心要点</label>
-      <input type="text" id="noteTitleInput" class="form-input" placeholder="例如：月破逢日辰合起之应期" />
-    </div>
-    <div class="form-field">
-      <label class="form-label">详细内容（原文 / 排盘与当时判断）</label>
-      <textarea id="noteContentInput" class="form-textarea" placeholder="记录原书断语，或当时卦象与推演判断..."></textarea>
-    </div>
-    <div id="caseExtraFields" style="display:none;">
-      <div class="form-field">
-        <label class="form-label">验证状态</label>
-        <select id="noteStatusInput" class="form-select">
-          <option value="pending">待验证</option>
-          <option value="verified">已应验</option>
+    <h3 style="margin:0 0 12px;font-size:16px;">快速跳转到指定年月</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div>
+        <label class="form-label">年份（1900 - 2100）</label>
+        <input type="number" id="calJumpYear" class="form-input" min="1900" max="2100" />
+      </div>
+      <div>
+        <label class="form-label">月份</label>
+        <select id="calJumpMonth" class="form-select">
+          <option value="0">1月</option><option value="1">2月</option><option value="2">3月</option>
+          <option value="3">4月</option><option value="4">5月</option><option value="5">6月</option>
+          <option value="6">7月</option><option value="7">8月</option><option value="8">9月</option>
+          <option value="9">10月</option><option value="10">11月</option><option value="11">12月</option>
         </select>
       </div>
-      <div class="form-field">
-        <label class="form-label">实际应验结果（填完可一键让参悟复盘进记忆）</label>
-        <textarea id="noteOutcomeInput" class="form-textarea" placeholder="后来真实发生了什么？哪天应验？"></textarea>
-      </div>
     </div>
-    <div class="form-field">
-      <label class="form-label">出处备注（选填）</label>
-      <input type="text" id="noteSourceInput" class="form-input" placeholder="例如：《增删卜易》第3章" />
-    </div>
-    <button class="btn-primary" style="width:100%;" onclick="saveNoteFromSheet()">保存笔记</button>
+    <button class="btn-primary" style="width:100%;" onclick="applyCalJump()">立即跳转</button>
   </div>
 </div>
 
-<!-- 抽屉：参悟大脑（三层记忆管理） -->
+<!-- 抽屉：编辑档案库分组 -->
+<div class="sheet-backdrop" id="sheet-groups" onclick="backdropClose(event,'sheet-groups')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <h3 style="margin:0 0 10px;font-size:16px;">管理档案分组（「全部」固定首位）</h3>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input type="text" id="newGroupInput" class="form-input" placeholder="输入新分组名，如：同学、合作伙伴" />
+      <button class="btn-primary" style="flex-shrink:0;" onclick="addArchiveGroup()">添加</button>
+    </div>
+    <div id="groupEditList"></div>
+  </div>
+</div>
+
+<!-- 抽屉：参悟历史话题 -->
+<div class="sheet-backdrop" id="sheet-threads" onclick="backdropClose(event,'sheet-threads')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <h3 style="margin:0;font-size:16px;">「<span id="threadRoomName">六爻</span>」历史话题</h3>
+      <button class="chip accent" onclick="startNewChatThread();closeSheet('sheet-threads')">+ 新话题</button>
+    </div>
+    <div id="threadListBody"></div>
+  </div>
+</div>
+
+<!-- 抽屉：参悟大脑（三层记忆 + 思想星图入口） -->
 <div class="sheet-backdrop" id="sheet-brain" onclick="backdropClose(event,'sheet-brain')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-      <h3 style="margin:0;font-size:17px;">参悟大脑 · 三层记忆进化</h3>
-      <span class="chip accent" id="brainCatTag">六爻</span>
+      <h3 style="margin:0;font-size:17px;">参悟大脑 · 三层记忆</h3>
+      <button class="chip accent" onclick="closeSheet('sheet-brain');openMindMap()">思想星图 ›</button>
     </div>
-    <div style="font-size:12.5px;color:var(--text-2);line-height:1.55;margin-bottom:12px;">
-      常驻心法每次必带；书库索引与错题铁律按需精准调用，不占字数不乱套。
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
       <button class="btn-secondary" onclick="runCrossBookSynthesis()">跨书自悟融合</button>
-      <button class="btn-secondary" onclick="runMemoryDistill()">整理蒸馏记忆</button>
+      <button class="btn-secondary" onclick="runMemoryDistill()">蒸馏精简记忆</button>
     </div>
     <div class="form-field">
-      <label class="form-label">新增一条常驻心法 / 纠偏铁律</label>
+      <label class="form-label">手动存入「<span id="brainCatTag">六爻</span>」常驻心法或铁律</label>
       <div style="display:flex;gap:8px;">
         <input type="text" id="newMemInput" class="form-input" placeholder="例如：月破逢日合为合起，不可一概论废" />
         <button class="btn-primary" style="padding:8px 14px;flex-shrink:0;" onclick="addManualMemory()">存入</button>
@@ -1623,2230 +513,136 @@ button:active {
   </div>
 </div>
 
-<!-- 抽屉：设置、主题与 iCloud / 私人云备份 -->
+<!-- 抽屉：添加自定义观星 / 术数外部链接 -->
+<div class="sheet-backdrop" id="sheet-add-portal" onclick="backdropClose(event,'sheet-add-portal')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <h3 style="margin:0 0 12px;font-size:16px;">添加自定义星象 / 术数传送门</h3>
+    <div class="form-field">
+      <label class="form-label">名称</label>
+      <input type="text" id="portalNameInput" class="form-input" placeholder="例如：七政四余在线排盘" />
+    </div>
+    <div class="form-field">
+      <label class="form-label">网址 URL</label>
+      <input type="url" id="portalUrlInput" class="form-input" placeholder="https://..." />
+    </div>
+    <div class="form-field">
+      <label class="form-label">简介说明</label>
+      <input type="text" id="portalDescInput" class="form-input" placeholder="简短描述用途" />
+    </div>
+    <button class="btn-primary" style="width:100%;" onclick="saveCustomPortal()">添加到百宝箱</button>
+  </div>
+</div>
+
+<!-- 抽屉：全局设置、主题配色、隐私加密、云同步与安全清缓存 -->
 <div class="sheet-backdrop" id="sheet-settings" onclick="backdropClose(event,'sheet-settings')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 14px;font-size:17px;">设置 · 视觉主题 · 防丢备份</h3>
+    <h3 style="margin:0 0 14px;font-size:17px;">设置 · 视觉美学 · 隐私云同步</h3>
 
     <div class="card" style="padding:12px;">
-      <div class="form-label">整体视觉主题（同色系分层美学）</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+      <div class="form-label">底色主题（6 套新中式与苹果风）</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;">
         <button class="btn-secondary" onclick="setAppTheme('warm')">素宣暖</button>
+        <button class="btn-secondary" onclick="setAppTheme('cinnabar')">故宫朱砂宣</button>
         <button class="btn-secondary" onclick="setAppTheme('apple')">极简白</button>
         <button class="btn-secondary" onclick="setAppTheme('cyan')">青岚灰</button>
+        <button class="btn-secondary" onclick="setAppTheme('indigo')">松烟黛青</button>
         <button class="btn-secondary" onclick="setAppTheme('dark')">深空黑</button>
       </div>
+      <div class="form-label">自定义点睛强调色</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+        <button class="accent-dot" style="background:#B43422;" onclick="setAccentColor('red')" title="朱砂红"></button>
+        <button class="accent-dot" style="background:#2A635D;" onclick="setAccentColor('teal')" title="松烟青"></button>
+        <button class="accent-dot" style="background:#2C5E8A;" onclick="setAccentColor('blue')" title="靛青蓝"></button>
+        <button class="accent-dot" style="background:#A67628;" onclick="setAccentColor('amber')" title="琥珀金"></button>
+        <button class="accent-dot" style="background:#242426;" onclick="setAccentColor('ink')" title="玄墨黑"></button>
+      </div>
+      <div class="form-label">角落低透明度背景意境暗纹</div>
+      <select id="cfgAmbientBg" class="form-select" onchange="setAmbientMode(this.value)">
+        <option value="luopan">罗盘刻度微动流转（推荐）</option>
+        <option value="moon">农历盈亏淡墨月相</option>
+        <option value="cloud">极简水墨云气</option>
+        <option value="none">纯净留白无纹</option>
+      </select>
     </div>
 
     <div class="card" style="padding:12px;">
-      <div class="form-label">AI 接口配置（DeepSeek 或兼容 OpenAI 接口）</div>
-      <div class="form-field">
-        <input type="password" id="cfgApiKey" class="form-input" placeholder="填入 API Key（如 sk-...）" />
-      </div>
-      <div class="form-field">
-        <input type="text" id="cfgBaseUrl" class="form-input" placeholder="接口地址，默认 https://api.deepseek.com" />
+      <div class="form-label">AI 接口配置与隐私保护</div>
+      <div class="form-field"><input type="password" id="cfgApiKey" class="form-input" placeholder="DeepSeek API Key（sk-...）" /></div>
+      <div class="form-field"><input type="text" id="cfgBaseUrl" class="form-input" placeholder="https://api.deepseek.com" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <input type="text" id="cfgFlashModel" class="form-input" placeholder="deepseek-chat" />
+        <input type="text" id="cfgProModel" class="form-input" placeholder="deepseek-reasoner" />
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
         <div>
-          <label class="form-label">极速省钱模型</label>
-          <input type="text" id="cfgFlashModel" class="form-input" placeholder="deepseek-chat" />
+          <label class="form-label">对话档位</label>
+          <select id="cfgUseTier" class="form-select"><option value="flash">极速省钱档</option><option value="pro">深度思考档</option></select>
         </div>
         <div>
-          <label class="form-label">深度思考模型</label>
-          <input type="text" id="cfgProModel" class="form-input" placeholder="deepseek-reasoner" />
+          <label class="form-label">普通闲聊自动过期</label>
+          <select id="cfgChatRetention" class="form-select">
+            <option value="30">保留 30 天（推荐）</option>
+            <option value="7">保留 7 天</option>
+            <option value="0">永久保留</option>
+            <option value="-1">关闭即清</option>
+          </select>
         </div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <span style="font-size:13px;">当前对话使用档位：</span>
-        <select id="cfgUseTier" class="form-select" style="width:auto;padding:6px 10px;">
-          <option value="flash">极速省钱档</option>
-          <option value="pro">深度思考档</option>
-        </select>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin:8px 0;">
+        <input type="checkbox" id="cfgRedactNames" /> 发给 AI 前自动替换真实姓名为「命主/某甲」
+      </label>
+      <div class="form-field" style="margin-top:8px;">
+        <label class="form-label">个人本命日柱（可选，仅存本地，用于日历天时共振）</label>
+        <input type="text" id="cfgMyDayPillar" class="form-input" placeholder="例如：甲子、丙午（留空则关闭）" />
       </div>
-      <button class="btn-primary" style="width:100%;" onclick="saveApiConfig()">保存接口配置</button>
+      <button class="btn-primary" style="width:100%;" onclick="saveGeneralSettings()">保存全部设置</button>
       <div id="costStatsBox" style="margin-top:8px;font-size:11.5px;color:var(--text-3);"></div>
     </div>
 
     <div class="card" style="padding:12px;">
-      <div class="form-label">换机 / 丢手机防丢保险（iCloud 云盘存取）</div>
-      <div id="backupStatusText" style="font-size:12px;color:var(--text-2);margin-bottom:10px;"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
-        <button class="btn-primary" onclick="exportAllBackup()">保存到 iCloud / 微信</button>
-        <button class="btn-secondary" onclick="document.getElementById('importBackupFile').click()">从 iCloud 恢复</button>
+      <div class="form-label">端到端加密 · Cloudflare D1 私人云同步（免外币卡）</div>
+      <div class="form-field">
+        <input type="url" id="cfgSyncUrl" class="form-input" placeholder="你的 Worker 同步地址（如 https://cw-sync.xxx.workers.dev）" />
       </div>
-      <input type="file" id="importBackupFile" accept=".json" style="display:none;" onchange="importAllBackup(event)" />
-      <div style="font-size:11.5px;color:var(--text-3);line-height:1.5;">
-        提示：在 iPhone Safari 中点底部分享按钮选择「添加到主屏幕」，可大幅提高系统对本地数据库的保护级别，防止长期未开被清理。
+      <div class="form-field">
+        <input type="password" id="cfgVaultPass" class="form-input" placeholder="私人保险箱口令（用于接口鉴权 + 本地 AES-256 加密）" />
       </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;margin-bottom:10px;">
+        <input type="checkbox" id="cfgE2eEncrypt" /> 开启本地 AES-256 端到端加密（云端仅存密文）
+      </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <button class="btn-primary" onclick="pushToCloudD1()">加密上传云端</button>
+        <button class="btn-secondary" onclick="pullFromCloudD1()">从云端拉回恢复</button>
+      </div>
+      <div id="cloudSyncStatus" style="font-size:11.5px;color:var(--text-3);"></div>
     </div>
 
     <div class="card" style="padding:12px;">
-      <div class="form-label">可选：私人云自动同步（GitHub 私有 Gist，零休眠）</div>
-      <div class="form-field">
-        <input type="password" id="cfgGistToken" class="form-input" placeholder="GitHub Personal Access Token（仅需 gist 权限）" />
+      <div class="form-label">两步式本地备份到 iCloud / 文件（专治苹果拦截）</div>
+      <div style="font-size:11.5px;color:var(--text-3);margin-bottom:8px;">自动分离大体积原版 PDF，仅打包文字资产（档案、AI报告、笔记、记忆、书库索引），1 秒极速完成。</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <button class="btn-secondary" id="packBackupBtn" onclick="prepareLocalBackup()">第1步：生成备份包</button>
+        <button class="btn-primary" id="saveBackupBtn" onclick="triggerLocalBackupSave()" disabled style="opacity:0.45;">第2步：存到 iCloud</button>
       </div>
-      <div class="form-field">
-        <input type="text" id="cfgGistId" class="form-input" placeholder="Gist ID（首次上传自动生成并回填）" />
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <button class="btn-secondary" onclick="syncToGist()">上传到私人云</button>
-        <button class="btn-secondary" onclick="pullFromGist()">从私人云拉回</button>
-      </div>
+      <button class="btn-secondary" style="width:100%;" onclick="document.getElementById('importBackupFile').click()">从 iCloud / 文件恢复备份</button>
+      <input type="file" id="importBackupFile" accept=".json" style="display:none;" onchange="importLocalBackup(event)" />
+    </div>
+
+    <div class="card" style="padding:12px;">
+      <div class="form-label">存储空间体检与安全清缓存</div>
+      <div id="storageStatsBox" style="font-size:12.5px;color:var(--text-2);line-height:1.6;margin-bottom:10px;">计算中...</div>
+      <button class="btn-secondary" style="width:100%;color:var(--accent);" onclick="runSafeClearCache()">一键安全清缓存（绝不删书籍、档案、笔记与记忆）</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script>
-// ==================== 1. 基础常量与术数元数据 ====================
-const CATEGORIES = ['六爻', '八字', '梅花', '奇门', '六壬', '紫微', '风水'];
-const COVER_PALETTES = [
-  'linear-gradient(155deg, #4A3728, #2B1F16)',
-  'linear-gradient(155deg, #2E4C47, #1A2F2C)',
-  'linear-gradient(155deg, #6E2D24, #3E1813)',
-  'linear-gradient(155deg, #2D3F56, #192534)',
-  'linear-gradient(155deg, #544638, #312820)',
-  'linear-gradient(155deg, #433952, #251F30)'
-];
-
-const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-const BRANCHES = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-const STEM_WX = ['木','木','火','火','土','土','金','金','水','水'];
-const BRANCH_WX = ['水','土','木','木','土','火','火','土','金','金','土','水'];
-const HIDDEN_STEMS = {
-  '子':'癸','丑':'己癸辛','寅':'甲丙戊','卯':'乙','辰':'戊乙癸','巳':'丙庚戊',
-  '午':'丁己','未':'己丁乙','申':'庚壬戊','酉':'辛','戌':'戊辛丁','亥':'壬甲'
-};
-const LIU_HE = {'子':'丑','丑':'子','寅':'亥','亥':'寅','卯':'戌','戌':'卯','辰':'酉','酉':'辰','巳':'申','申':'巳','午':'未','未':'午'};
-const LIU_CHONG = {'子':'午','午':'子','丑':'未','未':'丑','寅':'申','申':'寅','卯':'酉','酉':'卯','辰':'戌','戌':'辰','巳':'亥','亥':'巳'};
-
-// 八卦核心数据 (3位二进制：bit0初爻，bit1二爻，bit2三爻)
-const TRIGRAMS = {
-  7: { id:7, name:'乾', sym:'☰', wx:'金', nature:'天', xianNum:1, houNum:6, xianPos:'南', houPos:'西北', person:'父、长辈、领导', body:'头、骨、肺', items:'金属、玉器、圆满、刚健、大车', inner:['甲子','甲寅','甲辰'], outer:['壬午','壬申','壬戌'] },
-  3: { id:3, name:'兑', sym:'☱', wx:'金', nature:'泽', xianNum:2, houNum:7, xianPos:'东南', houPos:'西', person:'少女、口才者', body:'口、舌、肺', items:'泽水、言辞、喜悦、缺口、金属小件', inner:['丁巳','丁卯','丁丑'], outer:['丁亥','丁酉','丁未'] },
-  5: { id:5, name:'离', sym:'☲', wx:'火', nature:'火', xianNum:3, houNum:9, xianPos:'东', houPos:'南', person:'中女、文人', body:'目、心、血', items:'光明、文书、电子、艳丽、中空之物', inner:['己卯','己丑','己亥'], outer:['己酉','己未','己巳'] },
-  1: { id:1, name:'震', sym:'☳', wx:'木', nature:'雷', xianNum:4, houNum:3, xianPos:'东北', houPos:'东', person:'长男、行动派', body:'足、肝、发', items:'震动、声音、车辆、草木、突发性事', inner:['庚子','庚寅','庚辰'], outer:['庚午','庚申','庚戌'] },
-  6: { id:6, name:'巽', sym:'☴', wx:'木', nature:'风', xianNum:5, houNum:4, xianPos:'西南', houPos:'东南', person:'长女、商旅', body:'股、胆、呼吸', items:'风气、消息、绳索、细长、顺入摇摆', inner:['辛丑','辛亥','辛酉'], outer:['辛未','辛巳','辛卯'] },
-  2: { id:2, name:'坎', sym:'☵', wx:'水', nature:'水', xianNum:6, houNum:1, xianPos:'西', houPos:'北', person:'中男、智谋者', body:'耳、肾、血', items:'水流、险陷、隐秘、智慧、黑色液体', inner:['戊寅','戊辰','戊午'], outer:['戊申','戊戌','戊子'] },
-  4: { id:4, name:'艮', sym:'☶', wx:'土', nature:'山', xianNum:7, houNum:8, xianPos:'西北', houPos:'东北', person:'少男、守成者', body:'手、背、脾胃', items:'山石、阻隔、止步、门庭、稳重厚实', inner:['丙辰','丙午','丙申'], outer:['丙戌','丙子','丙寅'] },
-  0: { id:0, name:'坤', sym:'☷', wx:'土', nature:'地', xianNum:8, houNum:2, xianPos:'北', houPos:'西南', person:'母、大众、臣属', body:'腹、脾、肌肉', items:'大地、布帛、包容、柔顺、众多基础', inner:['乙未','乙巳','乙卯'], outer:['乙丑','乙亥','乙酉'] }
-};
-
-// 先天八卦顺时针排布（从正上方南开始：乾、巽、坎、艮、坤、震、离、兑）
-const XIAN_ORDER = [7, 6, 2, 4, 0, 1, 5, 3];
-// 后天八卦顺时针排布（从正上方南开始：离、坤、兑、乾、坎、艮、震、巽）
-const HOU_ORDER = [5, 0, 3, 7, 2, 4, 1, 6];
-
-// 六十四卦名称、周易卦序与精要卦辞
-const HEX_DICT = {
-  '7_7':[1,'乾为天','元亨利贞。刚健中正，自强不息，利大局开创。'],
-  '0_0':[2,'坤为地','元亨，利牝马之贞。厚德载物，顺势承接，先迷后得。'],
-  '2_1':[3,'水雷屯','元亨利贞，勿用有攸往。万事开头难，宜积蓄建侯。'],
-  '4_2':[4,'山水蒙','亨，匪我求童蒙，童蒙求我。启蒙明理，宜师承求教。'],
-  '2_7':[5,'水天需','有孚，光亨，贞吉。时机未熟，耐心待时，不可冒进。'],
-  '7_2':[6,'天水讼','有孚窒惕，中吉终凶。意见相左，宜和解止讼。'],
-  '0_2':[7,'地水师','贞，丈人吉，无咎。统率有序，以正领众，纪律为先。'],
-  '2_0':[8,'水地比','吉，原筮元永贞。亲比协作，择善而从，不宜迟疑。'],
-  '6_7':[9,'风天小畜','亨，密云不雨。力量尚微，宜小蓄积淀，等待透雨。'],
-  '7_3':[10,'天泽履','履虎尾，不咥人，亨。谨守礼法，步步为营可化险。'],
-  '0_7':[11,'地天泰','小往大来，吉亨。天地交泰，上下通畅，诸事顺遂。'],
-  '7_0':[12,'天地否','否之匪人，不利君子贞。上下闭塞，宜守正敛锋待转机。'],
-  '7_5':[13,'天火同人','同人于野，亨。志同道合，公心协作，利远行谋事。'],
-  '5_7':[14,'火天大有','元亨。光明普照，丰盛大有，宜戒满守谦。'],
-  '0_4':[15,'地山谦','亨，君子有终。谦逊低调，有实力而不张扬，终获吉果。'],
-  '1_0':[16,'雷地豫','利建侯行师。顺动欢豫，宜提前筹谋，防逸乐失警。'],
-  '3_1':[17,'泽雷随','元亨利贞，无咎。审时度势，随顺正道而行。'],
-  '4_6':[18,'山风蛊','元亨，利涉大川。积弊已久，当果断革新整顿。'],
-  '0_3':[19,'地泽临','元亨利贞。势头渐盛，亲临督导，居安思危。'],
-  '6_0':[20,'风地观','盥而不荐，有孚颙若。冷静观察全局，示范引导。'],
-  '5_1':[21,'火雷噬嗑','亨，利用狱。中间有梗阻，须明断去障方通。'],
-  '4_5':[22,'山火贲','亨，小利有攸往。文饰修容，宜重实质莫流于浮华。'],
-  '4_0':[23,'山地剥','不利有攸往。阳微阴盛，顺时止损，静待复生。'],
-  '0_1':[24,'地雷复','亨，出入无疾。一阳来复，转机初现，宜休养生息。'],
-  '7_1':[25,'天雷无妄','元亨利贞。顺应天理不妄为，真诚守正则吉。'],
-  '4_7':[26,'山天大畜','利贞，不家食吉。厚积薄发，养德蓄才以待大用。'],
-  '4_1':[27,'山雷颐','贞吉，观颐。谨言慎食，修养身心与谋生之道。'],
-  '3_6':[28,'泽风大过','栋桡，利有攸往。压力过载，须非常之策方能度过。'],
-  '2_2':[29,'坎为水','习坎，有孚，维心亨。重重险阻，守信定心行有尚。'],
-  '5_5':[30,'离为火','利贞，亨。光明依附正道，柔顺中正而大明。'],
-  '3_4':[31,'泽山咸','亨，利贞，取女吉。虚心感应，心意相通，感情顺合。'],
-  '1_6':[32,'雷风恒','亨，无咎，利贞。恒久坚持正道，稳扎稳打。'],
-  '7_4':[33,'天山遁','亨，小利贞。退避锋芒，知止抽身反得主动。'],
-  '1_7':[34,'雷天大壮','利贞。阳刚强盛，切忌莽撞冲动，以礼节之。'],
-  '5_0':[35,'火地晋','康侯用锡马蕃庶。日出地上，步步高升，顺明进取。'],
-  '0_5':[36,'地火明夷','利艰贞。光明受损，宜韬光养晦、隐忍自保。'],
-  '6_5':[37,'风火家人','利女贞。内治有序，家道和睦则外事可成。'],
-  '5_3':[38,'火泽睽','小事吉。志趣乖违，求同存异，小事可为大事慎。'],
-  '2_4':[39,'水山蹇','利西南，不利东北。前有险阻，宜借贵人绕道而行。'],
-  '1_2':[40,'雷水解','利西南，无所往其来复吉。险难消解，宜速清余患回归常态。'],
-  '4_3':[41,'山泽损','有孚，元吉，无咎。损下益上，先舍后得，诚敬为本。'],
-  '6_1':[42,'风雷益','利有攸往，利涉大川。损上益下，助人利己，宜果断推进。'],
-  '3_7':[43,'泽天夬','扬于王庭，孚号有厉。决断除弊，刚中带柔防反扑。'],
-  '7_6':[44,'天风姤','女壮，勿用取女。不期而遇，防微杜渐，慎防暗耗。'],
-  '3_0':[45,'泽地萃','亨，王假有庙。人才资源聚集，宜防内耗与突发变故。'],
-  '0_6':[46,'地风升','元亨，用见大人。积小成大，顺势而升，得贵人扶助。'],
-  '3_2':[47,'泽水困','亨，贞大人吉。陷入困境，言多无益，守正静待破局。'],
-  '2_6':[48,'水风井','改邑不改井。资源恒常，重在修浚维护、润泽长久。'],
-  '3_5':[49,'泽火革','巳日乃孚，元亨利贞。革故鼎新，时机成熟乃可大变。'],
-  '5_6':[50,'火风鼎','元吉，亨。稳重鼎新，凝聚合力，成就新格局。'],
-  '1_1':[51,'震为雷','亨，震来虩虩，笑言哑哑。突发震动，戒惧应对反得安宁。'],
-  '4_4':[52,'艮为山','艮其背，不获其身。该止则止，定心守位不妄动。'],
-  '6_4':[53,'风山渐','女归吉，利贞。循序渐进，戒急戒躁，步步稳成。'],
-  '1_3':[54,'雷泽归妹','征凶，无攸利。名分未正或急于求成，宜守分度。'],
-  '1_5':[55,'雷火丰','亨，王假之，勿忧。盛大丰盈，防盛极而衰。'],
-  '5_4':[56,'火山旅','小亨，旅贞吉。客居飘泊之象，柔顺谨慎，小事可成。'],
-  '6_6':[57,'巽为风','小亨，利有攸往。谦逊渗入，反复沟通，借势而行。'],
-  '3_3':[58,'兑为泽','亨，利贞。和悦沟通，以诚相交，防口舌是非。'],
-  '6_2':[59,'风水涣','亨，王假有庙。涣散离析，宜凝聚人心、化冰解结。'],
-  '2_3':[60,'水泽节','亨，苦节不可贞。适度节制有度，过犹不及。'],
-  '6_3':[61,'风泽中孚','豚鱼吉，利涉大川。诚信感通，由衷相待则无往不利。'],
-  '1_4':[62,'雷山小过','亨，利贞，可小事不可大事。宜谦恭小步，不宜强求大局。'],
-  '2_5':[63,'水火既济','亨小，利贞，初吉终乱。功成圆满，须防松懈生变。'],
-  '5_2':[64,'火水未济','亨，小狐汔济，濡其尾。尚未收官，最后关头尤需谨慎。']
-};
-
-const PALACE_ORDER = [7, 2, 4, 1, 6, 5, 0, 3];
-const PALACE_GEN_NAMES = ['本宫','一世','二世','三世','四世','五世','游魂','归魂'];
-
-function buildAll64Hexagrams() {
-  const list = [];
-  const byKey = {};
-  PALACE_ORDER.forEach(p => {
-    const pTri = TRIGRAMS[p];
-    let bits = [p & 1, (p >> 1) & 1, (p >> 2) & 1, p & 1, (p >> 1) & 1, (p >> 2) & 1];
-    for (let g = 0; g < 8; g++) {
-      if (g >= 1 && g <= 5) bits[g - 1] ^= 1;
-      else if (g === 6) bits[3] ^= 1;
-      else if (g === 7) { bits[0] = p & 1; bits[1] = (p >> 1) & 1; bits[2] = (p >> 2) & 1; }
-      const lower = bits[0] + (bits[1] << 1) + (bits[2] << 2);
-      const upper = bits[3] + (bits[4] << 1) + (bits[5] << 2);
-      const key = upper + '_' + lower;
-      const meta = HEX_DICT[key] || [0, '未知卦', ''];
-      const shiMap = [6, 1, 2, 3, 4, 5, 4, 3];
-      const shi = shiMap[g];
-      const ying = ((shi + 2) % 6) + 1;
-      const item = {
-        key, upper, lower,
-        seq: meta[0], name: meta[1], guaci: meta[2],
-        bits: [...bits],
-        palaceId: p, palaceName: pTri.name + '宫', palaceWx: pTri.wx,
-        genIndex: g, genName: PALACE_GEN_NAMES[g],
-        shi, ying
-      };
-      list.push(item);
-      byKey[key] = item;
-    }
-  });
-  return { list, byKey };
-}
-const HEX_DATA = buildAll64Hexagrams();
-
-function getLiuQin(palaceWx, lineWx) {
-  const rel = {
-    '木': { '木':'兄弟', '火':'子孙', '土':'妻财', '金':'官鬼', '水':'父母' },
-    '火': { '火':'兄弟', '土':'子孙', '金':'妻财', '水':'官鬼', '木':'父母' },
-    '土': { '土':'兄弟', '金':'子孙', '水':'妻财', '木':'官鬼', '火':'父母' },
-    '金': { '金':'兄弟', '水':'子孙', '木':'妻财', '火':'官鬼', '土':'父母' },
-    '水': { '水':'兄弟', '木':'子孙', '火':'妻财', '土':'官鬼', '金':'父母' }
-  };
-  return rel[palaceWx][lineWx] || '';
-}
-
-function getHexLinesDetail(hex) {
-  const lowTri = TRIGRAMS[hex.lower];
-  const upTri = TRIGRAMS[hex.upper];
-  const najia = [...lowTri.inner, ...upTri.outer];
-  return hex.bits.map((b, i) => {
-    const gz = najia[i];
-    const br = gz[1];
-    const wx = BRANCH_WX[BRANCHES.indexOf(br)];
-    return {
-      pos: i + 1,
-      bit: b,
-      gz, branch: br, wx,
-      liuqin: getLiuQin(hex.palaceWx, wx),
-      isShi: hex.shi === i + 1,
-      isYing: hex.ying === i + 1
-    };
-  });
-}
-
-// ==================== 2. IndexedDB 持久化存储 ====================
-const DB_NAME = 'CangwangV5DB';
-const DB_VER = 1;
-let dbInst = null;
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VER);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      ['books','chapters','notes','memories','hexCache','meta','footprints'].forEach(store => {
-        if (!db.objectStoreNames.contains(store)) {
-          db.createObjectStore(store, { keyPath: 'id' });
-        }
-      });
-    };
-    req.onsuccess = e => { dbInst = e.target.result; resolve(dbInst); };
-    req.onerror = e => reject(e.target.error);
-  });
-}
-
-function dbGet(store, id) {
-  return new Promise((res, rej) => {
-    const tx = dbInst.transaction(store, 'readonly');
-    const req = tx.objectStore(store).get(id);
-    req.onsuccess = () => res(req.result);
-    req.onerror = () => rej(req.error);
-  });
-}
-
-function dbGetAll(store) {
-  return new Promise((res, rej) => {
-    const tx = dbInst.transaction(store, 'readonly');
-    const req = tx.objectStore(store).getAll();
-    req.onsuccess = () => res(req.result || []);
-    req.onerror = () => rej(req.error);
-  });
-}
-
-function dbPut(store, obj) {
-  return new Promise((res, rej) => {
-    const tx = dbInst.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).put(obj);
-    req.onsuccess = () => res(req.result);
-    req.onerror = () => rej(req.error);
-  });
-}
-
-function dbDel(store, id) {
-  return new Promise((res, rej) => {
-    const tx = dbInst.transaction(store, 'readwrite');
-    const req = tx.objectStore(store).delete(id);
-    req.onsuccess = () => res();
-    req.onerror = () => rej(req.error);
-  });
-}
-
-// ==================== 3. 全局状态 ====================
-const state = {
-  mainTab: 'books',
-  category: '六爻',
-  subTab: 'shelf',
-  noteFilter: 'all',
-  atlasTab: 'bagua',
-  baguaMode: 'hou',
-  baguaSpin: true,
-  baguaSelected: 7,
-  composeUpper: null,
-  composeLower: null,
-  hexSort: 'palace',
-  hexPalaceFilter: 'all',
-  hexSearch: '',
-  currentHexKey: '7_7',
-  hexMovingSet: new Set(),
-  calYear: new Date().getFullYear(),
-  calMonth: new Date().getMonth(),
-  calSelectedDate: formatDateKey(new Date()),
-  canwuMode: 'answer',
-  chatHistory: [],
-  userScrolledUp: false,
-  isStreaming: false,
-  books: [],
-  chapters: [],
-  notes: [],
-  memories: [],
-  footprints: {},
-  studyRunningBookId: null,
-  studyStopFlag: false,
-  reader: {
-    bookId: null,
-    chapIdx: 0,
-    textMode: 'orig', // orig | modern | both
-    barsHidden: true,
-    selText: '',
-    selHexKey: null
-  },
-  tts: {
-    playing: false,
-    mode: 'modern',
-    rate: 1.0,
-    timerMin: 0,
-    timerId: null,
-    queue: [],
-    qIdx: 0
-  },
-  settings: {
-    theme: 'warm',
-    apiKey: '',
-    baseUrl: 'https://api.deepseek.com',
-    flashModel: 'deepseek-chat',
-    proModel: 'deepseek-reasoner',
-    useTier: 'flash',
-    gistToken: '',
-    gistId: '',
-    fontSize: 16.5,
-    lineHeight: 1.88,
-    paddingX: 22,
-    fontFamily: 'songhei',
-    paper: 'warm',
-    tokensIn: 0,
-    tokensOut: 0,
-    dirtySinceBackup: false,
-    lastBackupAt: ''
-  }
-};
-
-// ==================== 4. 工具函数 ====================
-function uid(prefix='id') {
-  return prefix + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 7);
-}
-
-function escapeHtml(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function formatDateKey(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.classList.remove('show'), 2600);
-}
-
-async function markDirty() {
-  state.settings.dirtySinceBackup = true;
-  document.getElementById('backupDot').classList.add('show');
-  await saveSettingsMeta();
-}
-
-async function saveSettingsMeta() {
-  await dbPut('meta', { id: 'settings', data: state.settings });
-}
-
-async function markStudyFootprint() {
-  const key = formatDateKey(new Date());
-  state.footprints[key] = (state.footprints[key] || 0) + 1;
-  await dbPut('footprints', { id: key, count: state.footprints[key] });
-}
-
-function openSheet(id) {
-  if (id === 'sheet-import') {
-    document.getElementById('importCatName').textContent = state.category;
-  }
-  document.getElementById(id).classList.add('open');
-}
-
-function closeSheet(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-function backdropClose(e, id) {
-  if (e.target.id === id) closeSheet(id);
-}
-
-function openOverlay(id) {
-  document.getElementById(id).classList.add('open');
-}
-
-function closeOverlay(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-// ==================== 5. 导航与视图切换 ====================
-function switchMainTab(tab) {
-  state.mainTab = tab;
-  document.querySelectorAll('.view-page').forEach(p => p.classList.toggle('active', p.id === 'view-' + tab));
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  if (tab === 'books') renderBooksView();
-  if (tab === 'calendar') renderCalendarView();
-  if (tab === 'atlas') renderAtlasView();
-  if (tab === 'canwu') renderCanwuHeader();
-}
-
-function renderCatStrip() {
-  const el = document.getElementById('catStrip');
-  el.innerHTML = CATEGORIES.map(c =>
-    `<button class="cat-pill ${c === state.category ? 'active' : ''}" onclick="switchCategory('${c}')">${c}</button>`
-  ).join('');
-  document.getElementById('brandSubText').textContent = state.category + '书房';
-  document.getElementById('notesTabLabel').textContent = state.category + '笔记';
-  document.getElementById('canwuHeaderSub').textContent = state.category + '专属智能体';
-}
-
-function switchCategory(cat) {
-  state.category = cat;
-  renderCatStrip();
-  renderBooksView();
-  renderCanwuHeader();
-}
-
-function switchSubTab(sub) {
-  state.subTab = sub;
-  const idx = ['shelf','study','notes'].indexOf(sub);
-  document.getElementById('subTabSlider').style.transform = `translateX(${idx * 100}%)`;
-  document.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.sub === sub));
-  renderBooksView();
-}
-
-// ==================== 6. 典籍书架 / 章节精读 / 门类笔记 ====================
-function renderBooksView() {
-  const wrap = document.getElementById('booksScrollArea');
-  const catBooks = state.books.filter(b => b.category === state.category).sort((a,b) => (b.lastReadAt || b.createdAt) - (a.lastReadAt || a.createdAt));
-
-  if (state.subTab === 'shelf') {
-    if (!catBooks.length) {
-      wrap.innerHTML = `<div class="empty-box">
-        <div style="font-size:32px;opacity:0.45;">冊</div>
-        <p>「${state.category}」书架目前为空<br/>点右上角「+」导入 PDF / TXT 古籍或粘贴章节</p>
-        <button class="btn-primary" onclick="openSheet('sheet-import')">导入第一本典籍</button>
-      </div>`;
-      return;
-    }
-    const lastReadBookId = catBooks.find(b => b.lastReadAt)?.id;
-    wrap.innerHTML = `<div class="books-grid">${catBooks.map((b, i) => {
-      const chaps = state.chapters.filter(c => c.bookId === b.id);
-      const total = Math.max(1, chaps.length);
-      const prog = Math.min(100, Math.round(((b.lastChapIdx || 0) + 1) / total * 100));
-      const studied = chaps.filter(c => c.studied).length;
-      const bg = COVER_PALETTES[i % COVER_PALETTES.length];
-      return `<div class="book-item" onclick="openReader('${b.id}')">
-        <div class="book-cover" style="background:${bg};">
-          ${b.id === lastReadBookId ? '<span class="reading-badge">在读</span>' : ''}
-          <div class="book-cover-title">${escapeHtml(b.title)}</div>
-          <div class="book-cover-foot">
-            <span>${total}章</span>
-            <span>${studied > 0 ? '已精学' + studied : b.category}</span>
-          </div>
-        </div>
-        <div class="book-meta">
-          <div class="book-name">${escapeHtml(b.title)}</div>
-          <div class="book-prog">
-            <span>已读 ${prog}%</span>
-            <span onclick="event.stopPropagation();deleteBookConfirm('${b.id}')" style="opacity:0.55;padding:0 4px;">删</span>
-          </div>
-        </div>
-      </div>`;
-    }).join('')}</div>`;
-  } else if (state.subTab === 'study') {
-    if (!catBooks.length) {
-      wrap.innerHTML = `<div class="empty-box"><p>导入典籍后，点「AI 整书逐章深度学习」<br/>参悟会一章一章啃透全书，自动整理核心主题与断法精要。</p></div>`;
-      return;
-    }
-    wrap.innerHTML = catBooks.map(b => {
-      const chaps = state.chapters.filter(c => c.bookId === b.id).sort((a,c) => a.idx - c.idx);
-      const studiedCnt = chaps.filter(c => c.studied).length;
-      const pct = chaps.length ? Math.round(studiedCnt / chaps.length * 100) : 0;
-      const isRunning = state.studyRunningBookId === b.id;
-      return `<div class="card">
-        <div class="card-head">
-          <div>
-            <div class="card-title">${escapeHtml(b.title)}</div>
-            <div style="font-size:11.5px;color:var(--text-3);margin-top:2px;">已精学 ${studiedCnt} / ${chaps.length} 章（${pct}%）</div>
-          </div>
-          ${isRunning
-            ? `<button class="btn-secondary" style="color:var(--accent);" onclick="pauseWholeBookStudy()">暂停学习</button>`
-            : `<button class="btn-primary" style="padding:7px 12px;font-size:12px;" onclick="startWholeBookStudy('${b.id}')">${studiedCnt > 0 && studiedCnt < chaps.length ? '继续逐章精学' : (studiedCnt === chaps.length && chaps.length > 0 ? '重新核校' : 'AI 整书逐章学习')}</button>`
-          }
-        </div>
-        <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
-        <div>
-          ${chaps.map(c => `<div class="study-row" onclick="openChapterStudyDetail('${c.id}')">
-            <div style="flex:1;min-width:0;">
-              <div class="study-title">${escapeHtml(c.topicTitle || c.title)}</div>
-              <div class="study-sub">${c.studied ? escapeHtml((c.essentials || '').replace(/\n/g,' ')) : '尚未深度精学，点击查看原文或单章精学'}</div>
-            </div>
-            <span class="chip ${c.studied ? 'accent' : ''}">${c.studied ? '已精学' : '待学'}</span>
-          </div>`).join('')}
-        </div>
-      </div>`;
-    }).join('');
-  } else {
-    const catNotes = state.notes.filter(n => n.category === state.category).sort((a,b) => b.createdAt - a.createdAt);
-    const filtered = state.noteFilter === 'all' ? catNotes : catNotes.filter(n => n.type === state.noteFilter);
-    wrap.innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;">
-        <div style="display:flex;gap:6px;">
-          <button class="chip ${state.noteFilter==='all'?'accent':''}" onclick="setNoteFilter('all')">全部</button>
-          <button class="chip ${state.noteFilter==='excerpt'?'accent':''}" onclick="setNoteFilter('excerpt')">经典摘录</button>
-          <button class="chip ${state.noteFilter==='case'?'accent':''}" onclick="setNoteFilter('case')">实战案例</button>
-        </div>
-        <div style="display:flex;gap:6px;">
-          ${catNotes.length ? `<button class="chip" onclick="randomReviewNote()">随机温习</button>` : ''}
-          <button class="chip accent" onclick="openNoteSheet()">+ 记一笔</button>
-        </div>
-      </div>
-      ${!filtered.length ? `<div class="empty-box"><p>还没有「${state.category}笔记」<br/>看书时划词摘录，或点右上角记录实战卦例复盘。</p></div>` : filtered.map(n => `
-        <div class="card">
-          <div class="card-head" style="margin-bottom:6px;">
-            <div class="card-title" style="font-size:14.5px;">${escapeHtml(n.title)}</div>
-            <div style="display:flex;gap:5px;align-items:center;">
-              <span class="chip ${n.type==='case'?'accent':''}">${n.type==='case' ? (n.status==='verified'?'已应验':'待验证') : '经典摘录'}</span>
-            </div>
-          </div>
-          <div style="font-size:13.5px;line-height:1.65;color:var(--text-2);white-space:pre-wrap;">${escapeHtml(n.content)}</div>
-          ${n.outcome ? `<div style="margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--bg);font-size:12.5px;"><strong>实际应验：</strong>${escapeHtml(n.outcome)}</div>` : ''}
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:1px solid var(--border);font-size:11.5px;color:var(--text-3);">
-            <span>${n.source ? `<span class="ref-jump" onclick="jumpBySourceText('${escapeHtml(n.source)}')">${escapeHtml(n.source)}</span>` : formatDateKey(new Date(n.createdAt))}</span>
-            <div style="display:flex;gap:8px;">
-              ${n.type==='case' ? `<button class="chip accent" style="padding:3px 8px;font-size:11px;" onclick="reviewCaseWithCanwu('${n.id}')">让参悟复盘</button>` : ''}
-              <button onclick="editNote('${n.id}')" style="font-size:12px;color:var(--text-2);">编辑</button>
-              <button onclick="deleteNote('${n.id}')" style="font-size:12px;color:var(--text-3);">删除</button>
-            </div>
-          </div>
-        </div>
-      `).join('')}
-    `;
-  }
-}
-
-function setNoteFilter(f) {
-  state.noteFilter = f;
-  renderBooksView();
-}
-
-function randomReviewNote() {
-  const list = state.notes.filter(n => n.category === state.category);
-  if (!list.length) return;
-  const pick = list[Math.floor(Math.random() * list.length)];
-  showToast('温故：' + pick.title);
-  openNoteSheet(pick);
-}
-
-// ==================== 7. 导入书籍（支持 PDF / TXT / MD / 粘贴） ====================
-function splitChapters(rawText, bookTitle) {
-  const clean = rawText.replace(/\r\n/g, '\n').trim();
-  const re = /(?:^|\n)\s*((?:第[零一二三四五六七八九十百千0-9]+[章节卷篇回节]|卷[零一二三四五六七八九十0-9]+|【[^】]{2,28}】)[^\n]{0,36})/g;
-  const matches = [];
-  let m;
-  while ((m = re.exec(clean)) !== null) {
-    matches.push({ title: m[1].trim(), index: m.index });
-  }
-  const chapters = [];
-  if (matches.length >= 2) {
-    if (matches[0].index > 120) {
-      chapters.push({ title: '序言 / 卷首', content: clean.slice(0, matches[0].index).trim() });
-    }
-    for (let i = 0; i < matches.length; i++) {
-      const start = matches[i].index;
-      const end = i + 1 < matches.length ? matches[i + 1].index : clean.length;
-      const body = clean.slice(start, end).trim();
-      if (body.length > 20) chapters.push({ title: matches[i].title, content: body });
-    }
-  } else {
-    const chunkSize = 2400;
-    let part = 1;
-    for (let i = 0; i < clean.length; i += chunkSize) {
-      chapters.push({ title: `${bookTitle} · 第${part}节`, content: clean.slice(i, i + chunkSize).trim() });
-      part++;
-    }
-  }
-  return chapters.length ? chapters : [{ title: '正文', content: clean }];
-}
-
-async function saveNewBook(title, rawText) {
-  const bookId = uid('bk');
-  const chapsRaw = splitChapters(rawText, title);
-  const book = {
-    id: bookId,
-    title: title.trim() || '未命名典籍',
-    category: state.category,
-    createdAt: Date.now(),
-    lastReadAt: 0,
-    lastChapIdx: 0
-  };
-  await dbPut('books', book);
-  state.books.push(book);
-  for (let i = 0; i < chapsRaw.length; i++) {
-    const ch = {
-      id: uid('ch'),
-      bookId,
-      idx: i,
-      title: chapsRaw[i].title,
-      topicTitle: '',
-      content: chapsRaw[i].content,
-      modernText: '',
-      essentials: '',
-      quotes: '',
-      studied: false
-    };
-    await dbPut('chapters', ch);
-    state.chapters.push(ch);
-  }
-  await markDirty();
-  closeSheet('sheet-import');
-  renderBooksView();
-  showToast(`已导入《${book.title}》，共切分 ${chapsRaw.length} 章`);
-}
-
-async function handleBookFileSelect(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const title = file.name.replace(/\.(pdf|txt|md)$/i, '');
-  if (/\.pdf$/i.test(file.name)) {
-    showToast('正在解析 PDF 文本，请稍候...');
-    try {
-      await loadPdfJs();
-      const buf = await file.arrayBuffer();
-      const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
-      let fullText = '';
-      for (let p = 1; p <= pdf.numPages; p++) {
-        const page = await pdf.getPage(p);
-        const tc = await page.getTextContent();
-        fullText += tc.items.map(it => it.str).join('') + '\n';
-      }
-      if (fullText.trim().length < 20) {
-        showToast('该 PDF 似乎是纯图片扫描件，建议先用 OCR 转成文字再粘贴导入');
-        return;
-      }
-      await saveNewBook(title, fullText);
-    } catch (err) {
-      showToast('PDF 解析组件加载失败，请联网重试或改用 TXT / 直接粘贴');
-    }
-  } else {
-    const text = await file.text();
-    await saveNewBook(title, text);
-  }
-  e.target.value = '';
-}
-
-function loadPdfJs() {
-  if (window.pdfjsLib) return Promise.resolve();
-  return new Promise((res, rej) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    s.onload = () => {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      res();
-    };
-    s.onerror = rej;
-    document.head.appendChild(s);
-  });
-}
-
-async function importPastedBook() {
-  const title = document.getElementById('pasteBookTitle').value.trim();
-  const content = document.getElementById('pasteBookContent').value.trim();
-  if (!content) return showToast('请先粘贴典籍内容');
-  await saveNewBook(title || '自录典籍', content);
-  document.getElementById('pasteBookTitle').value = '';
-  document.getElementById('pasteBookContent').value = '';
-}
-
-async function deleteBookConfirm(bookId) {
-  const b = state.books.find(x => x.id === bookId);
-  if (!b || !confirm(`确定删除《${b.title}》及其全部精读记录吗？`)) return;
-  await dbDel('books', bookId);
-  const chs = state.chapters.filter(c => c.bookId === bookId);
-  for (const c of chs) await dbDel('chapters', c.id);
-  state.books = state.books.filter(x => x.id !== bookId);
-  state.chapters = state.chapters.filter(c => c.bookId !== bookId);
-  await markDirty();
-  renderBooksView();
-  showToast('已删除');
-}
-
-// ==================== 8. 沉浸阅读器 & 听书（Web Speech） ====================
-function openReader(bookId, chapIdx) {
-  const book = state.books.find(b => b.id === bookId);
-  if (!book) return;
-  state.reader.bookId = bookId;
-  const chaps = state.chapters.filter(c => c.bookId === bookId).sort((a,b) => a.idx - b.idx);
-  state.reader.chapIdx = typeof chapIdx === 'number' ? Math.max(0, Math.min(chaps.length - 1, chapIdx)) : (book.lastChapIdx || 0);
-  state.reader.barsHidden = true;
-  document.getElementById('readerOverlay').classList.add('bars-hidden');
-  applyTypoSettings();
-  renderReaderChapter();
-  openOverlay('readerOverlay');
-  markStudyFootprint();
-}
-
-function closeReader() {
-  stopTts();
-  closeOverlay('readerOverlay');
-  document.getElementById('selPopover').classList.remove('show');
-  renderBooksView();
-}
-
-async function renderReaderChapter() {
-  const book = state.books.find(b => b.id === state.reader.bookId);
-  const chaps = state.chapters.filter(c => c.bookId === state.reader.bookId).sort((a,b) => a.idx - b.idx);
-  const chap = chaps[state.reader.chapIdx];
-  if (!book || !chap) return;
-  book.lastChapIdx = state.reader.chapIdx;
-  book.lastReadAt = Date.now();
-  await dbPut('books', book);
-
-  document.getElementById('readerBookTitle').textContent = book.title;
-  document.getElementById('readerChapTitle').textContent = chap.topicTitle || chap.title;
-  document.getElementById('readerFootChap').textContent = chap.topicTitle || chap.title;
-  document.getElementById('readerFootProg').textContent = `${state.reader.chapIdx + 1} / ${chaps.length}`;
-  const range = document.getElementById('readerRange');
-  range.max = Math.max(0, chaps.length - 1);
-  range.value = state.reader.chapIdx;
-  document.getElementById('readerRangeText').textContent = `${state.reader.chapIdx + 1}/${chaps.length}`;
-  document.getElementById('readerModeBtn').textContent = state.reader.textMode === 'orig' ? '原文' : (state.reader.textMode === 'modern' ? '白话' : '对照');
-
-  const body = document.getElementById('readerTextBody');
-  const origParas = chap.content.split(/\n+/).map(s => s.trim()).filter(Boolean);
-  const modParas = (chap.modernText || '').split(/\n+/).map(s => s.trim()).filter(Boolean);
-
-  let html = `<h2 style="font-size:1.25em;margin:0 0 18px;line-height:1.4;">${escapeHtml(chap.topicTitle || chap.title)}</h2>`;
-  if (state.reader.textMode === 'modern') {
-    if (!modParas.length) {
-      html += `<div class="card" style="text-align:center;margin:20px 0;"><p style="font-size:13.5px;color:var(--text-2);margin:0 0 12px;">本章尚未生成现代白话译文</p><button class="btn-primary" onclick="translateCurrentChapter()">立即用 AI 翻译本章白话</button></div>`;
-    } else {
-      html += modParas.map((p, i) => `<p class="reader-para" data-pidx="${i}">${escapeHtml(p)}</p>`).join('');
-    }
-  } else if (state.reader.textMode === 'both') {
-    html += origParas.map((p, i) => `
-      <p class="reader-para" data-pidx="${i}">${escapeHtml(p)}</p>
-      ${modParas[i] ? `<div class="reader-modern-block">${escapeHtml(modParas[i])}</div>` : ''}
-    `).join('');
-    if (!modParas.length) {
-      html += `<div style="text-align:center;margin:14px 0;"><button class="btn-secondary" onclick="translateCurrentChapter()">一键生成本章白话对照</button></div>`;
-    }
-  } else {
-    html += origParas.map((p, i) => `<p class="reader-para" data-pidx="${i}">${escapeHtml(p)}</p>`).join('');
-  }
-  body.innerHTML = html;
-  document.getElementById('readerContentWrap').scrollTop = 0;
-}
-
-function handleReaderTap(e) {
-  const sel = window.getSelection ? window.getSelection().toString().trim() : '';
-  if (sel.length >= 2) {
-    showSelectionPopover(sel);
-    return;
-  }
-  document.getElementById('selPopover').classList.remove('show');
-  if (e.target.closest('button')) return;
-  state.reader.barsHidden = !state.reader.barsHidden;
-  document.getElementById('readerOverlay').classList.toggle('bars-hidden', state.reader.barsHidden);
-}
-
-function showSelectionPopover(text) {
-  state.reader.selText = text;
-  const matchedHex = HEX_DATA.list.find(h => text.includes(h.name) || (h.name.length >= 3 && text.includes(h.name.slice(-2))));
-  state.reader.selHexKey = matchedHex ? matchedHex.key : null;
-  document.getElementById('selHexBtn').style.display = matchedHex ? 'inline-block' : 'none';
-  document.getElementById('selPopover').classList.add('show');
-}
-
-function selActionAsk() {
-  const txt = state.reader.selText;
-  document.getElementById('selPopover').classList.remove('show');
-  closeReader();
-  switchMainTab('canwu');
-  document.getElementById('chatInput').value = `结合书库详细讲讲这段话的实战含义和成立前提：「${txt}」`;
-  sendCanwuMessage();
-}
-
-function selActionNote() {
-  const book = state.books.find(b => b.id === state.reader.bookId);
-  const txt = state.reader.selText;
-  document.getElementById('selPopover').classList.remove('show');
-  openNoteSheet({
-    type: 'excerpt',
-    title: txt.slice(0, 18),
-    content: txt,
-    source: book ? `《${book.title}》第${state.reader.chapIdx + 1}章` : ''
-  });
-}
-
-function selActionHex() {
-  document.getElementById('selPopover').classList.remove('show');
-  if (state.reader.selHexKey) openHexDetail(state.reader.selHexKey);
-}
-
-function cycleReaderTextMode() {
-  const order = ['orig', 'modern', 'both'];
-  state.reader.textMode = order[(order.indexOf(state.reader.textMode) + 1) % 3];
-  renderReaderChapter();
-}
-
-function readerStepChapter(delta) {
-  stopTts();
-  const chaps = state.chapters.filter(c => c.bookId === state.reader.bookId);
-  const next = state.reader.chapIdx + delta;
-  if (next < 0 || next >= chaps.length) return showToast(delta < 0 ? '已经是第一章了' : '已经是最后一章了');
-  state.reader.chapIdx = next;
-  renderReaderChapter();
-}
-
-function readerJumpChapter(idx) {
-  stopTts();
-  state.reader.chapIdx = idx;
-  renderReaderChapter();
-}
-
-function openReaderToc() {
-  const chaps = state.chapters.filter(c => c.bookId === state.reader.bookId).sort((a,b) => a.idx - b.idx);
-  document.getElementById('readerTocList').innerHTML = chaps.map((c, i) => `
-    <div class="study-row" onclick="readerJumpChapter(${i});closeSheet('sheet-toc')">
-      <span style="font-size:13.5px;${i===state.reader.chapIdx?'color:var(--accent);font-weight:700;':''}">${escapeHtml(c.topicTitle || c.title)}</span>
-      ${c.studied ? '<span class="chip accent">已精学</span>' : ''}
-    </div>
-  `).join('');
-  openSheet('sheet-toc');
-}
-
-function applyTypoSettings() {
-  const s = state.settings;
-  const ov = document.getElementById('readerOverlay');
-  ov.setAttribute('data-paper', s.paper || 'warm');
-  const wrap = document.getElementById('readerContentWrap');
-  wrap.style.paddingLeft = (s.paddingX || 22) + 'px';
-  wrap.style.paddingRight = (s.paddingX || 22) + 'px';
-  const body = document.getElementById('readerTextBody');
-  body.style.fontSize = (s.fontSize || 16.5) + 'px';
-  body.style.lineHeight = s.lineHeight || 1.88;
-  const fontMap = {
-    songhei: '-apple-system, "PingFang SC", "Noto Sans SC", sans-serif',
-    song: '"Songti SC", "STSong", "Noto Serif SC", Georgia, serif',
-    hei: '"PingFang SC", "Microsoft YaHei", sans-serif',
-    kai: '"Kaiti SC", "STKaiti", "KaiTi", serif'
-  };
-  body.style.fontFamily = fontMap[s.fontFamily || 'songhei'];
-  document.getElementById('typoSizeVal').textContent = s.fontSize || 16.5;
-  document.getElementById('typoSizeRange').value = s.fontSize || 16.5;
-}
-
-async function updateTypo(key, val) {
-  state.settings[key] = val;
-  applyTypoSettings();
-  await saveSettingsMeta();
-}
-
-// 听书朗读（分句朗读，兼容 iOS Safari）
-function setTtsOpt(k, v) {
-  state.tts[k] = v;
-  document.getElementById('ttsRateLabel').textContent = state.tts.rate + 'x';
-  showToast(k === 'rate' ? `语速已设为 ${v} 倍` : '已切换听书内容模式');
-  if (state.tts.playing) { stopTts(); toggleTtsPlay(); }
-}
-
-function setTtsTimer(min) {
-  clearTimeout(state.tts.timerId);
-  state.tts.timerMin = min;
-  if (min > 0) {
-    state.tts.timerId = setTimeout(() => { stopTts(); showToast('睡前定时已到，自动停止听书'); }, min * 60000);
-    showToast(`将在 ${min} 分钟后自动停止`);
-  } else {
-    showToast('已关闭睡前定时');
-  }
-}
-
-function toggleTtsPlay(customText) {
-  if (!('speechSynthesis' in window)) return showToast('当前浏览器不支持语音朗读');
-  if (state.tts.playing && !customText) {
-    stopTts();
-    return;
-  }
-  stopTts();
-  let texts = [];
-  if (customText) {
-    texts = customText.split(/\n+/).filter(Boolean);
-  } else {
-    const chaps = state.chapters.filter(c => c.bookId === state.reader.bookId).sort((a,b) => a.idx - b.idx);
-    const chap = chaps[state.reader.chapIdx];
-    if (!chap) return;
-    const orig = chap.content.split(/\n+/).filter(Boolean);
-    const mod = (chap.modernText || '').split(/\n+/).filter(Boolean);
-    if (state.tts.mode === 'modern' && mod.length) texts = mod;
-    else if (state.tts.mode === 'both' && mod.length) {
-      orig.forEach((p, i) => { texts.push(p); if (mod[i]) texts.push('白话解说：' + mod[i]); });
-    } else {
-      texts = orig;
-    }
-  }
-  if (!texts.length) return showToast('本章暂无可朗读文本');
-  state.tts.queue = texts;
-  state.tts.qIdx = 0;
-  state.tts.playing = true;
-  document.getElementById('ttsPlayBtn').textContent = '暂停朗读';
-  speakNextChunk();
-  closeSheet('sheet-tts');
-}
-
-function speakNextChunk() {
-  if (!state.tts.playing || state.tts.qIdx >= state.tts.queue.length) {
-    stopTts();
-    return;
-  }
-  const idx = state.tts.qIdx;
-  document.querySelectorAll('.reader-para').forEach((el, i) => {
-    el.classList.toggle('speaking', i === idx);
-    if (i === idx) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  });
-  const utter = new SpeechSynthesisUtterance(state.tts.queue[idx]);
-  utter.lang = 'zh-CN';
-  utter.rate = state.tts.rate || 1.0;
-  utter.onend = () => { state.tts.qIdx++; speakNextChunk(); };
-  utter.onerror = () => { stopTts(); };
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utter);
-}
-
-function stopTts() {
-  state.tts.playing = false;
-  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-  document.querySelectorAll('.reader-para.speaking').forEach(el => el.classList.remove('speaking'));
-  const btn = document.getElementById('ttsPlayBtn');
-  if (btn) btn.textContent = '开始朗读本章';
-}
-
-// ==================== 9. AI 整书逐章深度学习 & 单章翻译 ====================
-function ensureApiKey() {
-  if (!state.settings.apiKey) {
-    showToast('请先在设置中填写 DeepSeek API Key');
-    openSettings();
-    return false;
-  }
-  return true;
-}
-
-function isOffPeakHour() {
-  const h = new Date().getHours();
-  return (h >= 0 && h < 8);
-}
-
-async function callLLM(messages, { stream = false, tier = null, onChunk = null } = {}) {
-  const s = state.settings;
-  const model = (tier || s.useTier) === 'pro' ? (s.proModel || 'deepseek-reasoner') : (s.flashModel || 'deepseek-chat');
-  const base = (s.baseUrl || 'https://api.deepseek.com').replace(/\/$/, '');
-  const resp = await fetch(`${base}/chat/completions`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${s.apiKey}` },
-    body: JSON.stringify({ model, messages, stream, temperature: 0.45 })
-  });
-  if (!resp.ok) {
-    const errText = await resp.text();
-    throw new Error(`接口请求失败 (${resp.status})：${errText.slice(0, 100)}`);
-  }
-  if (!stream) {
-    const data = await resp.json();
-    const content = data.choices?.[0]?.message?.content || '';
-    if (data.usage) {
-      s.tokensIn += data.usage.prompt_tokens || 0;
-      s.tokensOut += data.usage.completion_tokens || 0;
-      saveSettingsMeta();
-    }
-    return content;
-  }
-  const reader = resp.body.getReader();
-  const dec = new TextDecoder();
-  let full = '';
-  let buf = '';
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-    const lines = buf.split('\n');
-    buf = lines.pop() || '';
-    for (const line of lines) {
-      const t = line.trim();
-      if (!t.startsWith('data:')) continue;
-      const payload = t.slice(5).trim();
-      if (payload === '[DONE]') continue;
-      try {
-        const json = JSON.parse(payload);
-        const delta = json.choices?.[0]?.delta?.content || '';
-        if (delta) {
-          full += delta;
-          if (onChunk) onChunk(full);
-        }
-      } catch (e) {}
-    }
-  }
-  s.tokensIn += Math.round(JSON.stringify(messages).length * 0.6);
-  s.tokensOut += Math.round(full.length * 0.8);
-  saveSettingsMeta();
-  return full;
-}
-
-async function studySingleChapter(chap, book) {
-  const prompt = `你是精通「${book.category}」的古籍精读专家。请深度研读以下《${book.title}》的章节内容，并严格返回 JSON（不要 Markdown 代码块包裹，直接输出 JSON 对象）：
-{
-  "topicTitle": "清晰明了的主题标题（例如：第一章：动爻与日月的生克关系）",
-  "essentials": "用 1. 2. 3. 4. 编号清单提炼核心实战规律、成立前提与例外反转，重点词用【】括起来，禁止使用星号",
-  "quotes": "摘抄本章最核心的 2 到 4 句原书断语，每句一行",
-  "modernText": "通俗流畅、忠实原意的现代大白话逐段译文"
-}
-
-章节原题：${chap.title}
-章节原文：
-${chap.content.slice(0, 6500)}`;
-
-  const raw = await callLLM([{ role: 'user', content: prompt }], { tier: 'flash' });
-  const match = raw.match(/\{[\s\S]*\}/);
-  const parsed = JSON.parse(match ? match[0] : raw);
-  chap.topicTitle = parsed.topicTitle || chap.title;
-  chap.essentials = parsed.essentials || '';
-  chap.quotes = parsed.quotes || '';
-  chap.modernText = parsed.modernText || chap.modernText || '';
-  chap.studied = true;
-  await dbPut('chapters', chap);
-  await markDirty();
-  await markStudyFootprint();
-}
-
-async function startWholeBookStudy(bookId) {
-  if (!ensureApiKey()) return;
-  const book = state.books.find(b => b.id === bookId);
-  const chaps = state.chapters.filter(c => c.bookId === bookId).sort((a,b) => a.idx - b.idx);
-  const todo = chaps.filter(c => !c.studied);
-  if (!todo.length) return showToast('本书已全部精学完成');
-  const peakTip = isOffPeakHour() ? '当前为闲时半价时段，最省费！' : '提示：凌晨0点至8点通常为API闲时半价时段。';
-  if (!confirm(`即将用极速省钱模型逐章精学《${book.title}》剩余 ${todo.length} 章（预计约 ${(todo.length * 0.15).toFixed(1)} 分钟，自动跳过已学章节）。\n${peakTip}\n是否开始？`)) return;
-
-  state.studyRunningBookId = bookId;
-  state.studyStopFlag = false;
-  renderBooksView();
-
-  for (const ch of todo) {
-    if (state.studyStopFlag) break;
-    try {
-      showToast(`正在精学：${ch.title}`);
-      await studySingleChapter(ch, book);
-      renderBooksView();
-    } catch (e) {
-      showToast('本章学习出错：' + e.message);
-      break;
-    }
-  }
-  state.studyRunningBookId = null;
-  renderBooksView();
-  showToast(state.studyStopFlag ? '已暂停，进度已自动保存' : `《${book.title}》逐章精学完成！`);
-}
-
-function pauseWholeBookStudy() {
-  state.studyStopFlag = true;
-  showToast('本章节完成后自动暂停...');
-}
-
-async function translateCurrentChapter() {
-  if (!ensureApiKey()) return;
-  const book = state.books.find(b => b.id === state.reader.bookId);
-  const chaps = state.chapters.filter(c => c.bookId === state.reader.bookId).sort((a,b) => a.idx - b.idx);
-  const chap = chaps[state.reader.chapIdx];
-  if (!chap) return;
-  showToast('正在翻译本章并同步提炼精要...');
-  try {
-    await studySingleChapter(chap, book);
-    state.reader.textMode = 'both';
-    renderReaderChapter();
-    showToast('本章白话与精读要点已永久缓存');
-  } catch (e) {
-    showToast('翻译失败：' + e.message);
-  }
-}
-
-function openChapterStudyDetail(chapId) {
-  const chap = state.chapters.find(c => c.id === chapId);
-  if (!chap) return;
-  const book = state.books.find(b => b.id === chap.bookId);
-  document.getElementById('cdHeaderTitle').textContent = book ? book.title : '章节精读';
-  document.getElementById('cdJumpBookBtn').onclick = () => {
-    closeOverlay('chapterDetailOverlay');
-    openReader(chap.bookId, chap.idx);
-  };
-  document.getElementById('cdBody').innerHTML = `
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title">${escapeHtml(chap.topicTitle || chap.title)}</div>
-        ${!chap.studied ? `<button class="chip accent" onclick="studyOneFromDetail('${chap.id}')">单章精学</button>` : `<button class="chip accent" onclick="listenChapterStudy('${chap.id}')">听本章精要</button>`}
-      </div>
-      ${chap.studied ? `
-        <div style="font-size:14px;line-height:1.75;white-space:pre-wrap;">${formatRichText(chap.essentials)}</div>
-        ${chap.quotes ? `<div style="margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--bg);font-size:13px;line-height:1.65;">
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
-            <strong>原书核心金句</strong>
-            <button class="chip accent" style="padding:2px 8px;font-size:11px;" onclick="saveQuotesToNote('${chap.id}')">存进笔记</button>
-          </div>
-          <div style="white-space:pre-wrap;color:var(--text-2);">${escapeHtml(chap.quotes)}</div>
-        </div>` : ''}
-      ` : `<p style="font-size:13px;color:var(--text-3);margin:0;">本章尚未精学，点右上角「单章精学」即可生成重点主题、1234 断法精要与白话译文。</p>`}
-    </div>
-    ${chap.modernText ? `<div class="card"><div class="card-title" style="margin-bottom:8px;">现代白话译文</div><div style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--text);">${escapeHtml(chap.modernText)}</div></div>` : ''}
-    <div class="card"><div class="card-title" style="margin-bottom:8px;">本章完整原文</div><div style="font-size:14px;line-height:1.8;white-space:pre-wrap;color:var(--text-2);">${escapeHtml(chap.content)}</div></div>
-  `;
-  openOverlay('chapterDetailOverlay');
-}
-
-async function studyOneFromDetail(chapId) {
-  if (!ensureApiKey()) return;
-  const chap = state.chapters.find(c => c.id === chapId);
-  const book = state.books.find(b => b.id === chap.bookId);
-  showToast('正在深度研读本章...');
-  try {
-    await studySingleChapter(chap, book);
-    openChapterStudyDetail(chapId);
-    renderBooksView();
-  } catch (e) {
-    showToast('精学失败：' + e.message);
-  }
-}
-
-function listenChapterStudy(chapId) {
-  const chap = state.chapters.find(c => c.id === chapId);
-  if (!chap) return;
-  toggleTtsPlay((chap.topicTitle || chap.title) + '\n' + (chap.essentials || '') + '\n' + (chap.modernText || chap.content));
-}
-
-function saveQuotesToNote(chapId) {
-  const chap = state.chapters.find(c => c.id === chapId);
-  const book = state.books.find(b => b.id === chap.bookId);
-  openNoteSheet({
-    type: 'excerpt',
-    title: chap.topicTitle || chap.title,
-    content: (chap.quotes || '') + '\n\n【精要】\n' + (chap.essentials || ''),
-    source: `《${book.title}》第${chap.idx + 1}章`
-  });
-}
-
-// ==================== 10. 门类笔记与实战复盘 ====================
-let editingNoteId = null;
-
-function openNoteSheet(preset) {
-  editingNoteId = preset && preset.id ? preset.id : null;
-  document.getElementById('noteSheetCat').textContent = state.category;
-  document.getElementById('noteTypeInput').value = preset?.type || 'excerpt';
-  document.getElementById('noteTitleInput').value = preset?.title || '';
-  document.getElementById('noteContentInput').value = preset?.content || '';
-  document.getElementById('noteStatusInput').value = preset?.status || 'pending';
-  document.getElementById('noteOutcomeInput').value = preset?.outcome || '';
-  document.getElementById('noteSourceInput').value = preset?.source || '';
-  toggleCaseFields();
-  openSheet('sheet-note');
-}
-
-function toggleCaseFields() {
-  const isCase = document.getElementById('noteTypeInput').value === 'case';
-  document.getElementById('caseExtraFields').style.display = isCase ? 'block' : 'none';
-}
-
-function editNote(id) {
-  const n = state.notes.find(x => x.id === id);
-  if (n) openNoteSheet(n);
-}
-
-async function saveNoteFromSheet() {
-  const title = document.getElementById('noteTitleInput').value.trim();
-  const content = document.getElementById('noteContentInput').value.trim();
-  if (!title && !content) return showToast('请填写笔记内容');
-  const note = {
-    id: editingNoteId || uid('nt'),
-    category: state.category,
-    type: document.getElementById('noteTypeInput').value,
-    title: title || content.slice(0, 16),
-    content,
-    status: document.getElementById('noteStatusInput').value,
-    outcome: document.getElementById('noteOutcomeInput').value.trim(),
-    source: document.getElementById('noteSourceInput').value.trim(),
-    createdAt: editingNoteId ? (state.notes.find(x => x.id === editingNoteId)?.createdAt || Date.now()) : Date.now()
-  };
-  await dbPut('notes', note);
-  state.notes = state.notes.filter(x => x.id !== note.id);
-  state.notes.push(note);
-  await markDirty();
-  closeSheet('sheet-note');
-  renderBooksView();
-  showToast('已存入' + state.category + '笔记');
-}
-
-async function deleteNote(id) {
-  if (!confirm('确认删除这条笔记？')) return;
-  await dbDel('notes', id);
-  state.notes = state.notes.filter(x => x.id !== id);
-  await markDirty();
-  renderBooksView();
-}
-
-async function reviewCaseWithCanwu(noteId) {
-  if (!ensureApiKey()) return;
-  const n = state.notes.find(x => x.id === noteId);
-  if (!n) return;
-  if (!n.outcome) {
-    showToast('先补充「实际应验结果」再复盘更准哦');
-    editNote(noteId);
-    return;
-  }
-  switchMainTab('canwu');
-  const q = `请帮我复盘这个${state.category}实战案例并提炼一条永久纠偏铁律：\n【案例】${n.title}\n【当时记录与判断】${n.content}\n【实际应验结果】${n.outcome}\n请按 1. 2. 3. 4. 指出哪里断准了、哪里看漏了，并在最后用【铁律提炼：...】总结一句可存入长期记忆的规律。`;
-  document.getElementById('chatInput').value = q;
-  sendCanwuMessage();
-}
-
-function jumpBySourceText(src) {
-  const m = src.match(/《([^》]+)》第(\d+)章/);
-  if (!m) return;
-  const book = state.books.find(b => b.title.includes(m[1]) || m[1].includes(b.title));
-  if (book) {
-    openReader(book.id, Math.max(0, Number(m[2]) - 1));
-  } else {
-    showToast('当前书架未找到《' + m[1] + '》');
-  }
-}
-
-// ==================== 11. 学习型干支日历 ====================
-function getDayGanZhiIndex(dateObj) {
-  // 基准：2026-11-26 为 甲辰日（六十甲子索引 40）
-  const utcNow = Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
-  const utcBase = Date.UTC(2026, 10, 26);
-  const diffDays = Math.round((utcNow - utcBase) / 86400000);
-  return ((40 + diffDays) % 60 + 60) % 60;
-}
-
-function getFourPillars(dateObj) {
-  const y = dateObj.getFullYear();
-  const m = dateObj.getMonth() + 1;
-  const d = dateObj.getDate();
-  const h = dateObj.getHours();
-
-  // 节气近似交节日期（立春2/4起寅月）
-  const jieBoundaries = [
-    [1,6,11],[2,4,0],[3,6,1],[4,5,2],[5,6,3],[6,6,4],
-    [7,7,5],[8,8,6],[9,8,7],[10,8,8],[11,7,9],[12,7,10]
-  ];
-  const isBeforeLiChun = (m === 1) || (m === 2 && d < 4);
-  const baziYear = isBeforeLiChun ? y - 1 : y;
-  const yIdx = ((baziYear - 4) % 60 + 60) % 60;
-  const yStem = yIdx % 10;
-  const yBranch = yIdx % 12;
-
-  let mOffset = 10; // 子月默认
-  for (let i = 0; i < jieBoundaries.length; i++) {
-    const [jm, jd, off] = jieBoundaries[i];
-    if (m > jm || (m === jm && d >= jd)) mOffset = off;
-  }
-  const mBranch = (2 + mOffset) % 12; // 寅=2
-  const tigerStart = [2,4,6,8,0][yStem % 5];
-  const mStem = (tigerStart + mOffset) % 10;
-
-  const dIdx = getDayGanZhiIndex(dateObj);
-  const dStem = dIdx % 10;
-  const dBranch = dIdx % 12;
-
-  const hBranch = Math.floor(((h + 1) % 24) / 2);
-  const ratStart = [0,2,4,6,8][dStem % 5];
-  const hStem = (ratStart + hBranch) % 10;
-
-  const k1 = (dBranch - dStem + 22) % 12;
-  const k2 = (k1 + 1) % 12;
-
-  return {
-    year:  { s: STEMS[yStem], b: BRANCHES[yBranch], swx: STEM_WX[yStem], bwx: BRANCH_WX[yBranch] },
-    month: { s: STEMS[mStem], b: BRANCHES[mBranch], swx: STEM_WX[mStem], bwx: BRANCH_WX[mBranch] },
-    day:   { s: STEMS[dStem], b: BRANCHES[dBranch], swx: STEM_WX[dStem], bwx: BRANCH_WX[dBranch] },
-    hour:  { s: STEMS[hStem], b: BRANCHES[hBranch], swx: STEM_WX[hStem], bwx: BRANCH_WX[hBranch] },
-    xunkong: BRANCHES[k1] + BRANCHES[k2]
-  };
-}
-
-function getLunarLabel(dateObj) {
-  try {
-    return new Intl.DateTimeFormat('zh-CN-u-ca-chinese', { month: 'long', day: 'numeric' }).format(dateObj);
-  } catch (e) {
-    return '';
-  }
-}
-
-function renderCalendarView() {
-  const wrap = document.getElementById('calendarScrollArea');
-  const y = state.calYear, m = state.calMonth;
-  const firstDay = new Date(y, m, 1);
-  const startDow = firstDay.getDay();
-  const daysInMonth = new Date(y, m + 1, 0).getDate();
-  const prevDays = new Date(y, m, 0).getDate();
-  const todayKey = formatDateKey(new Date());
-
-  let cells = '';
-  for (let i = startDow - 1; i >= 0; i--) {
-    const dt = new Date(y, m - 1, prevDays - i);
-    const gz = getDayGanZhiIndex(dt);
-    cells += `<div class="cal-cell other"><span class="cal-day-num">${prevDays - i}</span><span class="cal-gz">${STEMS[gz%10]+BRANCHES[gz%12]}</span></div>`;
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dt = new Date(y, m, d);
-    const key = formatDateKey(dt);
-    const gz = getDayGanZhiIndex(dt);
-    const isSel = key === state.calSelectedDate;
-    const isToday = key === todayKey;
-    const studied = state.footprints[key] > 0;
-    cells += `<div class="cal-cell ${isSel?'selected':''} ${isToday?'today':''}" onclick="selectCalDate('${key}')">
-      <span class="cal-day-num">${d}</span>
-      <span class="cal-gz">${STEMS[gz%10]+BRANCHES[gz%12]}</span>
-      ${studied ? '<span class="cal-study-dot"></span>' : ''}
-    </div>`;
-  }
-
-  const [sy, sm, sd] = state.calSelectedDate.split('-').map(Number);
-  const selDt = new Date(sy, sm - 1, sd, new Date().getHours(), new Date().getMinutes());
-  const fp = getFourPillars(selDt);
-  const lunarStr = getLunarLabel(selDt);
-  const mb = fp.month.b, db = fp.day.b;
-  let relTip = `月建 ${mb}（${fp.month.bwx}）与日辰 ${db}（${fp.day.bwx}）`;
-  if (LIU_CHONG[mb] === db) relTip += '：日月相冲（留意暗动与月破转折）';
-  else if (LIU_HE[mb] === db) relTip += '：日月六合（合中带羁绊或解冲）';
-  else if (mb === db) relTip += '：日月并建（当日地支力量极旺）';
-  else relTip += '：平顺交参';
-
-  wrap.innerHTML = `
-    <div class="card">
-      <div class="cal-head">
-        <button class="btn-secondary" style="padding:6px 12px;" onclick="shiftCalMonth(-1)">‹ 上月</button>
-        <div style="font-size:15.5px;font-weight:700;">${y} 年 ${m + 1} 月</div>
-        <button class="btn-secondary" style="padding:6px 12px;" onclick="shiftCalMonth(1)">下月 ›</button>
-      </div>
-      <div class="cal-grid">
-        ${['日','一','二','三','四','五','六'].map(w => `<div class="cal-wk">${w}</div>`).join('')}
-        ${cells}
-      </div>
-      <div style="margin-top:8px;font-size:11px;color:var(--text-3);display:flex;align-items:center;gap:6px;">
-        <span class="cal-study-dot" style="display:inline-block;margin:0;"></span> 绿点代表当日有看书或精学足迹
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head">
-        <div>
-          <div class="card-title">${state.calSelectedDate} ${lunarStr ? '· ' + lunarStr : ''}</div>
-          <div style="font-size:12px;color:var(--accent);font-weight:600;margin-top:2px;">日柱旬空：${fp.xunkong} 空亡</div>
-        </div>
-        <button class="btn-primary" style="padding:7px 12px;font-size:12px;" onclick="askCanwuCalendar()">问参悟此日</button>
-      </div>
-      <div class="pillars-grid">
-        ${[['年柱',fp.year],['月柱',fp.month],['日柱',fp.day],['时柱',fp.hour]].map(([lbl,p]) => `
-          <div class="pillar-col">
-            <div class="pillar-lbl">${lbl}</div>
-            <div class="pillar-stem wx-${p.swx}">${p.s}</div>
-            <div class="pillar-branch wx-${p.bwx}">${p.b}</div>
-            <div class="pillar-hidden">藏 ${HIDDEN_STEMS[p.b]}</div>
-          </div>
-        `).join('')}
-      </div>
-      <div style="margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--bg);font-size:12.5px;color:var(--text-2);line-height:1.6;">
-        <div><strong>日月关系：</strong>${relTip}</div>
-        <div><strong>冲合速查：</strong>日冲「${LIU_CHONG[db]}」 · 日合「${LIU_HE[db]}」 · 月破在「${LIU_CHONG[mb]}」</div>
-      </div>
-    </div>
-  `;
-}
-
-function shiftCalMonth(delta) {
-  const dt = new Date(state.calYear, state.calMonth + delta, 1);
-  state.calYear = dt.getFullYear();
-  state.calMonth = dt.getMonth();
-  renderCalendarView();
-}
-
-function selectCalDate(key) {
-  state.calSelectedDate = key;
-  renderCalendarView();
-}
-
-function calGoToday() {
-  const now = new Date();
-  state.calYear = now.getFullYear();
-  state.calMonth = now.getMonth();
-  state.calSelectedDate = formatDateKey(now);
-  renderCalendarView();
-}
-
-function askCanwuCalendar() {
-  const [sy, sm, sd] = state.calSelectedDate.split('-').map(Number);
-  const fp = getFourPillars(new Date(sy, sm - 1, sd, new Date().getHours()));
-  switchMainTab('canwu');
-  document.getElementById('chatInput').value = `今天是 ${fp.year.s+fp.year.b}年 ${fp.month.s+fp.month.b}月 ${fp.day.s+fp.day.b}日（旬空${fp.xunkong}），在${state.category}起盘断事中，这个月建日辰和空亡组合有哪些要特别留意的点？`;
-  sendCanwuMessage();
-}
-
-// ==================== 12. 易象图谱（八卦动盘 + 八宫六十四卦） ====================
-function switchAtlasTab(t) {
-  state.atlasTab = t;
-  renderAtlasView();
-}
-
-function renderAtlasView() {
-  document.getElementById('atlasModeBagua').className = 'chip ' + (state.atlasTab === 'bagua' ? 'accent' : '');
-  document.getElementById('atlasModeHex').className = 'chip ' + (state.atlasTab === 'hex' ? 'accent' : '');
-  const wrap = document.getElementById('atlasScrollArea');
-
-  if (state.atlasTab === 'bagua') {
-    const order = state.baguaMode === 'xian' ? XIAN_ORDER : HOU_ORDER;
-    const sel = TRIGRAMS[state.baguaSelected];
-    const nodes = order.map((tid, idx) => {
-      const ang = (idx * 45 - 90) * Math.PI / 180;
-      const r = 104;
-      const x = 150 + r * Math.cos(ang);
-      const y = 150 + r * Math.sin(ang);
-      const t = TRIGRAMS[tid];
-      const active = tid === state.baguaSelected;
-      return `<g class="trigram-node" onclick="selectBaguaTrigram(${tid})">
-        <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${active ? 24 : 20}" fill="${active ? 'var(--accent)' : 'var(--surface)'}" stroke="var(--border)" stroke-width="1.5"></circle>
-        <text x="${x.toFixed(1)}" y="${(y - 2).toFixed(1)}" text-anchor="middle" font-size="14" font-weight="700" fill="${active ? '#FFF' : 'var(--text)'}">${t.sym}</text>
-        <text x="${x.toFixed(1)}" y="${(y + 13).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="600" fill="${active ? '#FFF' : 'var(--text-2)'}">${t.name}</text>
-      </g>`;
-    }).join('');
-
-    const upT = state.composeUpper !== null ? TRIGRAMS[state.composeUpper] : null;
-    const lowT = state.composeLower !== null ? TRIGRAMS[state.composeLower] : null;
-    const composedHex = (upT && lowT) ? HEX_DATA.byKey[upT.id + '_' + lowT.id] : null;
-
-    wrap.innerHTML = `
-      <div class="card">
-        <div class="card-head">
-          <div style="display:flex;gap:6px;">
-            <button class="chip ${state.baguaMode==='hou'?'accent':''}" onclick="state.baguaMode='hou';renderAtlasView()">后天八卦</button>
-            <button class="chip ${state.baguaMode==='xian'?'accent':''}" onclick="state.baguaMode='xian';renderAtlasView()">先天八卦</button>
-          </div>
-          <button class="chip" onclick="state.baguaSpin=!state.baguaSpin;renderAtlasView()">${state.baguaSpin ? '暂停旋转' : '开启旋转'}</button>
-        </div>
-        <div class="bagua-stage">
-          <svg class="bagua-svg" viewBox="0 0 300 300">
-            <circle cx="150" cy="150" r="134" fill="none" stroke="var(--border)" stroke-dasharray="3 4"></circle>
-            <g class="bagua-ring-group ${state.baguaSpin ? 'bagua-spinning' : ''}">
-              <circle cx="150" cy="150" r="46" fill="var(--text)"></circle>
-              <path d="M150 104 A46 46 0 0 1 150 196 A23 23 0 0 1 150 150 A23 23 0 0 0 150 104 Z" fill="var(--surface)"></path>
-              <circle cx="150" cy="127" r="6" fill="var(--text)"></circle>
-              <circle cx="150" cy="173" r="6" fill="var(--surface)"></circle>
-              ${nodes}
-            </g>
-          </svg>
-        </div>
-        <div style="padding:12px;border-radius:14px;background:var(--bg);line-height:1.65;font-size:13.5px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-            <span style="font-size:16px;font-weight:700;">${sel.sym} ${sel.name}为${sel.nature} <span class="wx-${sel.wx}">（五行属${sel.wx}）</span></span>
-            <span class="chip">${state.baguaMode==='xian' ? '先天数'+sel.xianNum+' · '+sel.xianPos : '后天数'+sel.houNum+' · '+sel.houPos}</span>
-          </div>
-          <div><strong>人物：</strong>${sel.person}</div>
-          <div><strong>身体：</strong>${sel.body}</div>
-          <div><strong>类象：</strong>${sel.items}</div>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <button class="btn-secondary" style="flex:1;padding:7px;" onclick="setCompose('upper',${sel.id})">设为上卦</button>
-            <button class="btn-secondary" style="flex:1;padding:7px;" onclick="setCompose('lower',${sel.id})">设为下卦</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title">两卦相重组卦（梅花 / 六爻速查）</div>
-          ${(upT || lowT) ? `<button class="chip" onclick="state.composeUpper=null;state.composeLower=null;renderAtlasView()">重置</button>` : ''}
-        </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-          <div style="font-size:13.5px;color:var(--text-2);">
-            上卦：<strong>${upT ? upT.sym + upT.name : '未选'}</strong> ＋ 下卦：<strong>${lowT ? lowT.sym + lowT.name : '未选'}</strong>
-          </div>
-          ${composedHex ? `<button class="btn-primary" style="padding:7px 12px;font-size:12.5px;" onclick="openHexDetail('${composedHex.key}')">查看「${composedHex.name}」›</button>` : `<span style="font-size:12px;color:var(--text-3);">在上方点选两卦合成</span>`}
-        </div>
-      </div>
-    `;
-  } else {
-    let items = [...HEX_DATA.list];
-    if (state.hexSearch.trim()) {
-      const q = state.hexSearch.trim();
-      items = items.filter(h => h.name.includes(q) || h.palaceName.includes(q) || h.guaci.includes(q));
-    }
-    if (state.hexSort === 'seq') {
-      items.sort((a,b) => a.seq - b.seq);
-    } else if (state.hexPalaceFilter !== 'all') {
-      items = items.filter(h => h.palaceName === state.hexPalaceFilter);
-    }
-
-    wrap.innerHTML = `
-      <div style="display:flex;gap:8px;margin-bottom:10px;">
-        <input type="text" class="form-input" placeholder="搜卦名，如 既济、大有、乾宫..." value="${escapeHtml(state.hexSearch)}" oninput="state.hexSearch=this.value;renderAtlasView()" />
-        <button class="chip ${state.hexSort==='palace'?'accent':''}" style="flex-shrink:0;" onclick="state.hexSort=state.hexSort==='palace'?'seq':'palace';renderAtlasView()">${state.hexSort==='palace'?'八宫序':'周易序'}</button>
-      </div>
-      ${state.hexSort === 'palace' ? `<div class="cat-strip" style="padding:0 0 10px;">
-        <button class="cat-pill ${state.hexPalaceFilter==='all'?'active':''}" onclick="state.hexPalaceFilter='all';renderAtlasView()">全部八宫</button>
-        ${PALACE_ORDER.map(p => {
-          const pn = TRIGRAMS[p].name + '宫';
-          return `<button class="cat-pill ${state.hexPalaceFilter===pn?'active':''}" onclick="state.hexPalaceFilter='${pn}';renderAtlasView()">${pn}</button>`;
-        }).join('')}
-      </div>` : ''}
-      <div class="hex-mini-grid">
-        ${items.map(h => `
-          <div class="hex-card-item" onclick="openHexDetail('${h.key}')">
-            <div class="hex-mini-lines">
-              ${[5,4,3,2,1,0].map(i => `<div class="yao-bar ${h.bits[i] ? 'yang' : 'yin'}"></div>`).join('')}
-            </div>
-            <div style="min-width:0;">
-              <div style="font-size:14px;font-weight:700;color:var(--text);">${h.name}</div>
-              <div style="font-size:11px;color:var(--text-3);margin-top:2px;">${h.palaceName} · ${h.genName} · 第${h.seq}卦</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-  }
-}
-
-function selectBaguaTrigram(tid) {
-  state.baguaSelected = tid;
-  renderAtlasView();
-}
-
-function setCompose(pos, tid) {
-  if (pos === 'upper') state.composeUpper = tid;
-  else state.composeLower = tid;
-  renderAtlasView();
-}
-
-async function openHexDetail(key) {
-  state.currentHexKey = key;
-  state.hexMovingSet = new Set();
-  await renderHexDetail();
-  openOverlay('hexDetailOverlay');
-}
-
-async function renderHexDetail() {
-  const hex = HEX_DATA.byKey[state.currentHexKey];
-  if (!hex) return;
-  const fp = getFourPillars(new Date());
-  const xk = fp.xunkong;
-  const lines = getHexLinesDetail(hex);
-  const cached = await dbGet('hexCache', hex.key);
-
-  // 计算变卦
-  let bianHex = null;
-  if (state.hexMovingSet.size > 0) {
-    const bBits = hex.bits.map((b, i) => state.hexMovingSet.has(i + 1) ? (b ^ 1) : b);
-    const bLow = bBits[0] + (bBits[1] << 1) + (bBits[2] << 2);
-    const bUp = bBits[3] + (bBits[4] << 1) + (bBits[5] << 2);
-    bianHex = HEX_DATA.byKey[bUp + '_' + bLow];
-  }
-  const bianLines = bianHex ? getHexLinesDetail(bianHex) : null;
-
-  document.getElementById('hexDetailTitle').textContent = hex.name;
-  document.getElementById('hexDetailBody').innerHTML = `
-    <div class="card">
-      <div class="card-head">
-        <div>
-          <div class="card-title">${hex.name}（第 ${hex.seq} 卦）</div>
-          <div style="font-size:12px;color:var(--text-2);margin-top:2px;">
-            ${hex.palaceName}（<span class="wx-${hex.palaceWx}">${hex.palaceWx}</span>） · ${hex.genName} · 世在${hex.shi}爻 · 应在${hex.ying}爻
-          </div>
-        </div>
-        <span class="chip accent">今日旬空：${xk}</span>
-      </div>
-      <div style="font-size:12px;color:var(--text-3);margin-bottom:8px;">轻点任意一爻可切换「动爻 / 静爻」，自动演算出变卦与动变关系：</div>
-      ${[5,4,3,2,1,0].map(idx => {
-        const ln = lines[idx];
-        const isMov = state.hexMovingSet.has(ln.pos);
-        const isKong = xk.includes(ln.branch);
-        const bLn = bianLines ? bianLines[idx] : null;
-        return `<div class="hex-full-row ${isMov ? 'moving' : ''}" onclick="toggleHexMoving(${ln.pos})">
-          <span style="font-weight:600;color:var(--text-2);">${ln.liuqin}</span>
-          <span class="wx-${ln.wx}" style="font-weight:700;">${ln.gz}${ln.wx}${isKong ? '(空)' : ''}</span>
-          <div class="hex-full-bar ${ln.bit ? 'yang' : 'yin'}"></div>
-          <span style="text-align:center;font-size:12px;font-weight:600;">${ln.isShi ? '世' : (ln.isYing ? '应' : '')} ${isMov ? (ln.bit ? 'O动' : 'X动') : '静'}</span>
-          <span style="font-size:11.5px;color:var(--accent);text-align:right;">${isMov && bLn ? '→' + bLn.branch + bLn.wx : ''}</span>
-        </div>`;
-      }).join('')}
-      ${bianHex ? `<div style="margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:600;">动而化出变卦：${bianHex.name}（${bianHex.palaceName}）</div>` : ''}
-    </div>
-
-    <div class="card">
-      <div class="card-title" style="margin-bottom:6px;">原典卦辞与核心象义</div>
-      <div style="font-size:14px;line-height:1.75;color:var(--text);">${escapeHtml(hex.guaci)}</div>
-    </div>
-
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title">参悟深度白话拆解</div>
-        <button class="chip accent" onclick="generateHexDeepAI('${hex.key}')">${cached ? '重新生成' : 'AI 生成并永久缓存'}</button>
-      </div>
-      <div style="font-size:14px;line-height:1.75;white-space:pre-wrap;">
-        ${cached ? formatRichText(cached.text) : '<span style="color:var(--text-3);font-size:13px;">点击右上角按钮，由参悟结合你的书库生成本卦六爻详解与事业、感情、财运实战启示（首次生成后永久秒开）。</span>'}
-      </div>
-    </div>
-  `;
-}
-
-function toggleHexMoving(pos) {
-  if (state.hexMovingSet.has(pos)) state.hexMovingSet.delete(pos);
-  else state.hexMovingSet.add(pos);
-  renderHexDetail();
-}
-
-async function generateHexDeepAI(key) {
-  if (!ensureApiKey()) return;
-  const hex = HEX_DATA.byKey[key];
-  showToast('参悟正在深度解析此卦...');
-  try {
-    const prompt = `请用直观清晰的 1. 2. 3. 4. 编号清单（重点用【】标注，禁止星号），精解《周易》「${hex.name}」（${hex.palaceName}${hex.genName}）：
-1. 本卦核心气机与大白话象义
-2. 初爻至上爻的关键转折点（精炼点拨）
-3. 实战占断参考（事业、财运、感情、决策）
-4. 容易误判的陷阱与例外提醒`;
-    const text = await callLLM([{ role: 'user', content: prompt }], { tier: 'flash' });
-    await dbPut('hexCache', { id: key, text, updatedAt: Date.now() });
-    await markDirty();
-    renderHexDetail();
-    showToast('已生成并永久缓存');
-  } catch (e) {
-    showToast('生成失败：' + e.message);
-  }
-}
-
-function askCanwuAboutHex() {
-  const hex = HEX_DATA.byKey[state.currentHexKey];
-  const movs = Array.from(state.hexMovingSet).sort().join('、');
-  closeOverlay('hexDetailOverlay');
-  switchMainTab('canwu');
-  document.getElementById('chatInput').value = `结合我的${state.category}书库，深度分析「${hex.name}」${movs ? '（动爻在第' + movs + '爻）' : ''}的核心断法、世应关系与实战要点。`;
-  sendCanwuMessage();
-}
-
-// ==================== 13. 参悟 AI 智能体（三层记忆 + 防跳屏 + 解答/带练） ====================
-function renderCanwuHeader() {
-  document.getElementById('canwuHeaderSub').textContent = state.category + '专属智能体';
-  document.getElementById('modeToggleBtn').textContent = state.canwuMode === 'answer' ? '解答模式' : '带练考我';
-  document.getElementById('modeToggleBtn').className = 'chip ' + (state.canwuMode === 'practice' ? 'accent' : '');
-  if (!state.chatHistory.length) renderChatMessages();
-}
-
-function toggleCanwuMode() {
-  state.canwuMode = state.canwuMode === 'answer' ? 'practice' : 'answer';
-  renderCanwuHeader();
-  if (state.canwuMode === 'practice') {
-    showToast('已切到「带练模式」：输入「出题」让我考考你');
-  } else {
-    showToast('已切回「解答模式」');
-  }
-}
-
-function askCanwuFromReader() {
-  const book = state.books.find(b => b.id === state.reader.bookId);
-  const chaps = state.chapters.filter(c => c.bookId === state.reader.bookId).sort((a,b) => a.idx - b.idx);
-  const chap = chaps[state.reader.chapIdx];
-  closeReader();
-  switchMainTab('canwu');
-  if (book && chap) {
-    document.getElementById('chatInput').value = `帮我讲透《${book.title}》第${chap.idx + 1}章「${chap.topicTitle || chap.title}」的实战核心规律和容易踩的坑。`;
-  }
-}
-
-function autoResizeInput(el) {
-  el.style.height = '40px';
-  el.style.height = Math.min(110, el.scrollHeight) + 'px';
-}
-
-function formatRichText(text) {
-  let html = escapeHtml(text || '');
-  // 将 **重点** 或 【重点】 渲染为优雅加粗高亮，并清除散落星号
-  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/【([^】]+)】/g, '<strong>【$1】</strong>');
-  html = html.replace(/\*/g, '');
-  // 识别《书名》第X章 为可点击跳转胶囊
-  html = html.replace(/《([^》]+)》第(\d+)章/g, `<span class="ref-jump" onclick="jumpBySourceText('《$1》第$2章')">《$1》第$2章</span>`);
-  html = html.replace(/\n/g, '<br/>');
-  return html;
-}
-
-function renderChatMessages() {
-  const box = document.getElementById('chatMessages');
-  if (!state.chatHistory.length) {
-    box.innerHTML = `<div class="card" style="margin-top:8px;">
-      <div class="card-title" style="margin-bottom:6px;">你好，我是「参悟」</div>
-      <div style="font-size:13.5px;color:var(--text-2);line-height:1.7;">
-        当前已锁定「${state.category}」书库与长期记忆。你可以直接问我古籍条文、发卦例拆盘，或切到「带练考我」磨炼眼力。<br/>
-        我的回答默认采用 <strong>1、2、3、4 重点加黑</strong>，并区分原书依据与理法推演。
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;">
-        <button class="chip" onclick="quickAsk('帮我梳理解读本门类书库里最核心的断法铁律')">梳理书库核心铁律</button>
-        <button class="chip" onclick="quickAsk('月破在什么条件下算真破，什么条件下只是暂破？')">问：月破真假条件</button>
-        <button class="chip accent" onclick="state.canwuMode='practice';renderCanwuHeader();quickAsk('从我的书库或经典里出一道实战题考考我，先藏起答案')">出题考考我</button>
-      </div>
-    </div>`;
-    return;
-  }
-  box.innerHTML = state.chatHistory.map((m, idx) => `
-    <div class="msg-row ${m.role}">
-      <div class="msg-bubble">${m.role === 'ai' ? formatRichText(m.content) : escapeHtml(m.content).replace(/\n/g,'<br/>')}</div>
-      ${m.role === 'ai' && !m.streaming ? `<div class="msg-actions">
-        <button class="msg-act-btn" onclick="feedbackCanwu(${idx}, 'good')">说得准，存经验</button>
-        <button class="msg-act-btn" onclick="feedbackCanwu(${idx}, 'fix')">有偏差，我来纠正</button>
-        <button class="msg-act-btn" onclick="saveAiToNote(${idx})">存进笔记</button>
-      </div>` : ''}
-    </div>
-  `).join('');
-}
-
-function quickAsk(text) {
-  document.getElementById('chatInput').value = text;
-  sendCanwuMessage();
-}
-
-function clearChat() {
-  state.chatHistory = [];
-  renderChatMessages();
-  showToast('已开启全新对话');
-}
-
-function scrollChatToBottom(force = false) {
-  const box = document.getElementById('chatMessages');
-  if (force) {
-    state.userScrolledUp = false;
-    document.getElementById('scrollLatestBtn').classList.remove('show');
-  }
-  if (!state.userScrolledUp || force) {
-    box.scrollTop = box.scrollHeight;
-  }
-}
-
-// 检索当前门类的书库索引、精读摘要、笔记与三层记忆
-function buildCanwuContext(query) {
-  const cat = state.category;
-  const typoFix = query
-    .replace(/月婆|越破/g, '月破')
-    .replace(/旬孔|寻空/g, '旬空')
-    .replace(/动摇|洞爻/g, '动爻')
-    .replace(/世摇/g, '世爻')
-    .replace(/用神/g, '用神')
-    .replace(/三穿/g, '三传')
-    .replace(/四客/g, '四课');
-
-  const tokens = typoFix.match(/[\u4e00-\u9fa5]{2,4}/g) || [];
-  const scoreText = txt => tokens.reduce((acc, tk) => acc + (txt.includes(tk) ? 2 : 0), 0);
-
-  // Layer 1: 常驻心法 & 纠偏铁律
-  const catMems = state.memories.filter(m => m.category === cat);
-  const coreMems = catMems.filter(m => m.tier === 'core').slice(0, 15);
-  const fixMems = catMems.filter(m => m.tier !== 'core')
-    .sort((a,b) => scoreText(b.text) - scoreText(a.text))
-    .slice(0, 5);
-
-  // Layer 2: 精准命中章节与笔记
-  const catBooks = state.books.filter(b => b.category === cat);
-  const bookMap = Object.fromEntries(catBooks.map(b => [b.id, b.title]));
-  const catChaps = state.chapters.filter(c => bookMap[c.bookId]);
-  const rankedChaps = catChaps
-    .map(c => ({ c, s: scoreText((c.topicTitle||'') + (c.title||'') + (c.essentials||'') + (c.quotes||'') + c.content.slice(0,800)) }))
-    .sort((a,b) => b.s - a.s)
-    .slice(0, 3);
-
-  const rankedNotes = state.notes.filter(n => n.category === cat)
-    .map(n => ({ n, s: scoreText(n.title + n.content + (n.outcome||'')) }))
-    .sort((a,b) => b.s - a.s)
-    .slice(0, 3);
-
-  let ctx = '';
-  if (coreMems.length) ctx += '【常驻心法】\n' + coreMems.map((m,i) => `${i+1}. ${m.text}`).join('\n') + '\n\n';
-  if (fixMems.length) ctx += '【历史实战纠偏铁律（严禁再犯）】\n' + fixMems.map((m,i) => `${i+1}. ${m.text}`).join('\n') + '\n\n';
-  if (rankedChaps.length) {
-    ctx += '【命中的用户书库章节】\n' + rankedChaps.map(({c}) => {
-      const ref = `《${bookMap[c.bookId]}》第${c.idx + 1}章`;
-      return `${ref}（${c.topicTitle || c.title}）\n精要：${c.essentials || '未精学'}\n原文摘录：${c.content.slice(0, 650)}`;
-    }).join('\n---\n') + '\n\n';
-  }
-  if (rankedNotes.length) {
-    ctx += '【用户个人笔记与实战案例】\n' + rankedNotes.map(({n}) => `- ${n.title}：${n.content.slice(0,220)}${n.outcome ? '（实际应验：'+n.outcome+'）' : ''}`).join('\n');
-  }
-  return ctx || '当前书库暂未导入相关古籍，请诚实说明并结合传统经典理法作答。';
-}
-
-function getFrameworkHint(cat) {
-  const map = {
-    '六爻': '按「用神定位 → 动变生克 → 日月组合与空破合冲 → 应期推演」拆解；若展示卦象，必须写出完整六爻阴阳排列、动静爻与旬空。',
-    '梅花': '按「体用生克 → 互卦变卦趋势 → 旺衰与外应」拆解。',
-    '八字': '按「日主强弱与格局脉络 → 调候与用神 → 大运流年引动」拆解。',
-    '奇门': '按「核心落宫与值符值使 → 三奇六仪格局生克 → 应期与化解应对」拆解。',
-    '六壬': '按「四课三传课体 → 日辰年命与十二天将 → 吉凶转折」拆解。',
-    '紫微': '按「命宫主星格局 → 三方四正与四化引动 → 运限吉凶」拆解。',
-    '风水': '按「气口动线与形法峦头 → 方位理气生克 → 实操调整建议」拆解。'
-  };
-  return map[cat] || '';
-}
-
-async function sendCanwuMessage() {
-  if (state.isStreaming) return;
-  if (!ensureApiKey()) return;
-  const input = document.getElementById('chatInput');
-  const q = input.value.trim();
-  if (!q) return;
-  input.value = '';
-  input.style.height = '40px';
-
-  state.chatHistory.push({ role: 'user', content: q });
-  const aiMsg = { role: 'ai', content: '参悟思考中...', streaming: true };
-  state.chatHistory.push(aiMsg);
-  state.isStreaming = true;
-  state.userScrolledUp = false;
-  document.getElementById('scrollLatestBtn').classList.remove('show');
-  renderChatMessages();
-  scrollChatToBottom(true);
-
-  const ctx = buildCanwuContext(q);
-  const sysPrompt = `你是用户的专属术数学习智能体「参悟」，当前专注门类：「${state.category}」。
-必须严格遵守以下输出与思考规矩：
-1. 风格直观干脆：先给一句核心结论，随后严格用 1. 2. 3. 4. 编号清单分条拆解，关键断语和重点词全部用【】括起来高亮，绝对禁止使用任何星号符号。
-2. 严守依据边界：明确区分【原书依据】（引用书库时严格写成《书名》第X章格式以便用户点击跳转）和【理法推演补充】，绝不编造书里没写的内容。
-3. 先讲前提与例外：每次解答必须交代这条断语的【成立前提】与【反转例外】。
-4. 门类推演框架：${getFrameworkHint(state.category)}
-5. 模式要求：${state.canwuMode === 'practice' ? '当前为【带练模式】，出题时先隐去最终断语与应验结果，引导用户自己分析；用户作答后再像严师一样逐条批改指出遗漏。' : '当前为【解答模式】，直击要点，结尾附带1个值得继续深挖的追问方向。'}
-
-以下是检索到的用户专属书库与三层记忆：
-${ctx}`;
-
-  const recent = state.chatHistory.slice(-7, -1).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content }));
-  const messages = [{ role: 'system', content: sysPrompt }, ...recent];
-
-  try {
-    await callLLM(messages, {
-      stream: true,
-      onChunk: full => {
-        aiMsg.content = full;
-        const bubbles = document.querySelectorAll('#chatMessages .msg-row.ai .msg-bubble');
-        const last = bubbles[bubbles.length - 1];
-        if (last) last.innerHTML = formatRichText(full);
-        scrollChatToBottom(false);
-      }
-    });
-  } catch (e) {
-    aiMsg.content = '请求中断：' + e.message;
-  } finally {
-    aiMsg.streaming = false;
-    state.isStreaming = false;
-    renderChatMessages();
-    scrollChatToBottom(false);
-  }
-}
-
-async function feedbackCanwu(idx, type) {
-  const msg = state.chatHistory[idx];
-  if (!msg) return;
-  if (type === 'good') {
-    const summary = msg.content.split('\n')[0].slice(0, 80);
-    await saveMemoryItem(state.category, 'core', '已验证有效经验：' + summary);
-    showToast('已记入参悟大脑常驻经验');
-  } else {
-    const fix = prompt('请告诉参悟哪里判断有偏差，或实际正确规律是什么（它将自动提炼为永久纠偏铁律）：');
-    if (!fix || !fix.trim()) return;
-    await saveMemoryItem(state.category, 'fix', '实战纠偏：' + fix.trim());
-    showToast('已写入参悟错题纠偏大脑，下次绝不再犯！');
-  }
-}
-
-function saveAiToNote(idx) {
-  const msg = state.chatHistory[idx];
-  const prev = state.chatHistory[idx - 1];
-  openNoteSheet({
-    type: 'excerpt',
-    title: prev ? prev.content.slice(0, 20) : '参悟精解',
-    content: msg.content,
-    source: '参悟问答整理'
-  });
-}
-
-// ==================== 14. 参悟大脑（三层记忆管理、跨书自悟、蒸馏） ====================
-async function saveMemoryItem(category, tier, text) {
-  const item = { id: uid('mem'), category, tier, text, createdAt: Date.now() };
-  await dbPut('memories', item);
-  state.memories.push(item);
-  await markDirty();
-}
-
-function openBrainModal() {
-  document.getElementById('brainCatTag').textContent = state.category;
-  renderBrainList();
-  openSheet('sheet-brain');
-}
-
-function renderBrainList() {
-  const list = state.memories.filter(m => m.category === state.category).sort((a,b) => b.createdAt - a.createdAt);
-  const el = document.getElementById('brainMemList');
-  if (!list.length) {
-    el.innerHTML = `<div class="empty-box" style="padding:20px;"><p>还没有为「${state.category}」沉淀长期记忆。<br/>对话中点「有偏差，我来纠正」或手动新增铁律，参悟会越用越懂你。</p></div>`;
-    return;
-  }
-  el.innerHTML = list.map(m => `
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
-      <div style="font-size:13.5px;line-height:1.55;">
-        <span class="chip ${m.tier==='fix'?'accent':''}" style="padding:1px 6px;font-size:10.5px;margin-right:4px;">${m.tier==='fix'?'纠偏铁律':'常驻心法'}</span>
-        ${escapeHtml(m.text)}
-      </div>
-      <button onclick="deleteMemory('${m.id}')" style="font-size:12px;color:var(--text-3);flex-shrink:0;">删</button>
-    </div>
-  `).join('');
-}
-
-async function addManualMemory() {
-  const inp = document.getElementById('newMemInput');
-  const txt = inp.value.trim();
-  if (!txt) return;
-  await saveMemoryItem(state.category, 'core', txt);
-  inp.value = '';
-  renderBrainList();
-  showToast('已存入参悟常驻心法');
-}
-
-async function deleteMemory(id) {
-  await dbDel('memories', id);
-  state.memories = state.memories.filter(m => m.id !== id);
-  await markDirty();
-  renderBrainList();
-}
-
-async function runCrossBookSynthesis() {
-  if (!ensureApiKey()) return;
-  const catBooks = state.books.filter(b => b.category === state.category);
-  const studied = state.chapters.filter(c => catBooks.some(b => b.id === c.bookId) && c.studied);
-  if (studied.length < 2) return showToast('至少精学 2 个章节后才能做跨书自悟融合');
-  showToast('参悟正在跨书左右互搏、提炼总纲...');
-  try {
-    const digest = studied.slice(0, 12).map(c => `${c.topicTitle}：${c.essentials.slice(0, 180)}`).join('\n');
-    const res = await callLLM([{
-      role: 'user',
-      content: `请对比以下多章「${state.category}」精读要点，找出各章之间的核心共识与分歧点，提炼出 3 条最精炼的【跨书融合心法】（每条一行，不超过50字，不用星号）：\n${digest}`
-    }], { tier: 'flash' });
-    const lines = res.split('\n').map(s => s.replace(/^[\d.\-、\s]+/, '').trim()).filter(s => s.length > 6);
-    for (const ln of lines.slice(0, 3)) await saveMemoryItem(state.category, 'core', '跨书自悟：' + ln);
-    renderBrainList();
-    showToast(`已提炼 ${Math.min(3, lines.length)} 条跨书融合心法存入大脑`);
-  } catch (e) {
-    showToast('自悟失败：' + e.message);
-  }
-}
-
-async function runMemoryDistill() {
-  if (!ensureApiKey()) return;
-  const list = state.memories.filter(m => m.category === state.category);
-  if (list.length < 4) return showToast('记忆条数较少，暂无需蒸馏合并');
-  showToast('参悟正在整理蒸馏长期记忆...');
-  try {
-    const txt = list.map((m,i) => `${i+1}. ${m.text}`).join('\n');
-    const res = await callLLM([{
-      role: 'user',
-      content: `请将以下「${state.category}」学习记忆去重、合并矛盾点，蒸馏成最精纯的 5 到 8 条核心铁律（每条一行，不用星号）：\n${txt}`
-    }], { tier: 'flash' });
-    const lines = res.split('\n').map(s => s.replace(/^[\d.\-、\s]+/, '').trim()).filter(s => s.length > 5);
-    if (lines.length) {
-      for (const old of list) await dbDel('memories', old.id);
-      state.memories = state.memories.filter(m => m.category !== state.category);
-      for (const ln of lines) await saveMemoryItem(state.category, 'core', ln);
-      renderBrainList();
-      showToast('记忆已蒸馏精纯！');
-    }
-  } catch (e) {
-    showToast('蒸馏失败：' + e.message);
-  }
-}
-
-// ==================== 15. 设置、主题、iCloud 备份与私人云同步 ====================
-function setAppTheme(theme) {
-  state.settings.theme = theme;
-  if (theme === 'warm') document.documentElement.removeAttribute('data-theme');
-  else document.documentElement.setAttribute('data-theme', theme);
-  saveSettingsMeta();
-}
-
-function openSettings() {
-  const s = state.settings;
-  document.getElementById('cfgApiKey').value = s.apiKey || '';
-  document.getElementById('cfgBaseUrl').value = s.baseUrl || 'https://api.deepseek.com';
-  document.getElementById('cfgFlashModel').value = s.flashModel || 'deepseek-chat';
-  document.getElementById('cfgProModel').value = s.proModel || 'deepseek-reasoner';
-  document.getElementById('cfgUseTier').value = s.useTier || 'flash';
-  document.getElementById('cfgGistToken').value = s.gistToken || '';
-  document.getElementById('cfgGistId').value = s.gistId || '';
-  const estYuan = ((s.tokensIn / 1e6) * 1.5 + (s.tokensOut / 1e6) * 5).toFixed(3);
-  document.getElementById('costStatsBox').textContent = `累计估算用量：输入 ${s.tokensIn} / 输出 ${s.tokensOut} tokens（约 ¥${estYuan} 元）`;
-  document.getElementById('backupStatusText').textContent = s.dirtySinceBackup
-    ? '检测到有新导入的书、笔记或记忆尚未备份，建议顺手存一份到 iCloud 或微信收藏。'
-    : (s.lastBackupAt ? `上次备份时间：${s.lastBackupAt}` : '所有数据安全存于本地 IndexedDB，随时可导出。');
-  openSheet('sheet-settings');
-}
-
-async function saveApiConfig() {
-  const s = state.settings;
-  s.apiKey = document.getElementById('cfgApiKey').value.trim();
-  s.baseUrl = document.getElementById('cfgBaseUrl').value.trim() || 'https://api.deepseek.com';
-  s.flashModel = document.getElementById('cfgFlashModel').value.trim() || 'deepseek-chat';
-  s.proModel = document.getElementById('cfgProModel').value.trim() || 'deepseek-reasoner';
-  s.useTier = document.getElementById('cfgUseTier').value;
-  s.gistToken = document.getElementById('cfgGistToken').value.trim();
-  s.gistId = document.getElementById('cfgGistId').value.trim();
-  await saveSettingsMeta();
-  showToast('配置已保存');
-}
-
-async function packBackupPayload() {
-  return {
-    version: 'CangwangV5',
-    exportedAt: new Date().toISOString(),
-    books: await dbGetAll('books'),
-    chapters: await dbGetAll('chapters'),
-    notes: await dbGetAll('notes'),
-    memories: await dbGetAll('memories'),
-    hexCache: await dbGetAll('hexCache'),
-    footprints: await dbGetAll('footprints')
-  };
-}
-
-async function restoreBackupPayload(data) {
-  if (!data || !Array.isArray(data.books)) throw new Error('备份文件格式不正确');
-  for (const store of ['books','chapters','notes','memories','hexCache','footprints']) {
-    if (Array.isArray(data[store])) {
-      for (const item of data[store]) await dbPut(store, item);
-    }
-  }
-  await loadAllFromDB();
-  state.settings.dirtySinceBackup = false;
-  document.getElementById('backupDot').classList.remove('show');
-  await saveSettingsMeta();
-  renderBooksView();
-  renderCalendarView();
-  showToast('全部书架、白话、笔记与记忆已无损恢复！');
-}
-
-async function exportAllBackup() {
-  const payload = await packBackupPayload();
-  const jsonStr = JSON.stringify(payload);
-  const fileName = `藏往备份_${formatDateKey(new Date())}.json`;
-  const blob = new Blob([jsonStr], { type: 'application/json' });
-  const file = new File([blob], fileName, { type: 'application/json' });
-
-  state.settings.dirtySinceBackup = false;
-  state.settings.lastBackupAt = new Date().toLocaleString();
-  document.getElementById('backupDot').classList.remove('show');
-  await saveSettingsMeta();
-
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title: '藏往全量备份', text: '存进 iCloud 云盘或微信收藏' });
-      return;
-    } catch (e) {}
-  }
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = fileName;
-  a.click();
-  URL.revokeObjectURL(a.href);
-  showToast('已生成备份文件，请存进 iCloud 云盘或微信收藏');
-}
-
-async function importAllBackup(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  try {
-    const data = JSON.parse(await file.text());
-    await restoreBackupPayload(data);
-    closeSheet('sheet-settings');
-  } catch (err) {
-    showToast('恢复失败：' + err.message);
-  }
-  e.target.value = '';
-}
-
-async function syncToGist() {
-  await saveApiConfig();
-  const { gistToken, gistId } = state.settings;
-  if (!gistToken) return showToast('请先填写 GitHub Token');
-  showToast('正在加密上传到私人云...');
-  try {
-    const payload = await packBackupPayload();
-    const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
-    const resp = await fetch(url, {
-      method: gistId ? 'PATCH' : 'POST',
-      headers: { 'Authorization': `token ${gistToken}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        description: 'Cangwang Private Backup',
-        public: false,
-        files: { 'cangwang_backup.json': { content: JSON.stringify(payload) } }
-      })
-    });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const res = await resp.json();
-    state.settings.gistId = res.id;
-    state.settings.dirtySinceBackup = false;
-    state.settings.lastBackupAt = new Date().toLocaleString() + '（云端）';
-    document.getElementById('cfgGistId').value = res.id;
-    document.getElementById('backupDot').classList.remove('show');
-    await saveSettingsMeta();
-    showToast('已成功上传至私人云 Gist！');
-  } catch (e) {
-    showToast('云上传失败：' + e.message);
-  }
-}
-
-async function pullFromGist() {
-  await saveApiConfig();
-  const { gistToken, gistId } = state.settings;
-  if (!gistToken || !gistId) return showToast('请填写 Token 与 Gist ID');
-  showToast('正在从私人云拉回数据...');
-  try {
-    const resp = await fetch(`https://api.github.com/gists/${gistId}`, {
-      headers: { 'Authorization': `token ${gistToken}` }
-    });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    const res = await resp.json();
-    const raw = res.files?.['cangwang_backup.json']?.content;
-    if (!raw) throw new Error('未找到备份文件内容');
-    await restoreBackupPayload(JSON.parse(raw));
-    closeSheet('sheet-settings');
-  } catch (e) {
-    showToast('拉回失败：' + e.message);
-  }
-}
-
-// ==================== 16. 初始化启动 ====================
-async function loadAllFromDB() {
-  const meta = await dbGet('meta', 'settings');
-  if (meta && meta.data) Object.assign(state.settings, meta.data);
-  state.books = await dbGetAll('books');
-  state.chapters = await dbGetAll('chapters');
-  state.notes = await dbGetAll('notes');
-  state.memories = await dbGetAll('memories');
-  const fps = await dbGetAll('footprints');
-  state.footprints = Object.fromEntries(fps.map(f => [f.id, f.count]));
-}
-
-async function initApp() {
-  await openDB();
-  await loadAllFromDB();
-  setAppTheme(state.settings.theme || 'warm');
-  if (state.settings.dirtySinceBackup) document.getElementById('backupDot').classList.add('show');
-
-  // 监听参悟对话区滚动：只要用户向上滑，立刻锁定不强行拉回底部
-  const chatBox = document.getElementById('chatMessages');
-  chatBox.addEventListener('scroll', () => {
-    const distFromBottom = chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight;
-    if (distFromBottom > 64) {
-      state.userScrolledUp = true;
-      document.getElementById('scrollLatestBtn').classList.add('show');
-    } else {
-      state.userScrolledUp = false;
-      document.getElementById('scrollLatestBtn').classList.remove('show');
-    }
-  });
-
-  // 回车发送（Shift+Enter 换行）
-  document.getElementById('chatInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendCanwuMessage();
-    }
-  });
-
-  renderCatStrip();
-  renderBooksView();
-  renderCanwuHeader();
-}
-
-initApp();
-</script>
+<script src="./cloud-sync.js"></script>
+<script src="./astro-engine.js"></script>
+<script src="./library-vault.js"></script>
+<script src="./canwu-agent.js"></script>
 </body>
 </html>
