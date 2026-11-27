@@ -59,7 +59,7 @@ async function callLLM(messages, { stream = false, tier = null, onChunk = null }
   const resp = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${prof.apiKey}` },
-    body: JSON.stringify({ model, messages: messages.map(m => ({ role: m.role, content: typeof m.content === 'string' ? redactPrivateText(m.content) : m.content })), stream, temperature: 0.38 })
+    body: JSON.stringify({ model, messages: messages.map(m => ({ role: m.role, content: typeof m.content === 'string' ? redactPrivateText(m.content) : m.content })), stream, temperature: 0.62 })
   });
   if (!resp.ok) throw new Error(`接口失败(${resp.status})`);
   if (!stream) {
@@ -169,6 +169,86 @@ function clearPendingChatImage() {
 }
 
 // ==================== 2. 文本渲染、检索与盘面摘要（含完整六爻/八字细盘） ====================
+let canwuGeminiStyleInjected = false;
+function ensureCanwuGeminiStyle() {
+  if (canwuGeminiStyleInjected) return;
+  canwuGeminiStyleInjected = true;
+  const st = document.createElement('style');
+  st.id = 'canwuGeminiStyle';
+  st.textContent = `
+    #chatMessages { padding: 12px 16px 24px !important; }
+    #chatMessages .msg-row.ai {
+      max-width: 100% !important;
+      width: 100% !important;
+      align-self: stretch !important;
+    }
+    #chatMessages .msg-row.ai .msg-bubble {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 4px 2px 6px !important;
+      border-radius: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      font-size: 15.8px !important;
+      line-height: 1.88 !important;
+      color: var(--text) !important;
+    }
+    #chatMessages .msg-row.user {
+      max-width: 84% !important;
+      align-self: flex-end !important;
+      margin-top: 8px !important;
+    }
+    #chatMessages .msg-row.user .msg-bubble {
+      border-radius: 18px 18px 4px 18px !important;
+      padding: 10px 14px !important;
+      font-size: 15px !important;
+      line-height: 1.65 !important;
+    }
+    .ai-coach-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .ai-followups-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin: 12px 0 6px;
+    }
+    .ai-followup-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      text-align: left;
+      padding: 9px 13px;
+      border-radius: 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 13.5px;
+      line-height: 1.45;
+      cursor: pointer;
+    }
+    .ai-followup-pill:active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+    #chatMessages .msg-actions {
+      padding-left: 2px !important;
+      margin-top: 6px !important;
+      padding-bottom: 12px !important;
+      border-bottom: 1px solid var(--border);
+    }
+  `;
+  document.head.appendChild(st);
+}
+
 function formatRichText(text) {
   let html = escapeHtml(text || '').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/【([^】]+)】/g, '<strong>【$1】</strong>').replace(/\*/g, '');
   html = html.replace(/《([^》]+)》第(\d+)页/g, `<span class="ref-jump" onclick="jumpToBookPage('$1',$2)">《$1》第$2页</span>`);
@@ -193,14 +273,22 @@ async function flagYingqiDate(dStr) {
   showToast(`已将 ${dStr} 标记到万年干支历`);
 }
 
+const DOMAIN_KEY_TERMS = ['月破','暗动','日破','旬空','伏神','飞神','进神','退神','回头克','回头生','三合','六合','六冲','反吟','伏吟','用神','世爻','应爻','独发','随鬼入墓','游魂','归魂','调候','用神','忌神','喜神','相穿','羊刃','七杀','伤官','食神','财库','官库','岁运并临','值符','值使','门迫','击刑','入墓','马星','体用','三传','四课','四化'];
+
 function retrieveFromSelectedBooks(bookIds, qText) {
   const tbs = state.books.filter(b => bookIds.includes(b.id)); if (!tbs.length) return '';
-  const tokens = (qText.match(/[\u4e00-\u9fa5]{2,4}/g) || []).slice(0, 16);
+  const rawTokens = (qText.match(/[\u4e00-\u9fa5]{2,4}/g) || []).slice(0, 18);
+  const hitTerms = DOMAIN_KEY_TERMS.filter(t => qText.includes(t));
   return tbs.map(b => {
     const pages = state.chapters.filter(c => c.bookId === b.id && c.content && c.content.length > 20)
-      .map(c => ({ c, s: tokens.reduce((acc, tk) => acc + ((c.content || '').includes(tk) ? 2 : 0), 0) }))
-      .sort((a, b2) => b2.s - a.s).slice(0, 2);
-    return `【书房原书：《${b.title}》】\n` + pages.map(({ c }) => `《${b.title}》第${c.pageNum}页：${(c.content || '').slice(0, 520)}`).join('\n');
+      .map(c => {
+        const txt = c.content || '';
+        let score = rawTokens.reduce((acc, tk) => acc + (txt.includes(tk) ? 2 : 0), 0);
+        score += hitTerms.reduce((acc, tm) => acc + (txt.includes(tm) ? 5 : 0), 0);
+        return { c, s: score };
+      })
+      .sort((a, b2) => b2.s - a.s).slice(0, 3);
+    return `【书房原书：《${b.title}》】\n` + pages.map(({ c }) => `《${b.title}》第${c.pageNum}页：${(c.content || '').slice(0, 560)}`).join('\n');
   }).join('\n========\n');
 }
 
@@ -233,6 +321,19 @@ function getWeakSpotsPrompt() {
   return `\n【用户历史练习薄弱点】：${ws.map(w => w.tag).join('、')}。如果本次盘面或问题恰好踩中其中某一点，请在开头先提醒他留意这个老盲区。`;
 }
 
+function getRecentArchivesDigest(cat, limit = 5) {
+  const list = state.archives
+    .filter(a => !cat || a.category === cat)
+    .sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0))
+    .slice(0, limit);
+  if (!list.length) return '';
+  return '\n【用户近期实战档案库参考（可直接前后对照）】\n' + list.map((a, idx) => {
+    const vMap = { hit: '已应验', miss: '有偏差', pending: '待验证' };
+    const outStr = a.outcome ? `｜实际结果：${a.outcome.slice(0, 40)}` : '';
+    return `${idx + 1}. [${a.category}·${vMap[a.verdict] || '待验证'}] ${a.title}（${(a.castTimeStr || '').slice(0, 11)}）${outStr}`;
+  }).join('\n');
+}
+
 async function runSelectedBooksAnalysis() {
   if (!ensureApiKey()) return;
   const rec = state.currentResult; if (!rec) return;
@@ -241,7 +342,7 @@ async function runSelectedBooksAnalysis() {
   const label = chosen.length === 0 ? '经典断' : (chosen.length === 1 ? `《${chosen[0].title}》` : `多书对照(${chosen.length}本)`);
   const digest = buildChartDigestForAI(rec);
   const bookCtx = retrieveFromSelectedBooks(state.selectedBookIds, digest + ' ' + rec.title);
-  const mems = state.memories.filter(m => m.category === rec.category).slice(0, 10).map((m, i) => `${i + 1}. ${m.text}`).join('\n');
+  const mems = state.memories.filter(m => m.category === rec.category).slice(0, 12).map((m, i) => `${i + 1}. ${m.text}`).join('\n');
   const selfBlock = (state.showSelfJudge && state.selfReason.trim()) ? `\n【用户盲断自判】：用户判「${state.selfVerdict}」，理由：「${state.selfReason.trim()}」。请务必在回复最前面单列【思路对照】，客观肯定他看准的地方，并直接指出他看漏或断反的关键理法！` : '';
 
   const sys = `你是用户的私人术数实战教练「参悟」，今日公历 ${formatDateKey(new Date())}。
@@ -249,7 +350,7 @@ async function runSelectedBooksAnalysis() {
 1. 严禁说「总体有波折保持心态就会好」这种两头堵的算命废话，严禁无脑吹捧，全程说人话、讲硬证据。
 2. 所有旺衰、月破、暗动、旬空、冲合刑穿、化进退神已由底层代码算死，严禁自行篡改。
 3. 先给核心定论，再分三层清晰展开：【第一层·吉凶定性】（引用参考书须标《书名》第X页）、【第二层·细节象意】（结合现实处境与六神/十神/神煞）、【第三层·具体应期】（换算公历并用 [应期:YYYY-MM-DD] 标注）。
-4. 严禁在回复中使用任何星号符号。${mems ? '\n【用户个人备忘要求】\n' + mems : ''}${getWeakSpotsPrompt()}${selfBlock}`;
+4. 严禁在回复中使用任何星号符号。${mems ? '\n【用户个人备忘要求】\n' + mems : ''}${getWeakSpotsPrompt()}${getRecentArchivesDigest(rec.category, 3)}${selfBlock}`;
 
   try {
     const content = (await callLLM([{ role: 'system', content: sys }, { role: 'user', content: `请精准剖析以下盘面：\n${digest}\n\n${bookCtx ? '书房参考原文：\n' + bookCtx : ''}` }])).replace(/\*/g, '').trim();
@@ -300,10 +401,19 @@ ${digest}
 function followUpFromResult() { const r = state.currentResult; if (!r) return; closeOverlay('resultOverlay'); switchMainTab('canwu'); switchCanwuRoom(r.category); document.getElementById('chatInput').value = `承接刚排的「${r.title}」，我想继续追问：`; }
 async function feedbackResultToBrain() { const r = state.currentResult; if (!r) return; const fix = prompt('写下这次发现的规律或纠偏，存入 AI 备忘：'); if (!fix?.trim()) return; await saveMemoryItem(r.category, 'fix', fix.trim()); showToast('已记入 AI 备忘'); }
 
-// ==================== 3. 参悟问答页（支持发照片看盘 + 多模型 + 大白话） ====================
+// ==================== 3. 参悟问答页（全宽沉浸排版 + 活记忆自动提炼 + 主动追问建议 + 带徒模式） ====================
+function toggleCanwuMentorMode() {
+  state.canwuMentorMode = !state.canwuMentorMode;
+  renderCanwuView();
+  showToast(state.canwuMentorMode ? '已切到【带徒练】：AI 会一步步引导你断卦，不直接喂答案' : '已切到【直接断】：AI 直接给出完整分析与建议');
+}
+
 function renderCanwuRoomStrip() {
+  ensureCanwuGeminiStyle();
   const el = document.getElementById('canwuRoomStrip'); if (!el) return;
-  el.innerHTML = buildDisciplineStripHtml(state.canwuRoom, 'switchCanwuRoom');
+  const mentorOn = Boolean(state.canwuMentorMode);
+  el.innerHTML = buildDisciplineStripHtml(state.canwuRoom, 'switchCanwuRoom') +
+    `<button class="cat-pill ${mentorOn ? 'active' : ''}" style="${mentorOn ? 'background:var(--seal);border-color:var(--seal);color:#fff;' : ''}" onclick="toggleCanwuMentorMode()">${mentorOn ? '带徒练·开' : '直接断'}</button>`;
   bindCatSwipe(el);
   updateCanwuModelBadge();
 }
@@ -325,35 +435,86 @@ function renderCanwuView() {
   const box = document.getElementById('chatMessages'), th = getActiveThread(), msgs = th?.messages || [];
   if (!msgs.length) {
     const bookCount = state.books.filter(b => b.category === state.canwuRoom || b.category === '其他').length;
+    const memCount = state.memories.filter(m => m.category === state.canwuRoom).length;
     box.innerHTML = `
       <div class="card" style="margin-top:6px;">
         <div class="card-head">
           <span class="card-title">${state.canwuRoom} · 私人术数教练</span>
-          <span class="pill-mini xs accent">书房已备 ${bookCount} 本</span>
+          <span class="pill-mini xs accent">书房 ${bookCount} 本 · 记忆 ${memCount} 条</span>
         </div>
-        <div style="font-size:14px;color:var(--text-2);line-height:1.72;">说人话、讲原书证据、敢直接指出你的错漏。点左下角相册图标可直接发排盘截图、古书书页或户型图让我分析。</div>
+        <div style="font-size:14.5px;color:var(--text-2);line-height:1.78;">
+          我已经连上你的书房原书、实战档案和个人备忘。聊完会自动记住你的习惯和进度；点上方「直接断 / 带徒练」可切换是直接听讲解，还是让我一步步考你引导你断。
+        </div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;">
-          <button class="chip" onclick="quickAskCanwu('帮我梳理我书房里${state.canwuRoom}书籍最核心的实战规律')">梳理书房核心</button>
-          <button class="chip" onclick="quickAskCanwu('对比不同古籍在${state.canwuRoom}断法上的主要分歧')">不同流派对比</button>
-          <button class="chip seal" onclick="quickAskCanwu('出一道${state.canwuRoom}实战难题考考我，先不要公布答案，等我回答完再点评')">出题考考我</button>
+          <button class="chip" onclick="quickAskCanwu('结合我书房里的${state.canwuRoom}书籍，按实战优先级帮我理一套看盘顺序')">理一套看盘顺序</button>
+          <button class="chip" onclick="quickAskCanwu('对比不同古籍在${state.canwuRoom}断法上的核心分歧，举实战例子讲透')">流派分歧对比</button>
+          <button class="chip seal" onclick="quickAskCanwu('出一道${state.canwuRoom}真实实战难题考考我，先不公布答案，等我回答完再点评')">出题考考我</button>
         </div>
       </div>
     `;
     return;
   }
-  box.innerHTML = msgs.map((m, i) => `
-    <div class="msg-row ${m.role}">
-      <div class="msg-bubble">
-        ${m.imageData ? `<img class="msg-img-thumb" src="${m.imageData}" alt="上传图片" />` : ''}
-        ${m.role === 'ai' ? formatRichText(m.content) : escapeHtml(m.content).replace(/\n/g, '<br/>')}
+  box.innerHTML = msgs.map((m, i) => {
+    const sugs = Array.isArray(m.suggestions) ? m.suggestions : [];
+    return `
+      <div class="msg-row ${m.role}">
+        ${m.role === 'ai' ? `<div class="ai-coach-badge"><span>✦ 参悟 · ${escapeHtml(state.canwuRoom)}${state.canwuMentorMode ? '（带徒模式）' : ''}</span></div>` : ''}
+        <div class="msg-bubble">
+          ${m.imageData ? `<img class="msg-img-thumb" src="${m.imageData}" alt="上传图片" />` : ''}
+          ${m.role === 'ai' ? formatRichText(m.content) : escapeHtml(m.content).replace(/\n/g, '<br/>')}
+        </div>
+        ${m.role === 'ai' && !m.streaming && sugs.length ? `
+          <div class="ai-followups-wrap">
+            ${sugs.map(sq => `<button class="ai-followup-pill" onclick="quickAskCanwu('${escapeHtml(sq).replace(/'/g, "\\'")}')"><span>${escapeHtml(sq)}</span><span style="color:var(--accent);font-weight:700;flex-shrink:0;">↗</span></button>`).join('')}
+          </div>
+        ` : ''}
+        ${m.role === 'ai' && !m.streaming ? `<div class="msg-actions"><button class="msg-act-btn" onclick="starCurrentThread()">${th.starred ? '★ 已收藏' : '☆ 收藏对话'}</button><button class="msg-act-btn" onclick="chatFeedback()">手动记备忘</button><button class="msg-act-btn" onclick="chatSaveNote(${i})">存为笔记</button></div>` : ''}
       </div>
-      ${m.role === 'ai' && !m.streaming ? `<div class="msg-actions"><button class="msg-act-btn" onclick="starCurrentThread()">${th.starred ? '★ 已收藏' : '☆ 收藏对话'}</button><button class="msg-act-btn" onclick="chatFeedback()">记进 AI 备忘</button><button class="msg-act-btn" onclick="chatSaveNote(${i})">存为笔记</button></div>` : ''}
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 function quickAskCanwu(t) { document.getElementById('chatInput').value = t; sendCanwuMessage(); }
 function autoResizeInput(el) { el.style.height = '42px'; el.style.height = Math.min(112, el.scrollHeight) + 'px'; }
 function scrollChatToBottom(force = false) { const box = document.getElementById('chatMessages'); if (force) { state.userScrolledUp = false; document.getElementById('scrollLatestBtn').classList.remove('show'); } if (!state.userScrolledUp || force) box.scrollTop = box.scrollHeight; }
+
+function parseAiReplyAndSuggestions(rawText) {
+  const clean = String(rawText || '').replace(/\*/g, '').trim();
+  const parts = clean.split(/###追问建议###|【追问建议】/);
+  const mainBody = (parts[0] || clean).trim();
+  let suggestions = [];
+  if (parts[1]) {
+    suggestions = parts[1].split('\n')
+      .map(ln => ln.replace(/^[\d.\-•、\s]+/, '').trim())
+      .filter(ln => ln.length >= 4 && ln.length <= 36)
+      .slice(0, 3);
+  }
+  return { mainBody, suggestions };
+}
+
+async function silentExtractAutoMemory(room, userMsg, aiReply) {
+  try {
+    if (!state.settings.apiKey || (userMsg || '').length < 6) return;
+    const existing = state.memories.filter(m => m.category === room).slice(-12).map(m => m.text).join('；');
+    const prompt = `你是私人学习助手的记忆整理员。分析下面这轮对话，判断用户是否透露了值得长期记住的信息（例如：他的学习阶段、容易混淆的知识点、个人偏好习惯、刚复盘出的断法心得、或某件正在跟进的占问背景）。
+已有记忆（避免重复）：${existing || '无'}
+用户说：${userMsg.slice(0, 300)}
+教练答：${aiReply.slice(0, 300)}
+
+如果发现了新的、有长期价值的个人情况或学习心得，请用一句不超过 32 个字的客观陈述总结出来（严禁星号）；如果只是普通问答没有新的个人特征，只回复 NONE。`;
+    const res = (await callLLM([{ role: 'user', content: prompt }], { tier: 'flash' })).replace(/\*/g, '').trim();
+    if (!res || res === 'NONE' || res.includes('NONE') || res.length < 5 || res.length > 50) return;
+    const dup = state.memories.some(m => m.category === room && (m.text.includes(res.slice(0, 10)) || res.includes(m.text.slice(0, 10))));
+    if (dup) return;
+    await saveMemoryItem(room, 'auto', res);
+    // 单门类自动记忆上限保留 40 条，轻巧不占手机内存
+    const roomAutos = state.memories.filter(m => m.category === room && m.tier === 'auto').sort((a, b) => a.createdAt - b.createdAt);
+    while (roomAutos.length > 40) {
+      const oldest = roomAutos.shift();
+      await dbDel('memories', oldest.id);
+      state.memories = state.memories.filter(m => m.id !== oldest.id);
+    }
+  } catch (e) {}
+}
 
 async function sendCanwuMessage() {
   if (state.isStreaming || !ensureApiKey()) return;
@@ -368,40 +529,56 @@ async function sendCanwuMessage() {
   else if (th.title === '新对话') th.title = q.slice(0, 16);
 
   th.messages.push({ role: 'user', content: q, imageData: imgData || '' });
-  const aiMsg = { role: 'ai', content: imgData ? '正在识图并翻书推演...' : '正在思索翻书...', streaming: true };
+  const aiMsg = { role: 'ai', content: imgData ? '正在识图并翻书推演...' : '正在结合你的档案与书库思考...', streaming: true, suggestions: [] };
   th.messages.push(aiMsg); th.updatedAt = Date.now();
   state.isStreaming = true; state.userScrolledUp = false; renderCanwuView(); scrollChatToBottom(true);
 
   const bookCtx = retrieveFromSelectedBooks(state.books.filter(b => b.category === state.canwuRoom || b.category === '其他').map(b => b.id).slice(0, 4), q);
-  const mems = state.memories.filter(m => m.category === state.canwuRoom).slice(0, 12).map((m, i) => `${i + 1}. ${m.text}`).join('\n');
-  const sys = `你是用户的私人术数教练「参悟」，当前门类：【${state.canwuRoom}】。
-1. 直接给结论，再用 1. 2. 3. 编号讲人话，重点词用【】标注，严禁使用星号符号。
-2. 严禁吹捧迎合和模棱两可的套话；如果用户理法理解错了，温和但直接指出错在哪里。
+  const mems = state.memories.filter(m => m.category === state.canwuRoom).slice(-15).map((m, i) => `${i + 1}. ${m.text}`).join('\n');
+  const recentArchives = getRecentArchivesDigest(state.canwuRoom, 5);
+  const mentorRule = state.canwuMentorMode
+    ? `\n【当前开启了「带徒模式」】：请像坐在对面的实战师父一样引导用户自己思考！不要一上来就把所有结论和答案全倒出来，而是先点破最关键的切入点，然后抛出 1 个具体问题让用户自己判断（例如先让他定用神、或看月日旺衰、或辨动变趋势），等他下一轮回答后再点评并推进下一步。`
+    : `\n【表达风格】：像一位经验老道、说话直爽有温度的私人顾问兼师父，先一针见血给出核心判断，再结合人情世故与经典理法自然展开。不要死板套用「1. 2. 3. 填表模板」，按内容逻辑自然分段、善用【】标重点即可。`;
+
+  const sys = `你是用户的私人术数实战教练「参悟」，当前门类：【${state.canwuRoom}】，今日公历 ${formatDateKey(new Date())}。
+核心准则：
+1. 你拥有持久记忆系统，下面【用户长期记忆与备忘】和【用户近期实战档案库】就是你一直陪伴用户积累下来的真实记忆，绝不能说「我没有记忆」或「下次我会忘」。
+2. 严禁吹捧迎合和两头堵套话；如果用户理法理解错了，温和但直接指出错在哪里、为什么错。
 3. 只要展示六爻卦象，必须完整写出六爻阴阳、动静爻与旬空。
-4. 优先引用下方书房原书并标明《书名》第X页，绝不拿地摊玄学瞎编。${mems ? '\n【用户个人备忘】\n' + mems : ''}${getWeakSpotsPrompt()}${bookCtx ? '\n【书房原书摘录】\n' + bookCtx : ''}`;
+4. 优先引用下方书房原书并标明《书名》第X页，严禁在正文中出现任何星号符号。${mentorRule}
+5. 在回答全部结束后的最后一行，单独加上标记 ###追问建议### ，并在其后换行写出 3 个站在教练角度最值得用户接着追问或演练的短句（每句 8 到 22 字，一行一句，不要加序号）。${mems ? '\n【用户长期记忆与备忘】\n' + mems : ''}${recentArchives}${getWeakSpotsPrompt()}${bookCtx ? '\n【书房原书摘录】\n' + bookCtx : ''}`;
 
   try {
     if (imgData) {
+      let rawOut = '';
       if (hasVisionConfig()) {
-        const visOut = await callVisionLLM(imgData, q, sys);
-        aiMsg.content = visOut.replace(/\*/g, '').trim();
+        rawOut = await callVisionLLM(imgData, q, sys);
       } else {
         const ocrTxt = await extractTextFromImage(imgData);
         const combinedQ = `${q}\n\n【从用户上传照片中识别出的文字】：\n${ocrTxt || '(图片较模糊，未能抠出清晰文字，请提示用户在设置里配置一个免费的视觉识图模型如智谱 glm-4v-flash)'}`;
-        const out = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: combinedQ }]);
-        aiMsg.content = out.replace(/\*/g, '').trim();
+        rawOut = await callLLM([{ role: 'system', content: sys }, { role: 'user', content: combinedQ }]);
       }
+      const parsed = parseAiReplyAndSuggestions(rawOut);
+      aiMsg.content = parsed.mainBody;
+      aiMsg.suggestions = parsed.suggestions;
     } else {
-      await callLLM([{ role: 'system', content: sys }, ...th.messages.slice(-7, -1).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content }))], {
+      let fullRaw = '';
+      await callLLM([{ role: 'system', content: sys }, ...th.messages.slice(-17, -1).map(m => ({ role: m.role === 'ai' ? 'assistant' : 'user', content: m.content }))], {
         stream: true,
         onChunk: full => {
-          aiMsg.content = full;
+          fullRaw = full;
+          const previewBody = full.split(/###追问建议###|【追问建议】/)[0];
+          aiMsg.content = previewBody;
           const bs = document.querySelectorAll('#chatMessages .msg-row.ai .msg-bubble');
-          if (bs.length) bs[bs.length - 1].innerHTML = formatRichText(full);
+          if (bs.length) bs[bs.length - 1].innerHTML = formatRichText(previewBody);
           scrollChatToBottom(false);
         }
       });
+      const parsed = parseAiReplyAndSuggestions(fullRaw);
+      aiMsg.content = parsed.mainBody;
+      aiMsg.suggestions = parsed.suggestions;
     }
+    silentExtractAutoMemory(state.canwuRoom, q, aiMsg.content);
   } catch (e) { aiMsg.content = '请求中断：' + e.message; }
   finally { aiMsg.streaming = false; state.isStreaming = false; th.updatedAt = Date.now(); await dbPut('chats', th); await markDirty(); renderCanwuView(); scrollChatToBottom(false); }
 }
@@ -808,6 +985,8 @@ function openSettings() {
   const est = ((s.tokensIn / 1e6) * 1.5 + (s.tokensOut / 1e6) * 5).toFixed(3);
   document.getElementById('costStatsBox').textContent = `累计估算：输入 ${s.tokensIn} / 输出 ${s.tokensOut} tokens（约 ¥${est}）`;
   document.getElementById('cloudSyncStatus').textContent = s.lastSyncAt ? '上次同步：' + s.lastSyncAt : '未配置云同步（推荐使用上方 iCloud 备份）';
+  injectStartTabSettingOnce();
+  const stSel = document.getElementById('cfgStartTab'); if (stSel) stSel.value = s.startTab || 'library';
   refreshStorageStats();
   openSheet('sheet-settings');
 }
@@ -911,8 +1090,11 @@ async function initApp() {
     else { state.userScrolledUp = false; document.getElementById('scrollLatestBtn').classList.remove('show'); }
   });
   document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCanwuMessage(); } });
-  renderCatStrip(); renderDivineView(); renderCanwuRoomStrip(); startLiveClockSync(); bindPhoneShakeForCast();
+  reorderBottomNavLibraryFirst();
+  renderCatStrip(); renderCanwuRoomStrip(); startLiveClockSync(); bindPhoneShakeForCast();
   bindMainSwipeNavigation();
+  const startTab = state.settings.startTab || 'library';
+  switchMainTab(startTab);
   // 包装 markDirty：只要配好了云同步地址和口令，每次新增档案/笔记/备忘自动在后台静默同步
   if (typeof markDirty === 'function' && !markDirty._cloudWrapped) {
     const origMarkDirty = markDirty;
@@ -928,7 +1110,7 @@ function bindMainSwipeNavigation() {
   const shell = document.getElementById('appShell');
   if (!shell || shell._mainSwipeBound) return;
   shell._mainSwipeBound = true;
-  const tabOrder = ['divine', 'library', 'study', 'canwu'];
+  const tabOrder = ['library', 'divine', 'study', 'canwu'];
   let sx = 0, sy = 0, ignore = false;
   shell.addEventListener('touchstart', e => {
     const t = e.target;
@@ -957,3 +1139,33 @@ function bindMainSwipeNavigation() {
   }, { passive: true });
 }
 window.addEventListener('DOMContentLoaded', initApp);
+
+function reorderBottomNavLibraryFirst() {
+  const nav = document.querySelector('.bottom-nav, nav');
+  if (!nav || nav._v11Reordered) return;
+  const btns = Array.from(nav.querySelectorAll('.nav-item[data-tab]'));
+  if (btns.length < 4) return;
+  const order = ['library', 'divine', 'study', 'canwu'];
+  order.forEach(t => {
+    const el = btns.find(b => b.dataset.tab === t);
+    if (el) nav.appendChild(el);
+  });
+  nav._v11Reordered = true;
+}
+
+function injectStartTabSettingOnce() {
+  const el = document.getElementById('cfgExtBookUrl');
+  if (!el || document.getElementById('cfgStartTab')) return;
+  const field = el.closest('.form-field') || el.parentElement;
+  field.insertAdjacentHTML('beforebegin', `
+    <div class="form-field">
+      <label class="form-label">打开「藏往」默认首屏页面</label>
+      <select id="cfgStartTab" class="form-select" onchange="state.settings.startTab=this.value;saveSettingsMeta();showToast('已更新默认首屏页')">
+        <option value="library">书房（优先读书打地基）</option>
+        <option value="divine">排盘（优先起卦排盘）</option>
+        <option value="study">研习（优先实战演习）</option>
+        <option value="canwu">参悟（直接找 AI 教练）</option>
+      </select>
+    </div>
+  `);
+}
