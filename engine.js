@@ -726,40 +726,126 @@ function openCalJumpSheet() { document.getElementById('calJumpYear').value = sta
 function applyCalJump() { state.calYear = Math.max(1900, Math.min(2100, parseInt(document.getElementById('calJumpYear').value) || state.calYear)); state.calMonth = parseInt(document.getElementById('calJumpMonth').value) || 0; state.calSelectedDate = formatDateKey(new Date(state.calYear, state.calMonth, 1)); closeSheet('sheet-cal-jump'); renderCalendarView(); }
 function instantCastFromCal() { castState.lyDate = state.calSelectedDate + 'T12:00'; castState.lyDateManual = true; closeOverlay('calendarOverlay'); switchMainTab('divine'); switchCategory('六爻'); switchSubTab('cast'); showToast('已填入起卦时间'); }
 
-// ==================== 独立水墨电子罗盘 + 节日节气倒计时 ====================
-function openCompassOverlay() { renderCompassOverlay(); openOverlay('compassOverlay'); }
+// ==================== 独立水墨电子罗盘（SVG 二十四山 + 天心十字 + 水平校准 + 飞星） + 节日节气倒计时 ====================
+const LUOPAN_MOUNTAINS = ['子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙','午','丁','未','坤','申','庚','酉','辛','戌','乾','亥','壬'];
+const LUOPAN_TRIGRAMS = [
+  { deg: 0, sym: '☵', name: '坎·北' }, { deg: 45, sym: '☶', name: '艮·东北' },
+  { deg: 90, sym: '☳', name: '震·东' }, { deg: 135, sym: '☴', name: '巽·东南' },
+  { deg: 180, sym: '☲', name: '离·南' }, { deg: 225, sym: '☷', name: '坤·西南' },
+  { deg: 270, sym: '☱', name: '兑·西' }, { deg: 315, sym: '☰', name: '乾·西北' }
+];
+
+function getLuopanMeta(rawDeg) {
+  const deg = ((Number(rawDeg) || 0) % 360 + 360) % 360;
+  // 正北 0° 为子山中心，每山 15°（子：352.5°~7.5°）
+  const shifted = (deg + 7.5) % 360;
+  const towardIdx = Math.floor(shifted / 15) % 24;
+  const sitIdx = (towardIdx + 12) % 24;
+  const offsetInMount = (shifted % 15) - 7.5; // -7.5 ~ +7.5
+  let jianDesc = '正向正线';
+  if (offsetInMount <= -4.5) jianDesc = `兼${LUOPAN_MOUNTAINS[(towardIdx + 23) % 24]}（偏左）`;
+  else if (offsetInMount >= 4.5) jianDesc = `兼${LUOPAN_MOUNTAINS[(towardIdx + 1) % 24]}（偏右）`;
+  const sitM = LUOPAN_MOUNTAINS[sitIdx], towardM = LUOPAN_MOUNTAINS[towardIdx];
+  const eastMounts = new Set(['壬','子','癸','甲','卯','乙','辰','巽','巳','丙','午','丁']);
+  const zhaiGroup = eastMounts.has(sitM) ? '东四宅（坎离震巽）' : '西四宅（乾坤艮兑）';
+  return { deg, sitM, towardM, jianDesc, zhaiGroup };
+}
+
+function buildInkLuopanSvg(deg, showCross = true, size = 276) {
+  const cx = 150, cy = 150;
+  let ticks = '';
+  for (let a = 0; a < 360; a += 5) {
+    const rad = (a - 90) * Math.PI / 180;
+    const isMajor = a % 15 === 0;
+    const r1 = 144, r2 = isMajor ? 136 : 140;
+    ticks += `<line x1="${(cx + r1 * Math.cos(rad)).toFixed(1)}" y1="${(cy + r1 * Math.sin(rad)).toFixed(1)}" x2="${(cx + r2 * Math.cos(rad)).toFixed(1)}" y2="${(cy + r2 * Math.sin(rad)).toFixed(1)}" stroke="${isMajor ? '#4A5550' : '#A8B0AC'}" stroke-width="${isMajor ? 1.2 : 0.7}"/>`;
+  }
+  let mTexts = '';
+  LUOPAN_MOUNTAINS.forEach((m, i) => {
+    const angle = i * 15;
+    const rad = (angle - 90) * Math.PI / 180;
+    const isCardinal = i % 6 === 0;
+    const tx = cx + 118 * Math.cos(rad), ty = cy + 118 * Math.sin(rad);
+    const sepRad = (angle - 7.5 - 90) * Math.PI / 180;
+    mTexts += `<line x1="${(cx + 102 * Math.cos(sepRad)).toFixed(1)}" y1="${(cy + 102 * Math.sin(sepRad)).toFixed(1)}" x2="${(cx + 134 * Math.cos(sepRad)).toFixed(1)}" y2="${(cy + 134 * Math.sin(sepRad)).toFixed(1)}" stroke="rgba(45,55,50,0.22)" stroke-width="0.8"/>`;
+    mTexts += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="11.5" font-weight="${isCardinal ? '700' : '600'}" fill="${isCardinal ? '#A63D33' : '#242A27'}" transform="rotate(${angle} ${tx.toFixed(1)} ${ty.toFixed(1)})">${m}</text>`;
+  });
+  let gTexts = '';
+  LUOPAN_TRIGRAMS.forEach(g => {
+    const rad = (g.deg - 90) * Math.PI / 180;
+    const tx = cx + 82 * Math.cos(rad), ty = cy + 82 * Math.sin(rad);
+    const sx = cx + 63 * Math.cos(rad), sy = cy + 63 * Math.sin(rad);
+    gTexts += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="600" fill="#4C5852" transform="rotate(${g.deg} ${tx.toFixed(1)} ${ty.toFixed(1)})">${g.name}</text>`;
+    gTexts += `<text x="${sx.toFixed(1)}" y="${sy.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="12" fill="#7A8680" transform="rotate(${g.deg} ${sx.toFixed(1)} ${sy.toFixed(1)})">${g.sym}</text>`;
+  });
+  return `<svg viewBox="0 0 300 300" width="${size}" height="${size}" style="display:block;margin:4px auto;user-select:none;">
+    <defs>
+      <radialGradient id="inkDialBg" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stop-color="#FAF8F3"/>
+        <stop offset="70%" stop-color="#F2EFE8"/>
+        <stop offset="100%" stop-color="#E7E2D7"/>
+      </radialGradient>
+    </defs>
+    <g transform="rotate(${(-deg).toFixed(1)} 150 150)">
+      <circle cx="150" cy="150" r="145" fill="url(#inkDialBg)" stroke="#2F3834" stroke-width="1.8"/>
+      <circle cx="150" cy="150" r="134" fill="none" stroke="rgba(45,55,50,0.3)" stroke-width="0.9"/>
+      <circle cx="150" cy="150" r="102" fill="rgba(255,255,255,0.45)" stroke="rgba(45,55,50,0.35)" stroke-width="1"/>
+      <circle cx="150" cy="150" r="50" fill="#FAF8F4" stroke="rgba(45,55,50,0.3)" stroke-width="1"/>
+      ${ticks}
+      ${mTexts}
+      ${gTexts}
+    </g>
+    ${showCross ? `
+      <line x1="150" y1="6" x2="150" y2="294" stroke="rgba(166,61,51,0.72)" stroke-width="1.2" stroke-dasharray="3 2"/>
+      <line x1="6" y1="150" x2="294" y2="150" stroke="rgba(166,61,51,0.52)" stroke-width="1.1" stroke-dasharray="3 2"/>
+    ` : ''}
+    <polygon points="150,2 144,13 156,13" fill="#A63D33"/>
+    <circle cx="150" cy="150" r="3.5" fill="#A63D33"/>
+  </svg>`;
+}
+
+function openCompassOverlay() {
+  if (typeof state.compass.showCross !== 'boolean') state.compass.showCross = true;
+  renderCompassOverlay();
+  openOverlay('compassOverlay');
+}
 function renderCompassOverlay() {
-  const mountains = ['壬','子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙','午','丁','未','坤','申','庚','酉','辛','戌','乾','亥'];
-  const deg = ((state.compass.heading % 360) + 360) % 360, mIdx = Math.floor(((deg + 7.5) % 360) / 15), sitIdx = (mIdx + 12) % 24;
+  const meta = getLuopanMeta(state.compass.heading);
   const starInfo = { 1:['一白贪狼','桃花人缘',true],2:['二黑巨门','病符宜静',false],3:['三碧禄存','是非口舌',false],4:['四绿文曲','文昌学业',true],5:['五黄廉贞','煞位忌动',false],6:['六白武曲','偏财贵人',true],7:['七赤破军','破财防盗',false],8:['八白左辅','正财旺位',true],9:['九紫右弼','喜庆旺运',true] };
   const center = ((11 - ((state.compass.year - 2000) % 9)) % 9) || 9;
   const stars = [['东南',-1],['正南',4],['西南',-3],['正东',-2],['中宫',0],['正西',2],['东北',3],['正北',-4],['西北',1]].map(([dir, off]) => { const n = ((center + off - 1 + 18) % 9) + 1; return { dir, star: starInfo[n][0], desc: starInfo[n][1], good: starInfo[n][2] }; });
+  const tilt = state.compass.tiltInfo || '水平校准：放平手机即可测准';
   document.getElementById('compassScrollArea').innerHTML = `
-    <div class="card" style="text-align:center;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <div class="card" style="text-align:center;padding:15px 14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:6px;flex-wrap:wrap;">
         <span class="pill-mini xs accent">${escapeHtml(state.compass.stability)}</span>
-        <button class="pill-mini xs ${state.compass.locked?'seal':''}" onclick="state.compass.locked=!state.compass.locked;renderCompassOverlay()">${state.compass.locked?'已锁定':'锁定度数'}</button>
-      </div>
-      <div class="compass-dial-wrap">
-        <div class="compass-needle-fixed"></div>
-        <div class="compass-wheel" style="transform:rotate(${-deg}deg);">
-          <span class="compass-dir-mark" style="top:8px;left:50%;transform:translateX(-50%);color:var(--seal);">北·子</span>
-          <span class="compass-dir-mark" style="bottom:8px;left:50%;transform:translateX(-50%);">南·午</span>
-          <span class="compass-dir-mark" style="right:10px;top:50%;transform:translateY(-50%);">东·卯</span>
-          <span class="compass-dir-mark" style="left:10px;top:50%;transform:translateY(-50%);">西·酉</span>
-          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(${deg}deg);">
-            <div style="font-family:'Songti SC',serif;font-size:26px;font-weight:700;">坐${mountains[sitIdx]}向${mountains[mIdx]}</div>
-            <div style="font-size:13px;color:var(--text-3);margin-top:2px;">${deg.toFixed(0)}°</div>
-          </div>
+        <div style="display:flex;gap:6px;">
+          <button class="pill-mini xs ${state.compass.showCross!==false?'accent':''}" onclick="state.compass.showCross=!(state.compass.showCross!==false);renderCompassOverlay()">天心十字</button>
+          <button class="pill-mini xs ${state.compass.locked?'seal':''}" onclick="state.compass.locked=!state.compass.locked;renderCompassOverlay()">${state.compass.locked?'已锁定坐向':'锁定坐向'}</button>
         </div>
       </div>
-      <input type="range" min="0" max="359" value="${deg}" style="width:100%;accent-color:var(--accent);" oninput="state.compass.heading=Number(this.value);state.compass.stability='手动校准模式';renderCompassOverlay()" />
-      <div style="font-size:12px;color:var(--text-3);margin-top:8px;line-height:1.55;">准度提示：户外空旷处手机磁力计误差极小；室内钢筋或磁吸壳易干扰磁场，请远离金属并按「8字形」晃动手机 3 秒校准。</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-radius:12px;background:var(--bg);margin-bottom:8px;">
+        <div style="text-align:left;">
+          <div style="font-family:'Songti SC',serif;font-size:21px;font-weight:700;color:var(--text);">坐${meta.sitM}向${meta.towardM}</div>
+          <div style="font-size:11.5px;color:var(--text-3);">${meta.jianDesc} · ${meta.zhaiGroup}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:20px;font-weight:700;color:var(--seal);">${meta.deg.toFixed(1)}°</div>
+          <div style="font-size:11px;color:var(--text-3);">${escapeHtml(tilt)}</div>
+        </div>
+      </div>
+      ${buildInkLuopanSvg(meta.deg, state.compass.showCross !== false, 276)}
+      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+        <button class="pill-mini xs" onclick="state.compass.heading=(state.compass.heading+359)%360;state.compass.stability='手动微调';renderCompassOverlay()">-1°</button>
+        <input type="range" min="0" max="359" value="${Math.round(meta.deg)}" style="flex:1;accent-color:var(--accent);" oninput="state.compass.heading=Number(this.value);state.compass.stability='手动微调';renderCompassOverlay()" />
+        <button class="pill-mini xs" onclick="state.compass.heading=(state.compass.heading+1)%360;state.compass.stability='手动微调';renderCompassOverlay()">+1°</button>
+      </div>
+      <div style="font-size:11.5px;color:var(--text-3);margin-top:8px;line-height:1.55;">实测诀窍：站屋中或大门内侧，手机水平端平、远离金属与磁吸壳，按「8字形」晃动 3 秒校准后点「锁定坐向」。</div>
     </div>
     <div class="card">
       <div class="card-head"><span class="card-title">${state.compass.year} 年玄空飞星吉凶</span><div style="display:flex;gap:6px;"><button class="pill-mini xs" onclick="state.compass.year--;renderCompassOverlay()">‹</button><button class="pill-mini xs" onclick="state.compass.year++;renderCompassOverlay()">›</button></div></div>
       <div class="nine-grid">${stars.map(c => `<div class="nine-cell"><strong>${c.dir}</strong><br/><span style="color:${c.good?'var(--wx-wood)':'var(--seal)'};font-weight:700;">${c.star}</span><br/><span style="font-size:11px;color:var(--text-3);">${c.desc}</span></div>`).join('')}</div>
-      <button class="btn-primary" style="width:100%;margin-top:14px;" onclick="closeOverlay('compassOverlay');castState.fsHeading=state.compass.heading;castState.fsYear=state.compass.year;submitFengshuiAI()">让参悟结合此坐向与飞星解析</button>
+      <button class="btn-primary" style="width:100%;margin-top:14px;" onclick="closeOverlay('compassOverlay');castState.fsHeading=state.compass.heading;castState.fsYear=state.compass.year;submitFengshuiAI()">让参悟结合「坐${meta.sitM}向${meta.towardM}」与飞星解析</button>
     </div>
   `;
 }
@@ -1348,16 +1434,29 @@ function submitZiweiCast() {
 }
 
 function renderFengshuiCastForm(wrap) {
-  const mountains = ['壬','子','癸','丑','艮','寅','甲','卯','乙','辰','巽','巳','丙','午','丁','未','坤','申','庚','酉','辛','戌','乾','亥'];
-  const deg = ((castState.fsHeading % 360) + 360) % 360, mIdx = Math.floor(((deg + 7.5) % 360) / 15), sitIdx = (mIdx + 12) % 24;
-  wrap.innerHTML = `<div class="card" style="text-align:center;"><div class="card-head"><span class="card-title">水墨罗盘与玄空飞星</span><button class="pill-mini xs accent" onclick="openCompassOverlay()">全屏罗盘 ›</button></div><div style="font-family:'Songti SC',serif;font-size:26px;font-weight:700;color:var(--accent);margin:8px 0;">坐${mountains[sitIdx]}向${mountains[mIdx]}（${deg.toFixed(0)}°）</div><input type="range" min="0" max="359" value="${deg}" style="width:100%;accent-color:var(--accent);margin:8px 0;" oninput="castState.fsHeading=Number(this.value);state.compass.heading=Number(this.value);renderDivineView()" /><button class="btn-primary" style="width:100%;margin-top:10px;" onclick="submitFengshuiAI()">让参悟分析坐向与流年飞星</button></div>`;
+  const meta = getLuopanMeta(castState.fsHeading);
+  wrap.innerHTML = `<div class="card" style="text-align:center;">
+    <div class="card-head">
+      <span class="card-title">水墨二十四山罗盘</span>
+      <button class="pill-mini xs accent" onclick="state.compass.heading=castState.fsHeading;openCompassOverlay()">全屏实测罗盘 ›</button>
+    </div>
+    <div style="font-family:'Songti SC',serif;font-size:23px;font-weight:700;color:var(--accent);margin:4px 0 2px;">坐${meta.sitM}向${meta.towardM}（${meta.deg.toFixed(0)}°）</div>
+    <div style="font-size:12px;color:var(--text-3);margin-bottom:6px;">${meta.jianDesc} · ${meta.zhaiGroup}</div>
+    ${buildInkLuopanSvg(meta.deg, true, 210)}
+    <input type="range" min="0" max="359" value="${Math.round(meta.deg)}" style="width:100%;accent-color:var(--accent);margin:8px 0;" oninput="castState.fsHeading=Number(this.value);state.compass.heading=Number(this.value);renderDivineView()" />
+    <button class="btn-primary" style="width:100%;margin-top:8px;" onclick="submitFengshuiAI()">让参悟分析坐向与 ${castState.fsYear} 年飞星</button>
+  </div>`;
 }
 function enableLiveCompass() {
   const h = e => {
     if (state.compass.locked) return;
     const deg = typeof e.webkitCompassHeading === 'number' ? e.webkitCompassHeading : (e.alpha != null ? 360 - e.alpha : null);
+    if (typeof e.beta === 'number' && typeof e.gamma === 'number') {
+      const tiltMag = Math.max(Math.abs(e.beta), Math.abs(e.gamma));
+      state.compass.tiltInfo = tiltMag <= 10 ? '手机已放平' : `倾斜 ${Math.round(tiltMag)}° · 请放平`;
+    }
     if (deg != null) {
-      const r = Math.round(deg);
+      const r = Math.round(deg * 10) / 10;
       state.compass.lastReadings.push(r); if (state.compass.lastReadings.length > 6) state.compass.lastReadings.shift();
       const spread = Math.max(...state.compass.lastReadings) - Math.min(...state.compass.lastReadings);
       state.compass.stability = spread > 25 && spread < 335 ? '磁场波动 · 请8字晃动校准' : '磁场稳定 · 实测中';
@@ -1368,7 +1467,12 @@ function enableLiveCompass() {
   if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') DeviceOrientationEvent.requestPermission().then(r => { if (r === 'granted') { window.addEventListener('deviceorientation', h); showToast('已开启陀螺仪，可做8字校准'); } });
   else { window.addEventListener('deviceorientation', h); showToast('已启用罗盘感应'); }
 }
-function submitFengshuiAI() { switchMainTab('canwu'); switchCanwuRoom('风水'); document.getElementById('chatInput').value = `当前方位角 ${castState.fsHeading}°，流年 ${castState.fsYear} 年九宫飞星已排好，请结合我的风水书库给出布局与避煞建议。`; sendCanwuMessage(); }
+function submitFengshuiAI() {
+  const meta = getLuopanMeta(castState.fsHeading);
+  switchMainTab('canwu'); switchCanwuRoom('风水');
+  document.getElementById('chatInput').value = `当前罗盘实测为【坐${meta.sitM}向${meta.towardM}】（${meta.deg.toFixed(1)}°，${meta.jianDesc}，属${meta.zhaiGroup}），结合 ${castState.fsYear} 年玄空九宫飞星，请给出务实的家居/工位吉凶布局与避煞建议。`;
+  sendCanwuMessage();
+}
 
 // ==================== 断事卷宗结果页（默认清净原盘 + 旬空直标 + 专业八字三页签） ====================
 function openLiuyaoResult(rec, skipHistory = false) {
@@ -1414,6 +1518,41 @@ function askCanwuFromTagTip() {
   sendCanwuMessage();
 }
 
+function buildBaziWxRatioHtml(ps) {
+  const scores = { '金': 0, '木': 0, '水': 0, '火': 0, '土': 0 };
+  const dmWx = ps[2].swx;
+  const stemW = [10, 12, 12, 10];
+  const brW = [12, 34, 18, 12];
+  ps.forEach((p, idx) => {
+    if (scores[p.swx] !== undefined) scores[p.swx] += stemW[idx];
+    const hs = (p.hiddenList || []);
+    const ratios = hs.length === 1 ? [1] : (hs.length === 2 ? [0.7, 0.3] : [0.6, 0.25, 0.15]);
+    hs.forEach((h, hi) => {
+      if (scores[h.wx] !== undefined) scores[h.wx] += brW[idx] * (ratios[hi] || 0.15);
+    });
+  });
+  const total = Object.values(scores).reduce((a, b) => a + b, 0) || 1;
+  const wxMeta = [
+    ['金', '#B8893A'], ['木', '#3F7D58'], ['水', '#366899'], ['火', '#B84438'], ['土', '#8C6C49']
+  ];
+  const relLabel = wx => {
+    const order = ['木','火','土','金','水'];
+    const diff = (order.indexOf(wx) - order.indexOf(dmWx) + 5) % 5;
+    return ['比劫','食伤','财才','官杀','印枭'][diff];
+  };
+  return `<div style="margin-top:10px;padding:12px 13px;border-radius:14px;background:var(--bg);">
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px;display:flex;justify-content:space-between;"><span>五行力量占比（含月令与藏干权重）</span><span style="font-size:11.5px;font-weight:400;color:var(--text-3);">辅助参考</span></div>
+    ${wxMeta.map(([wx, col]) => {
+      const pct = (scores[wx] / total * 100);
+      return `<div style="display:grid;grid-template-columns:20px 1fr 78px;align-items:center;gap:8px;margin-bottom:6px;font-size:12.5px;">
+        <strong style="color:${col};">${wx}</strong>
+        <div style="height:8px;border-radius:99px;background:rgba(0,0,0,0.06);overflow:hidden;"><div style="width:${Math.max(2, pct).toFixed(1)}%;height:100%;background:${col};border-radius:99px;"></div></div>
+        <span style="text-align:right;color:var(--text-2);font-size:12px;">${pct.toFixed(1)}% ${relLabel(wx)}</span>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
 function renderBaziResultCard(rec) {
   const d = rec.data, ps = d.pillars;
   const tabBar = `<div class="bz-tab-bar">${[['info','基本信息'],['basic','基础命盘'],['fine','专业细盘']].map(([k,l]) => `<button class="btn-secondary" style="padding:8px 2px;font-size:13px;${state.bzResTab===k?'background:var(--primary);color:var(--primary-fg);font-weight:600;':''}" onclick="state.bzResTab='${k}';renderResultOverlay()">${l}</button>`).join('')}</div>`;
@@ -1438,7 +1577,9 @@ function renderBaziResultCard(rec) {
     <div style="margin-top:12px;padding:11px 13px;border-radius:14px;background:var(--bg);">
       <div style="display:flex;justify-content:space-between;font-size:13px;"><span>日主 <strong>${escapeHtml(d.dmLabel||'')}</strong></span><span>同党 ${d.samePct||50}% vs 异党 ${d.diffPct||50}%</span></div>
       <div class="party-bar"><div style="width:${d.samePct||50}%;background:var(--accent);"></div><div style="width:${d.diffPct||50}%;background:var(--seal);"></div></div>
-    </div></div>`;
+    </div>
+    ${buildBaziWxRatioHtml(ps)}
+    </div>`;
   }
 
   if (state.bzResTab === 'basic') {
@@ -1585,17 +1726,27 @@ function renderResultOverlay() {
     chartHtml = renderBaziResultCard(rec);
   } else if (rec.category === '奇门') {
     const d = rec.data;
-    chartHtml = `<div class="card"><div class="gz-banner">${d.dun} · ${d.type}</div><div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:8px;"><div><strong>四柱：</strong>${d.gz}（空${d.xunkong}）</div><div><strong>值符：</strong><span style="color:var(--seal);font-weight:700;">${d.zhiFuStar}</span> · <strong>值使：</strong><span style="color:var(--seal);font-weight:700;">${d.zhiShiDoor}</span> · <strong>旬首：</strong>${d.xunShou} · <strong>马星：</strong>${d.yimaBr}${d.nianMingGz ? ` · <strong style="color:var(--seal);">年命 ${d.nianMingGz}</strong>` : ''}</div></div><div class="nine-grid">${d.palaces.map(p => `<div class="qimen-cell ${p.isNianMing?'nianming':''}"><div class="qimen-row"><span style="color:var(--text-3);">${p.god}</span><span style="color:var(--seal);font-weight:700;">${p.isNianMing?'命':''}${p.isKong?'空':''}${p.isMa?'马':''}${(p.warns||[]).join('')}</span></div><div class="qimen-row"><span style="font-weight:700;">${p.star}</span><strong style="font-size:14px;">${p.tian}</strong></div><div class="qimen-row"><span style="color:var(--accent);font-weight:600;">${p.door}</span><span>${p.di}</span></div><div class="qimen-row" style="font-size:10px;color:var(--text-3);"><span>${p.gName}</span><span>暗${p.anGan||'-'}</span></div></div>`).join('')}</div><div style="font-size:11.5px;color:var(--text-3);margin-top:8px;">红标提示：迫=门迫、刑=击刑、墓=入墓、空=空亡、马=马星</div></div>`;
+    chartHtml = `<div class="card"><div class="gz-banner">${d.dun} · ${d.type}</div><div style="font-size:13px;color:var(--text-2);line-height:1.7;margin-bottom:8px;"><div><strong>四柱：</strong>${d.gz}（空${d.xunkong}）</div><div><strong>值符：</strong><span style="color:var(--seal);font-weight:700;">${d.zhiFuStar}</span> · <strong>值使：</strong><span style="color:var(--seal);font-weight:700;">${d.zhiShiDoor}</span> · <strong>旬首：</strong>${d.xunShou} · <strong>马星：</strong>${d.yimaBr}${d.nianMingGz ? ` · <strong style="color:var(--seal);">年命 ${d.nianMingGz}</strong>` : ''}</div></div><div class="nine-grid">${d.palaces.map(p => `<div class="qimen-cell ${p.isNianMing?'nianming':''}"><div class="qimen-row"><span style="color:var(--text-3);">${p.god}</span><span style="color:var(--seal);font-weight:700;">${p.isNianMing?'命':''}${p.isKong?'空':''}${p.isMa?'马':''}${(p.warns||[]).join('')}</span></div><div class="qimen-row"><span style="font-weight:700;">${p.star}</span><strong style="font-size:14px;">${p.tian}</strong></div><div class="qimen-row"><span style="color:var(--accent);font-weight:600;">${p.door}</span><span>${p.di}</span></div><div class="qimen-row" style="font-size:10px;color:var(--text-3);"><span>${p.gName}</span><span>暗${p.anGan||'-'}</span></div></div>`).join('')}</div><div style="font-size:11.5px;color:var(--text-3);margin-top:8px;">红标提示：迫=门迫、刑=击刑、墓=入墓、空=空亡、马=马星</div>
+      <div style="margin-top:8px;padding:9px 11px;border-radius:11px;background:var(--bg);font-size:12.5px;line-height:1.65;color:var(--text-2);">
+        <strong>看盘抓手：</strong>先找日干（代表自己）与时干（代表所测之事）落宫生克，再核对落宫是否逢「迫、刑、墓、空」四害；吉门（开休生）逢吉星无四害则顺。
+      </div></div>`;
   } else if (rec.category === '梅花') {
     const d = rec.data, mh = HEX_DATA.byKey[d.mainKey], hh = HEX_DATA.byKey[d.huKey], bh = HEX_DATA.byKey[d.bianKey];
     const drawMini = (hex, mov) => `<div style="display:flex;flex-direction:column;gap:4px;margin:8px auto;width:54px;">${[5,4,3,2,1,0].map(i=>`<div style="height:5px;width:100%;border-radius:2px;display:flex;justify-content:space-between;${hex.bits[i]?'background:'+(mov===i+1?'var(--seal)':'var(--text)')+';':''}">${hex.bits[i]?'':`<span style="width:43%;height:100%;border-radius:2px;background:${mov===i+1?'var(--seal)':'var(--text)'};"></span><span style="width:43%;height:100%;border-radius:2px;background:${mov===i+1?'var(--seal)':'var(--text)'};"></span>`}</div>`).join('')}</div>`;
     chartHtml = `<div class="card"><div class="gz-banner">${d.gz}（空${d.xunkong}）</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;"><div class="pillar-col"><div class="pillar-lbl">本卦(${d.movPos}爻动)</div>${drawMini(mh, d.movPos)}<strong>${mh.name}</strong></div><div class="pillar-col"><div class="pillar-lbl">互卦(过程)</div>${drawMini(hh, 0)}<strong>${hh.name}</strong></div><div class="pillar-col"><div class="pillar-lbl">变卦(结局)</div>${drawMini(bh, 0)}<strong>${bh.name}</strong></div></div><div style="margin-top:12px;font-size:14px;font-weight:600;color:var(--accent);text-align:center;">体卦 ${d.tiName} vs 用卦 ${d.yongName}<br/>${d.tiYongRel}</div><div style="margin-top:10px;padding:10px 12px;border-radius:12px;background:var(--bg);font-size:13px;line-height:1.68;"><strong>本卦卦辞：</strong>${escapeHtml(mh.guaci)}</div></div>`;
   } else if (rec.category === '六壬') {
     const d = rec.data;
-    chartHtml = `<div class="card"><div class="gz-banner">${d.gz}</div><div style="font-size:13.5px;color:var(--text-2);margin-bottom:10px;"><strong>月将：</strong>${d.yueJiang} · <strong>贵人：</strong>${d.guiType} · <strong>旬空：</strong>${d.xunkong}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">${d.sanchuan.map(c => `<div class="nine-cell"><div style="color:var(--text-3);font-size:11px;">${c.lbl}</div><div style="font-size:16px;font-weight:700;color:var(--seal);">${c.br}</div><div>${c.lq} · ${c.jiang}</div></div>`).join('')}</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">${d.sike.map(k => `<div class="nine-cell"><div style="font-size:10.5px;color:var(--text-3);">${k.jiang}</div><div style="font-weight:700;">${k.top} / ${k.bot}</div><div style="font-size:10px;color:var(--text-3);">${k.lbl}</div></div>`).join('')}</div></div>`;
+    chartHtml = `<div class="card"><div class="gz-banner">${d.gz}</div><div style="font-size:13.5px;color:var(--text-2);margin-bottom:10px;"><strong>月将：</strong>${d.yueJiang} · <strong>贵人：</strong>${d.guiType} · <strong>旬空：</strong>${d.xunkong}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">${d.sanchuan.map(c => `<div class="nine-cell"><div style="color:var(--text-3);font-size:11px;">${c.lbl}</div><div style="font-size:16px;font-weight:700;color:var(--seal);">${c.br}</div><div>${c.lq} · ${c.jiang}</div></div>`).join('')}</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">${d.sike.map(k => `<div class="nine-cell"><div style="font-size:10.5px;color:var(--text-3);">${k.jiang}</div><div style="font-weight:700;">${k.top} / ${k.bot}</div><div style="font-size:10px;color:var(--text-3);">${k.lbl}</div></div>`).join('')}</div>
+      <div style="margin-top:10px;padding:9px 11px;border-radius:11px;background:var(--bg);font-size:12.5px;line-height:1.65;color:var(--text-2);">
+        <strong>三传速读：</strong>初传（${d.sanchuan[0]?.br||''}·${d.sanchuan[0]?.jiang||''}）看发端切入 → 中传（${d.sanchuan[1]?.br||''}·${d.sanchuan[1]?.jiang||''}）看过程推进 → 末传（${d.sanchuan[2]?.br||''}·${d.sanchuan[2]?.jiang||''}）定最终归宿。
+      </div></div>`;
   } else {
     const d = rec.data;
-    chartHtml = `<div class="card"><div class="gz-banner">${d.gz}</div><div style="font-size:13.5px;color:var(--text-2);margin-bottom:8px;"><strong>五行局：</strong>${d.wuxingJu || ''} · <strong>生年四化：</strong><span style="color:var(--seal);font-weight:600;">${d.sihua || ''}</span></div><div class="nine-grid">${(d.gongs || []).map(g => `<div class="nine-cell"><strong>${g.name}（${g.branch}）</strong><br/>${g.star}</div>`).join('')}</div></div>`;
+    chartHtml = `<div class="card"><div class="gz-banner">${d.gz}</div><div style="font-size:13.5px;color:var(--text-2);margin-bottom:8px;"><strong>五行局：</strong>${d.wuxingJu || ''} · <strong>生年四化：</strong><span style="color:var(--seal);font-weight:600;">${d.sihua || ''}</span></div><div class="nine-grid">${(d.gongs || []).map(g => {
+      const isSanFang = /^(命宫|财帛|官禄|迁移)/.test(g.name);
+      return `<div class="nine-cell" style="${isSanFang?'border:1px solid var(--accent);background:var(--accent-soft);':''}"><strong>${g.name}（${g.branch}）</strong><br/>${g.star}</div>`;
+    }).join('')}</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--text-3);">青框已自动标出「命宫、迁移、官禄、财帛」三方四正核心联动宫位。</div></div>`;
   }
 
   const catBooks = state.books.filter(b => b.category === rec.category || b.category === '其他');

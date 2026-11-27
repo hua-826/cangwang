@@ -643,6 +643,25 @@ async function buildTextVaultPayload() {
     }
   };
 }
+
+// 轻重分离云同步包：只同步高价值轻文字（档案、笔记、AI备忘、练习盲区、自扩断法、近100条历史），绝不上传笨重PDF和大书译文，省内存防卡顿
+async function buildLiteCloudPayload() {
+  const histAll = (await dbGetAll('history')).sort((a, b) => (b.histCreatedAt || b.createdAt || 0) - (a.histCreatedAt || a.createdAt || 0)).slice(0, 100);
+  return {
+    version: 'CangwangV10_Lite', exportedAt: new Date().toISOString(),
+    notes: await dbGetAll('notes'),
+    archives: await dbGetAll('archives'),
+    history: histAll,
+    memories: await dbGetAll('memories'),
+    footprints: await dbGetAll('footprints'),
+    settingsLite: {
+      theme: state.settings.theme, groups: state.settings.groups, myDayPillar: state.settings.myDayPillar,
+      extBookUrl: state.settings.extBookUrl, weakSpots: state.settings.weakSpots,
+      customDict: state.customDict
+    }
+  };
+}
+
 async function applyTextVaultPayload(data) {
   if (!data || !Array.isArray(data.archives)) throw new Error('备份文件格式不匹配');
   for (const st of ['books','chapters','notes','archives','history','chats','memories','footprints']) {
@@ -655,22 +674,31 @@ async function applyTextVaultPayload(data) {
   await loadAllFromDB(); applyVisualTheme(); renderAllCurrentViews(); updateFollowupBadge();
 }
 
-async function pushToCloudD1() {
-  saveGeneralSettings(true);
+let autoCloudSyncTimer = null;
+function scheduleAutoCloudSync() {
+  const { syncUrl, vaultPass } = state.settings;
+  if (!syncUrl || !vaultPass) return;
+  clearTimeout(autoCloudSyncTimer);
+  autoCloudSyncTimer = setTimeout(() => { pushToCloudD1(true); }, 4000);
+}
+
+async function pushToCloudD1(silent = false) {
+  if (!silent) saveGeneralSettings(true);
   const { syncUrl, vaultPass, e2eEncrypt } = state.settings;
-  if (!syncUrl || !vaultPass) return showToast('请先填写 Worker 地址和口令');
-  showToast('正在加密上传云端...');
+  if (!syncUrl || !vaultPass) { if (!silent) showToast('请先填写 Worker 地址和口令'); return; }
+  if (!silent) showToast('正在加密上传核心数据（轻重分离）...');
   try {
-    let bodyStr = JSON.stringify(await buildTextVaultPayload());
+    let bodyStr = JSON.stringify(await buildLiteCloudPayload());
     if (e2eEncrypt) bodyStr = await encryptPayload(bodyStr, vaultPass);
     const resp = await fetch(syncUrl.replace(/\/$/, '') + '/sync', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Vault-Token': vaultPass }, body: JSON.stringify({ payload: bodyStr }) });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     state.settings.dirtySinceBackup = false; state.settings.lastSyncAt = new Date().toLocaleString();
     document.getElementById('backupDot')?.classList.remove('show');
     await saveSettingsMeta();
-    document.getElementById('cloudSyncStatus').textContent = '上次同步：' + state.settings.lastSyncAt;
-    showToast('已同步至云端');
-  } catch (e) { showToast('上传失败：' + e.message); }
+    const stEl = document.getElementById('cloudSyncStatus');
+    if (stEl) stEl.textContent = '上次同步（轻量核心）：' + state.settings.lastSyncAt;
+    if (!silent) showToast('核心档案与笔记已加密同步至云端');
+  } catch (e) { if (!silent) showToast('上传失败：' + e.message); }
 }
 async function pullFromCloudD1() {
   saveGeneralSettings(true);
@@ -884,5 +912,48 @@ async function initApp() {
   });
   document.getElementById('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendCanwuMessage(); } });
   renderCatStrip(); renderDivineView(); renderCanwuRoomStrip(); startLiveClockSync(); bindPhoneShakeForCast();
+  bindMainSwipeNavigation();
+  // 包装 markDirty：只要配好了云同步地址和口令，每次新增档案/笔记/备忘自动在后台静默同步
+  if (typeof markDirty === 'function' && !markDirty._cloudWrapped) {
+    const origMarkDirty = markDirty;
+    window.markDirty = async function() {
+      await origMarkDirty();
+      scheduleAutoCloudSync();
+    };
+    window.markDirty._cloudWrapped = true;
+  }
+}
+
+function bindMainSwipeNavigation() {
+  const shell = document.getElementById('appShell');
+  if (!shell || shell._mainSwipeBound) return;
+  shell._mainSwipeBound = true;
+  const tabOrder = ['divine', 'library', 'study', 'canwu'];
+  let sx = 0, sy = 0, ignore = false;
+  shell.addEventListener('touchstart', e => {
+    const t = e.target;
+    ignore = Boolean(
+      document.querySelector('.overlay-page.open, .sheet-backdrop.open, .side-drawer.open') ||
+      t.closest('.cat-strip, .bz-h-strip, input, textarea, select, .zen-ring, .compass-dial-wrap')
+    );
+    if (ignore || !e.touches || e.touches.length !== 1) return;
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+  }, { passive: true });
+  shell.addEventListener('touchend', e => {
+    if (ignore || !e.changedTouches || !e.changedTouches.length) return;
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < 72 || Math.abs(dx) < Math.abs(dy) * 1.65) return;
+    // 在研习页内，优先左右滑动切换「实战演习 <-> 断法库」
+    if (state.mainTab === 'study') {
+      if (dx < 0 && state.studySub === 'practice') { switchStudySub('kb'); return; }
+      if (dx > 0 && state.studySub === 'kb') { switchStudySub('practice'); return; }
+    }
+    const idx = tabOrder.indexOf(state.mainTab);
+    if (idx < 0) return;
+    const nextIdx = dx < 0 ? idx + 1 : idx - 1;
+    if (nextIdx >= 0 && nextIdx < tabOrder.length) switchMainTab(tabOrder[nextIdx]);
+  }, { passive: true });
 }
 window.addEventListener('DOMContentLoaded', initApp);
