@@ -7,10 +7,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="藏往" />
 <meta name="theme-color" id="metaThemeColor" content="#F4F2EC" />
-<link rel="apple-touch-icon" sizes="512x512" href="./icon.png?v=9" />
-<link rel="icon" type="image/png" href="./icon.png?v=9" />
-<title>藏往 · 水墨术数研习终端</title>
+<link rel="apple-touch-icon" sizes="512x512" href="./icon.png.JPG?v=10" />
+<link rel="icon" type="image/jpeg" href="./icon.png.JPG?v=10" />
+<title>藏往 · 水墨术数研习终端 V10</title>
 <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
 <style>
 :root {
   --bg: #F4F2EC;
@@ -31,7 +32,7 @@
   --dock-bg: rgba(252, 251, 248, 0.93);
   --wash-aura: rgba(45, 70, 68, 0.12);
   --shadow-sm: 0 4px 18px rgba(24, 26, 24, 0.045);
-  --shadow-md: 0 14px 36px rgba(24, 26, 24, 0.11);
+  --shadow-md: 0 14px 36px rgba(24, 26, 24, 0.12);
   --shadow-book: 0 10px 22px -6px rgba(20, 22, 20, 0.18), 0 2px 5px rgba(20, 22, 20, 0.06);
   --wx-wood: #3A7D5C;
   --wx-fire: #B84435;
@@ -44,7 +45,6 @@
   --dock-space: 84px;
 }
 
-/* 一术一境：切换门类时的柔和墨韵流转 */
 .app-shell[data-realm="六爻"] { --wash-aura: rgba(42, 68, 66, 0.13); --accent: #284240; --accent-soft: rgba(40, 66, 64, 0.11); }
 .app-shell[data-realm="八字"] { --wash-aura: rgba(124, 88, 52, 0.12); --accent: #5C422B; --accent-soft: rgba(92, 66, 43, 0.11); }
 .app-shell[data-realm="奇门"] { --wash-aura: rgba(36, 62, 92, 0.13); --accent: #243C58; --accent-soft: rgba(36, 60, 88, 0.11); }
@@ -54,32 +54,18 @@
 .app-shell[data-realm="风水"] { --wash-aura: rgba(58, 64, 60, 0.12); --accent: #38403C; --accent-soft: rgba(56, 64, 60, 0.11); }
 
 [data-theme="jade"] {
-  --bg: #F3F5F5;
-  --surface: #FFFFFF;
-  --surface-2: #E6EBEB;
-  --text: #161A1B;
-  --text-2: #5A6466;
-  --text-3: #8D989A;
-  --btn-bg: #ECF0F0;
-  --dock-bg: rgba(255, 255, 255, 0.94);
+  --bg: #F3F5F5; --surface: #FFFFFF; --surface-2: #E6EBEB;
+  --text: #161A1B; --text-2: #5A6466; --text-3: #8D989A;
+  --btn-bg: #ECF0F0; --dock-bg: rgba(255, 255, 255, 0.94);
 }
-
 [data-theme="night"] {
-  --bg: #111312;
-  --surface: #1A1D1C;
-  --surface-2: #242826;
+  --bg: #111312; --surface: #1A1D1C; --surface-2: #242826;
   --border: rgba(244, 240, 232, 0.085);
-  --text: #ECE9E0;
-  --text-2: #9FA39C;
-  --text-3: #6C706A;
-  --primary: #E6E1D5;
-  --primary-fg: #141615;
-  --accent: #9BB8B0;
-  --accent-soft: rgba(155, 184, 176, 0.15);
-  --seal: #D95B4A;
-  --seal-soft: rgba(217, 91, 74, 0.16);
-  --btn-bg: #242826;
-  --btn-fg: #E6E1D5;
+  --text: #ECE9E0; --text-2: #9FA39C; --text-3: #6C706A;
+  --primary: #E6E1D5; --primary-fg: #141615;
+  --accent: #9BB8B0; --accent-soft: rgba(155, 184, 176, 0.15);
+  --seal: #D95B4A; --seal-soft: rgba(217, 91, 74, 0.16);
+  --btn-bg: #242826; --btn-fg: #E6E1D5;
   --dock-bg: rgba(26, 29, 28, 0.94);
   --shadow-sm: 0 4px 18px rgba(0, 0, 0, 0.36);
   --shadow-md: 0 14px 36px rgba(0, 0, 0, 0.58);
@@ -96,7 +82,6 @@ html, body {
   overflow: hidden;
   transition: background 0.35s var(--ease), color 0.25s var(--ease);
 }
-
 button, input, textarea, select { font-family: inherit; color: inherit; outline: none; }
 button { border: none; background: none; cursor: pointer; transition: transform 0.14s var(--ease), background 0.2s var(--ease), opacity 0.2s var(--ease); }
 button:active { transform: scale(0.96); }
@@ -107,321 +92,234 @@ button:active { transform: scale(0.96); }
 }
 .app-shell::before {
   content: ""; position: absolute; top: -65px; right: -45px; width: 290px; height: 260px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--wash-aura) 0%, transparent 72%);
-  pointer-events: none; z-index: 1;
-  transition: background 0.45s var(--ease);
+  border-radius: 50%; background: radial-gradient(circle, var(--wash-aura) 0%, transparent 72%);
+  pointer-events: none; z-index: 1; transition: background 0.45s var(--ease);
 }
 .privacy-on .priv-blur { filter: blur(6px); user-select: none; pointer-events: none; }
 
-/* 顶部无缝纯色状态栏与水墨标题 */
+/* 顶部栏 */
 .top-header {
   position: relative; z-index: 20; flex-shrink: 0;
   padding: calc(var(--safe-top) + 10px) 18px 8px;
   background: var(--bg);
 }
-.header-row { display: flex; align-items: center; justify-content: space-between; height: 42px; }
-.header-left { display: flex; align-items: center; gap: 10px; }
+.header-row { display: flex; align-items: center; justify-content: space-between; height: 42px; gap: 6px; }
+.header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .brand-wrap { display: inline-flex; align-items: center; gap: 7px; }
-.brand-name {
-  font-family: "Songti SC", "STSong", "Noto Serif SC", Georgia, serif;
-  font-size: 23px; font-weight: 700; letter-spacing: 0.08em;
-}
-.brand-seal {
-  width: 7px; height: 7px; border-radius: 50%; background: var(--seal);
-  box-shadow: 0 0 8px var(--seal-soft); flex-shrink: 0;
-}
-.brand-sub { font-size: 12.5px; color: var(--text-3); font-weight: 500; }
-.overlay-title { font-family: "Songti SC", "STSong", serif; font-size: 18px; font-weight: 700; letter-spacing: 0.04em; }
-.header-actions { display: flex; align-items: center; gap: 7px; }
+.brand-name { font-family: "Songti SC", "STSong", "Noto Serif SC", Georgia, serif; font-size: 23px; font-weight: 700; letter-spacing: 0.08em; }
+.brand-seal { width: 7px; height: 7px; border-radius: 50%; background: var(--seal); box-shadow: 0 0 8px var(--seal-soft); flex-shrink: 0; }
+.brand-sub { font-size: 12.5px; color: var(--text-3); font-weight: 500; white-space: nowrap; }
+.overlay-title { font-family: "Songti SC", "STSong", serif; font-size: 17.5px; font-weight: 700; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
 .icon-btn {
-  position: relative; width: 37px; height: 37px; border-radius: 50%;
+  position: relative; width: 36px; height: 36px; border-radius: 50%;
   background: var(--surface); color: var(--text);
   box-shadow: var(--shadow-sm); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .icon-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
-.backup-dot {
-  position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%;
-  background: var(--seal); border: 1.5px solid var(--surface); display: none;
-}
+.backup-dot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--seal); border: 1.5px solid var(--surface); display: none; }
 .backup-dot.show { display: block; }
-
-.btn-ghost { font-size: 15.5px; font-weight: 600; color: var(--accent); padding: 6px 4px; }
+.btn-ghost { font-size: 15px; font-weight: 600; color: var(--accent); padding: 6px 4px; white-space: nowrap; }
 .pill-mini {
-  padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600;
+  padding: 5.5px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 600;
   background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border); white-space: nowrap;
+  border: 1px solid var(--border); white-space: nowrap; display: inline-flex; align-items: center; gap: 4px;
 }
 .pill-mini.accent { background: var(--accent-soft); color: var(--accent); border-color: transparent; box-shadow: none; }
 .pill-mini.seal { background: var(--seal-soft); color: var(--seal); border-color: transparent; box-shadow: none; }
+.pill-mini.xs { padding: 3.5px 9px; font-size: 11.5px; }
 
-/* 侧边极简水墨抽屉 */
-.drawer-backdrop {
-  position: fixed; inset: 0; background: rgba(16, 18, 16, 0.34); backdrop-filter: blur(5px);
-  z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.25s var(--ease);
-}
+/* 侧边抽屉 */
+.drawer-backdrop { position: fixed; inset: 0; background: rgba(16, 18, 16, 0.34); backdrop-filter: blur(5px); z-index: 90; opacity: 0; pointer-events: none; transition: opacity 0.25s var(--ease); }
 .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
 .side-drawer {
-  position: fixed; top: 0; bottom: 0; left: 0; width: 284px; max-width: 82vw;
+  position: fixed; top: 0; bottom: 0; left: 0; width: 288px; max-width: 83vw;
   background: var(--surface); z-index: 95; padding: calc(var(--safe-top) + 22px) 18px calc(var(--safe-bottom) + 24px);
   box-shadow: 16px 0 42px rgba(0, 0, 0, 0.14);
   transform: translateX(-105%); transition: transform 0.3s var(--ease);
   display: flex; flex-direction: column; overflow-y: auto;
 }
 .side-drawer.open { transform: translateX(0); }
-.drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
-.drawer-mark {
-  width: 42px; height: 42px; border-radius: 13px; background: var(--bg); border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-}
+.drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.drawer-mark { width: 42px; height: 42px; border-radius: 13px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
 .drawer-brand { font-family: "Songti SC", "STSong", serif; font-size: 21px; font-weight: 700; letter-spacing: 0.08em; }
 .drawer-sub { font-size: 12px; color: var(--text-3); margin-top: 2px; }
-.drawer-section-lbl { font-size: 12px; font-weight: 600; color: var(--text-3); padding: 0 10px 8px; letter-spacing: 0.04em; }
-.drawer-menu { display: flex; flex-direction: column; gap: 7px; }
-.drawer-item {
-  display: flex; align-items: center; gap: 12px; padding: 13px 14px; border-radius: 15px;
-  font-size: 15px; font-weight: 500; color: var(--text); text-align: left; background: var(--bg);
-}
-.drawer-ico { width: 20px; height: 20px; color: var(--text-2); display: flex; align-items: center; justify-content: center; }
+.drawer-section-lbl { font-size: 12px; font-weight: 600; color: var(--text-3); padding: 0 10px 7px; letter-spacing: 0.04em; margin-top: 14px; }
+.drawer-section-lbl:first-of-type { margin-top: 0; }
+.drawer-menu { display: flex; flex-direction: column; gap: 6px; }
+.drawer-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 15px; font-size: 14.5px; font-weight: 500; color: var(--text); text-align: left; background: var(--bg); }
+.drawer-ico { width: 20px; height: 20px; color: var(--text-2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .drawer-ico svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 .drawer-txt { flex: 1; }
-.drawer-badge { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; background: var(--surface); color: var(--text-2); }
+.drawer-badge { font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--surface); color: var(--text-2); }
+.drawer-badge.seal { background: var(--seal-soft); color: var(--seal); }
 
-/* 视图容器 */
+/* 主视图与滚动区 */
 .views-wrap { position: relative; flex: 1; overflow: hidden; z-index: 2; }
-.view-page {
-  position: absolute; inset: 0; display: flex; flex-direction: column;
-  opacity: 0; pointer-events: none; transform: translateY(5px);
-  transition: opacity 0.22s var(--ease), transform 0.24s var(--ease);
-}
+.view-page { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(5px); transition: opacity 0.22s var(--ease), transform 0.24s var(--ease); }
 .view-page.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
-.scroll-area {
-  flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
-  padding: 6px 18px calc(var(--dock-space) + var(--safe-bottom) + 22px);
-}
+.scroll-area { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding: 6px 18px calc(var(--dock-space) + var(--safe-bottom) + 22px); }
 .scroll-area::-webkit-scrollbar { display: none; }
 
-/* 核心四门 + 左滑/轻点丝滑展开其余三门 */
-.cat-strip {
-  display: flex; align-items: center; gap: 7px; overflow-x: auto; padding: 9px 0 4px;
-  scrollbar-width: none; scroll-behavior: smooth;
-}
+/* 核心四门 + 更多向右顺滑展开六壬/紫微/风水 */
+.cat-strip { display: flex; align-items: center; gap: 7px; overflow-x: auto; padding: 9px 0 4px; scrollbar-width: none; scroll-behavior: smooth; }
 .cat-strip::-webkit-scrollbar { display: none; }
-.cat-pill {
-  flex: 0 0 auto; padding: 7px 14px; border-radius: 999px; font-size: 14px; font-weight: 500;
-  color: var(--text-2); background: var(--surface); border: 1px solid var(--border);
-  transition: all 0.22s var(--ease);
-}
-.cat-pill.active {
-  background: var(--primary); color: var(--primary-fg); border-color: transparent; font-weight: 600;
-  box-shadow: 0 4px 12px rgba(20, 22, 20, 0.14);
-}
-.cat-pill.more-toggle {
-  background: transparent; border: 1px dashed var(--border); color: var(--text-3); font-size: 13px; padding: 6px 11px;
-}
-.cat-extra-wrap {
-  display: inline-flex; align-items: center; gap: 7px; overflow: hidden;
-  max-width: 0; opacity: 0; transition: max-width 0.34s var(--ease), opacity 0.28s var(--ease);
-}
-.cat-extra-wrap.expanded { max-width: 280px; opacity: 1; }
-.cat-divider { width: 1px; height: 14px; background: var(--border); flex-shrink: 0; margin: 0 2px; }
+.cat-pill { flex: 0 0 auto; padding: 7px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--text-2); background: var(--surface); border: 1px solid var(--border); transition: all 0.22s var(--ease); white-space: nowrap; }
+.cat-pill.active { background: var(--primary); color: var(--primary-fg); border-color: transparent; font-weight: 600; box-shadow: 0 4px 12px rgba(20, 22, 20, 0.14); }
+.cat-pill.more-toggle { background: transparent; border: 1px dashed var(--border); color: var(--text-3); font-size: 13px; padding: 6px 11px; }
+.cat-extra-wrap { display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0; }
+.cat-divider { width: 1px; height: 14px; background: var(--border); flex-shrink: 0; margin: 0 1px; }
 
-/* 宣纸分段滑块 */
-.seg-wrap {
-  margin-top: 8px; background: var(--surface-2); border-radius: 13px; padding: 3.5px;
-  display: grid; grid-template-columns: repeat(2, 1fr); position: relative;
-}
+/* 分段滑块 */
+.seg-wrap { margin-top: 8px; background: var(--surface-2); border-radius: 13px; padding: 3.5px; display: grid; grid-template-columns: repeat(2, 1fr); position: relative; }
 .seg-btn { position: relative; z-index: 2; padding: 7.5px 4px; font-size: 14px; font-weight: 500; color: var(--text-2); border-radius: 10px; text-align: center; }
 .seg-btn.active { color: var(--text); font-weight: 600; }
-.seg-slider {
-  position: absolute; top: 3.5px; bottom: 3.5px; left: 3.5px; width: calc((100% - 7px) / 2);
-  background: var(--surface); border-radius: 10px; box-shadow: 0 2px 8px rgba(20, 22, 20, 0.06);
-  transition: transform 0.26s var(--ease); z-index: 1;
-}
+.seg-slider { position: absolute; top: 3.5px; bottom: 3.5px; left: 3.5px; width: calc((100% - 7px) / 2); background: var(--surface); border-radius: 10px; box-shadow: 0 2px 8px rgba(20, 22, 20, 0.06); transition: transform 0.26s var(--ease); z-index: 1; }
 
-/* 卡片与统一焦墨按钮 */
-.card {
-  background: var(--surface); border-radius: 22px; border: 1px solid var(--border);
-  padding: 17px; box-shadow: var(--shadow-sm); margin-bottom: 13px;
-}
-.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
-.card-title { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: 0.01em; }
-.chip {
-  display: inline-flex; align-items: center; gap: 4px; padding: 6.5px 12px; border-radius: 999px;
-  font-size: 13px; font-weight: 500; background: var(--btn-bg); color: var(--btn-fg); white-space: nowrap;
-}
+/* 卡片与通用控件 */
+.card { background: var(--surface); border-radius: 22px; border: 1px solid var(--border); padding: 16px; box-shadow: var(--shadow-sm); margin-bottom: 13px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 11px; }
+.card-title { font-size: 15.5px; font-weight: 700; color: var(--text); letter-spacing: 0.01em; }
+.chip { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 500; background: var(--btn-bg); color: var(--btn-fg); white-space: nowrap; }
 .chip.accent { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .chip.seal { background: var(--seal-soft); color: var(--seal); font-weight: 600; }
+.btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 13px 18px; border-radius: 15px; background: var(--primary); color: var(--primary-fg); font-size: 15px; font-weight: 600; box-shadow: 0 6px 18px rgba(20, 22, 20, 0.14); }
+.btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 9.5px 13px; border-radius: 13px; background: var(--btn-bg); color: var(--btn-fg); font-size: 13.5px; font-weight: 500; }
+.empty-box { text-align: center; padding: 36px 20px; color: var(--text-3); }
+.empty-box p { margin: 10px 0 16px; font-size: 14px; line-height: 1.72; }
 
-.btn-primary {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 13.5px 18px;
-  border-radius: 15px; background: var(--primary); color: var(--primary-fg); font-size: 15.5px; font-weight: 600;
-  box-shadow: 0 6px 18px rgba(20, 22, 20, 0.14);
-}
-.btn-accent {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 13.5px 18px;
-  border-radius: 15px; background: var(--accent); color: #FAF8F3; font-size: 15.5px; font-weight: 600;
-  box-shadow: 0 6px 18px var(--accent-soft);
-}
-.btn-secondary {
-  display: inline-flex; align-items: center; justify-content: center; gap: 5px; padding: 9.5px 13px;
-  border-radius: 13px; background: var(--btn-bg); color: var(--btn-fg); font-size: 14px; font-weight: 500;
-}
-.empty-box { text-align: center; padding: 38px 20px; color: var(--text-3); }
-.empty-box p { margin: 10px 0 16px; font-size: 14.5px; line-height: 1.72; }
-
-/* 清爽表单行 */
-.form-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 11px 0; border-bottom: 1px solid var(--border);
-}
+/* 表单行 */
+.form-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10.5px 0; border-bottom: 1px solid var(--border); }
 .form-row:last-child { border-bottom: none; padding-bottom: 2px; }
 .form-row:first-child { padding-top: 2px; }
-.form-row-lbl { font-size: 14.5px; font-weight: 600; color: var(--text); flex-shrink: 0; min-width: 72px; }
-.form-row-val { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 8px; }
-.inline-input {
-  width: 100%; border: none; background: transparent; text-align: right; font-size: 14.5px; color: var(--text);
-}
+.form-row-lbl { font-size: 14.5px; font-weight: 600; color: var(--text); flex-shrink: 0; min-width: 70px; }
+.form-row-val { flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 8px; min-width: 0; }
+.inline-input { width: 100%; border: none; background: transparent; text-align: right; font-size: 14.5px; color: var(--text); }
 .inline-input::placeholder { color: var(--text-3); }
-.gender-pill { display: inline-flex; background: var(--btn-bg); border-radius: 999px; padding: 3px; }
-.gender-pill button { padding: 4.5px 14px; border-radius: 999px; font-size: 13px; color: var(--text-2); }
+.time-trigger-btn {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 14px; font-weight: 500;
+  color: var(--text); padding: 4px 8px; border-radius: 10px; background: var(--bg); border: 1px solid var(--border);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cal-type-tag { font-size: 11px; padding: 1.5px 6px; border-radius: 6px; background: var(--accent-soft); color: var(--accent); font-weight: 600; flex-shrink: 0; }
+.gender-pill { display: inline-flex; background: var(--btn-bg); border-radius: 999px; padding: 3px; flex-shrink: 0; }
+.gender-pill button { padding: 4px 13px; border-radius: 999px; font-size: 13px; color: var(--text-2); }
 .gender-pill button.active { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
 
-/* 六爻「指定」直触 6 墨线台 */
-.touch-hex-board { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 16px; }
-.touch-yao-row { display: flex; align-items: center; gap: 11px; }
+/* 六爻「指定」双模式（直点墨线 + 空白格四选一） */
+.mini-switch { display: inline-flex; background: var(--surface-2); border-radius: 999px; padding: 2px; gap: 2px; }
+.mini-switch button { padding: 3px 9px; border-radius: 999px; font-size: 11.5px; color: var(--text-2); font-weight: 500; }
+.mini-switch button.active { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+.touch-hex-board { display: flex; flex-direction: column; gap: 9px; margin: 12px 0 14px; }
+.touch-yao-row { display: flex; align-items: center; gap: 10px; }
 .touch-yao-pos { width: 34px; font-size: 13px; font-weight: 600; color: var(--text-3); text-align: right; flex-shrink: 0; }
-.touch-yao-bar-btn {
-  flex: 1; height: 36px; padding: 0 8px; border-radius: 11px; background: var(--bg);
-  border: 1px solid var(--border); display: flex; align-items: center; justify-content: center;
-}
-.ink-stroke {
-  width: 100%; height: 10px; display: flex; justify-content: space-between; align-items: center;
-  transition: all 0.2s var(--ease);
-}
+.touch-yao-bar-btn { flex: 1; height: 36px; padding: 0 10px; border-radius: 11px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.touch-yao-bar-btn.empty-slot { justify-content: space-between; color: var(--text-3); font-size: 13px; }
+.ink-stroke { width: 100%; height: 9.5px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s var(--ease); }
 .ink-stroke.yang { background: var(--text); border-radius: 5px; }
-.ink-stroke.yin::before, .ink-stroke.yin::after {
-  content: ""; width: 43%; height: 100%; background: var(--text); border-radius: 5px;
-  transition: all 0.2s var(--ease);
-}
+.ink-stroke.yin::before, .ink-stroke.yin::after { content: ""; width: 43%; height: 100%; background: var(--text); border-radius: 5px; transition: all 0.2s var(--ease); }
 .ink-stroke.mov.yang, .ink-stroke.mov.yin::before, .ink-stroke.mov.yin::after { background: var(--seal); }
-.touch-mov-btn {
-  width: 46px; height: 36px; border-radius: 11px; border: 1px solid var(--border);
-  background: var(--bg); color: var(--text-3); font-size: 12.5px; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
+.touch-mov-btn { width: 44px; height: 36px; border-radius: 11px; border: 1px solid var(--border); background: var(--bg); color: var(--text-3); font-size: 12.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .touch-mov-btn.active { background: var(--seal-soft); color: var(--seal); border-color: rgba(184, 59, 42, 0.26); font-size: 16px; }
+
+.yao-pick-opt { display: flex; align-items: center; gap: 14px; width: 100%; padding: 13px 16px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); margin-bottom: 10px; }
+.yao-pick-opt:hover { border-color: var(--accent); }
+.yao-pick-lbl { width: 36px; font-size: 14.5px; font-weight: 600; color: var(--text); text-align: left; flex-shrink: 0; }
+.yao-pick-sym { width: 22px; font-size: 18px; font-weight: 700; color: var(--seal); text-align: center; flex-shrink: 0; }
 
 /* 现代水墨灵石摇卦台 */
 .zen-cast-wrap { display: flex; flex-direction: column; align-items: center; padding: 10px 0 4px; }
-.zen-ring {
-  position: relative; width: 212px; height: 212px; border-radius: 50%;
-  border: 1.5px solid var(--border);
-  background: radial-gradient(circle, var(--surface) 46%, var(--bg) 100%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  user-select: none; -webkit-user-select: none; touch-action: none; cursor: pointer;
-  box-shadow: inset 0 0 28px rgba(24, 26, 24, 0.03), var(--shadow-sm);
-  transition: transform 0.2s var(--ease), border-color 0.25s;
-}
-.zen-ring::before {
-  content: ""; position: absolute; inset: 10px; border-radius: 50%;
-  border: 1px dashed var(--border); pointer-events: none;
-}
+.zen-ring { position: relative; width: 206px; height: 206px; border-radius: 50%; border: 1.5px solid var(--border); background: radial-gradient(circle, var(--surface) 46%, var(--bg) 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; user-select: none; -webkit-user-select: none; touch-action: none; cursor: pointer; box-shadow: inset 0 0 28px rgba(24, 26, 24, 0.03), var(--shadow-sm); transition: transform 0.2s var(--ease), border-color 0.25s; }
+.zen-ring::before { content: ""; position: absolute; inset: 10px; border-radius: 50%; border: 1px dashed var(--border); pointer-events: none; }
 .zen-ring.holding { transform: scale(0.96); border-color: var(--accent); }
 .zen-ring.holding::before { animation: zenSpin 2.4s linear infinite; border-color: var(--accent); }
-.zen-ripple {
-  position: absolute; inset: -6px; border-radius: 50%; border: 1.5px solid var(--accent);
-  opacity: 0; pointer-events: none;
-}
+.zen-ripple { position: absolute; inset: -6px; border-radius: 50%; border: 1.5px solid var(--accent); opacity: 0; pointer-events: none; }
 .zen-ring.holding .zen-ripple { animation: inkRipple 1.2s var(--ease) infinite; }
 @keyframes zenSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes inkRipple { 0% { transform: scale(0.92); opacity: 0.55; } 100% { transform: scale(1.22); opacity: 0; } }
-
 .zen-stones { display: flex; gap: 14px; margin-bottom: 12px; z-index: 2; }
-.zen-stone {
-  width: 34px; height: 34px; border-radius: 50%;
-  transition: transform 0.25s var(--ease), background 0.25s;
-  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600;
-}
-.zen-stone.yang {
-  background: radial-gradient(circle at 32% 30%, #FFFFFF, #DDD8CC);
-  color: #363836; border: 1px solid rgba(30, 32, 30, 0.14);
-  box-shadow: 0 5px 12px rgba(20, 22, 20, 0.10);
-}
-.zen-stone.yin {
-  background: radial-gradient(circle at 32% 30%, #4A4D4E, #191B1C);
-  color: #EAE6DC; border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 6px 14px rgba(10, 12, 10, 0.28);
-}
+.zen-stone { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+.zen-stone.yang { background: radial-gradient(circle at 32% 30%, #FFFFFF, #DDD8CC); color: #363836; border: 1px solid rgba(30, 32, 30, 0.14); box-shadow: 0 5px 12px rgba(20, 22, 20, 0.10); }
+.zen-stone.yin { background: radial-gradient(circle at 32% 30%, #4A4D4E, #191B1C); color: #EAE6DC; border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 6px 14px rgba(10, 12, 10, 0.28); }
 .zen-ring.holding .zen-stone { animation: stoneHover 0.34s ease-in-out infinite alternate; }
 .zen-ring.holding .zen-stone:nth-child(2) { animation-delay: 0.11s; }
 .zen-ring.holding .zen-stone:nth-child(3) { animation-delay: 0.22s; }
 @keyframes stoneHover { from { transform: translateY(2px) scale(0.95); } to { transform: translateY(-9px) scale(1.06); } }
 
-/* 排盘结果与三层透视 */
-.gz-banner {
-  background: var(--primary); color: var(--primary-fg); text-align: center; padding: 11px 12px;
-  border-radius: 14px; font-size: 14.5px; font-weight: 600; letter-spacing: 0.04em; margin: 10px 0;
-}
+/* 盘头四行版式与六爻无换行排版 */
+.case-header-grid { display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; color: var(--text-2); line-height: 1.55; padding-bottom: 8px; border-bottom: 1px dashed var(--border); }
+.case-header-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.case-header-row strong { color: var(--text); font-weight: 600; }
+.gz-banner { background: var(--primary); color: var(--primary-fg); text-align: center; padding: 10px 12px; border-radius: 14px; font-size: 14px; font-weight: 600; letter-spacing: 0.04em; margin: 10px 0; }
+
 .ly-row {
-  display: grid; grid-template-columns: 36px 50px 1fr 22px 1fr; align-items: center; gap: 5px;
-  padding: 9px 6px; border-bottom: 1px dashed var(--border); font-size: 13.5px; cursor: pointer;
-  animation: yaoReveal 0.34s var(--ease) both;
+  display: grid; grid-template-columns: 32px 46px minmax(0, 1.32fr) 16px minmax(0, 1fr);
+  align-items: center; gap: 4px; padding: 8.5px 4px; border-bottom: 1px dashed var(--border);
+  font-size: 13px; cursor: pointer; animation: yaoReveal 0.3s var(--ease) both;
 }
-@keyframes yaoReveal { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes yaoReveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 .ly-row:last-child { border-bottom: none; }
 .ly-row.yongshen { background: var(--accent-soft); border-radius: 10px; }
-.yao-svg { width: 38px; height: 8.5px; display: inline-flex; justify-content: space-between; vertical-align: middle; margin-right: 4px; }
+.ly-main-cell, .ly-bian-cell { display: flex; align-items: center; gap: 3px; white-space: nowrap; overflow: hidden; }
+.yao-svg { width: 30px; height: 8px; display: inline-flex; justify-content: space-between; flex-shrink: 0; }
 .yao-svg.yang { background: var(--text); border-radius: 2px; }
 .yao-svg.yin::before, .yao-svg.yin::after { content: ""; width: 43%; height: 100%; background: var(--text); border-radius: 2px; }
 .yao-svg.mov.yang, .yao-svg.mov.yin::before, .yao-svg.mov.yin::after { background: var(--seal); }
+.yao-badge { font-size: 10px; font-weight: 700; padding: 1px 4px; border-radius: 4px; line-height: 1.25; flex-shrink: 0; }
+.yao-badge.shi { color: var(--seal); background: var(--seal-soft); }
+.yao-badge.ying { color: var(--text-2); background: var(--surface-2); }
+.yao-badge.kong { color: var(--accent); border: 1px solid var(--accent); background: transparent; }
+.yao-badge.ys { color: #FAF8F3; background: var(--accent); }
 .wx-木 { color: var(--wx-wood); } .wx-火 { color: var(--wx-fire); } .wx-土 { color: var(--wx-earth); } .wx-金 { color: var(--wx-metal); } .wx-水 { color: var(--wx-water); }
 
-.exam-tag-btn {
-  padding: 2.5px 7px; border-radius: 6px; background: var(--bg); color: var(--text-2);
-  font-size: 11.5px; border: 1px solid var(--border);
-}
+.exam-tag-btn { padding: 2px 6.5px; border-radius: 6px; background: var(--bg); color: var(--text-2); font-size: 11px; border: 1px solid var(--border); }
 .exam-tag-btn.hot { color: var(--seal); background: var(--seal-soft); border-color: transparent; font-weight: 600; }
+.exam-tag-btn.rel { color: var(--accent); background: var(--accent-soft); border-color: transparent; font-weight: 600; }
+.ruler-insight-bar { margin-top: 10px; padding: 9px 12px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-size: 12.5px; line-height: 1.65; }
 
-/* 书房书架 */
+/* 专业三页签八字细盘 */
+.bz-tab-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+.bz-info-table { display: flex; flex-direction: column; gap: 7px; font-size: 13px; }
+.bz-info-row { display: flex; justify-content: space-between; gap: 10px; padding-bottom: 7px; border-bottom: 1px dashed var(--border); }
+.bz-info-row:last-child { border-bottom: none; padding-bottom: 0; }
+.bz-matrix { width: 100%; border-collapse: collapse; text-align: center; font-size: 12.5px; table-layout: fixed; }
+.bz-matrix th, .bz-matrix td { padding: 6.5px 2px; border-bottom: 1px dashed var(--border); vertical-align: top; }
+.bz-matrix th:first-child, .bz-matrix td:first-child { width: 42px; color: var(--text-3); font-weight: 500; text-align: left; }
+.bz-gz-char { font-family: "Songti SC", serif; font-size: 22px; font-weight: 700; line-height: 1.25; }
+.bz-h-strip { display: flex; gap: 6px; overflow-x: auto; padding: 6px 0; scrollbar-width: none; }
+.bz-h-strip::-webkit-scrollbar { display: none; }
+.bz-step-btn { flex: 0 0 auto; min-width: 54px; padding: 7px 6px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); text-align: center; font-size: 11.5px; line-height: 1.38; }
+.bz-step-btn.active { background: var(--primary); color: var(--primary-fg); border-color: transparent; }
+.bz-step-btn.active .wx-木, .bz-step-btn.active .wx-火, .bz-step-btn.active .wx-土, .bz-step-btn.active .wx-金, .bz-step-btn.active .wx-水 { color: var(--primary-fg); }
+.wx-season-bar { display: grid; grid-template-columns: repeat(5, 1fr); border-radius: 10px; overflow: hidden; font-size: 11.5px; font-weight: 600; color: #FAF8F3; text-align: center; margin: 10px 0; }
+.wx-season-bar span { padding: 6px 2px; }
+.party-bar { height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; display: flex; margin: 6px 0; }
+
+/* 书房书架与在线古籍 */
 .books-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 14px; padding-top: 4px; }
 .book-item { display: flex; flex-direction: column; cursor: pointer; }
-.book-cover {
-  position: relative; width: 100%; aspect-ratio: 2 / 2.82; border-radius: 5px 13px 13px 5px;
-  box-shadow: var(--shadow-book); overflow: hidden; display: flex; flex-direction: column;
-  justify-content: space-between; padding: 13px 10px 10px 15px;
-}
-.book-cover::before {
-  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 8px;
-  background: linear-gradient(90deg, rgba(0,0,0,0.24), rgba(255,255,255,0.14) 58%, rgba(0,0,0,0.05));
-}
-.book-cover-title {
-  font-family: "Songti SC", "STSong", serif; font-size: 14px; font-weight: 700; line-height: 1.42; color: #F7F4EC;
-  position: relative; z-index: 2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-}
+.book-cover { position: relative; width: 100%; aspect-ratio: 2 / 2.82; border-radius: 5px 13px 13px 5px; box-shadow: var(--shadow-book); overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; padding: 13px 10px 10px 15px; }
+.book-cover::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 8px; background: linear-gradient(90deg, rgba(0,0,0,0.24), rgba(255,255,255,0.14) 58%, rgba(0,0,0,0.05)); }
+.book-cover-title { font-family: "Songti SC", "STSong", serif; font-size: 13.5px; font-weight: 700; line-height: 1.4; color: #F7F4EC; position: relative; z-index: 2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .book-cover-foot { position: relative; z-index: 2; display: flex; justify-content: space-between; font-size: 10px; color: rgba(247,244,236,0.78); }
 .book-meta { margin-top: 8px; display: flex; justify-content: space-between; align-items: flex-start; gap: 3px; }
-.book-name { font-size: 13.5px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.book-name { font-size: 13px; font-weight: 600; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-/* 研习：满屏知识卡片 & 闪卡 */
-.study-card {
-  background: var(--surface); border-radius: 20px; border: 1px solid var(--border);
-  padding: 16px 18px; box-shadow: var(--shadow-sm); margin-bottom: 11px; cursor: pointer;
-}
-.study-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
-.study-card-title { font-family: "Songti SC", "STSong", serif; font-size: 17px; font-weight: 700; color: var(--text); }
-.study-card-sub { font-size: 13.5px; color: var(--text-2); line-height: 1.62; }
-.study-card-foot { margin-top: 9px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-3); }
+/* 研习：阶梯知识库 & 闪卡 */
+.stage-head { display: flex; align-items: center; justify-content: space-between; margin: 14px 2px 8px; }
+.stage-title { font-family: "Songti SC", serif; font-size: 15.5px; font-weight: 700; color: var(--accent); }
+.stage-sub { font-size: 12px; color: var(--text-3); }
+.study-card { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); padding: 14px 16px; box-shadow: var(--shadow-sm); margin-bottom: 10px; cursor: pointer; }
+.study-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+.study-card-title { font-family: "Songti SC", "STSong", serif; font-size: 16px; font-weight: 700; color: var(--text); }
+.study-card-sub { font-size: 13px; color: var(--text-2); line-height: 1.58; }
+.study-card-foot { margin-top: 8px; display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: var(--text-3); }
+.flashcard-stage { min-height: 245px; background: var(--surface); border-radius: 24px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); padding: 22px 20px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; margin-bottom: 14px; }
 
-.flashcard-stage {
-  min-height: 250px; background: var(--surface); border-radius: 24px; border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm); padding: 24px 20px; display: flex; flex-direction: column;
-  justify-content: space-between; cursor: pointer; margin-bottom: 14px;
-}
-
-/* 备忘录与日历 */
+/* 备忘录与日历三行紧凑格子 */
 .note-toolbar { display: flex; align-items: center; gap: 7px; overflow-x: auto; padding: 9px 14px; background: var(--surface); border-bottom: 1px solid var(--border); }
 .note-paper { flex: 1; display: flex; flex-direction: column; padding: 18px; background: var(--surface); overflow-y: auto; }
 .note-title-input { width: 100%; border: none; background: transparent; font-family: "Songti SC", serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 12px; }
@@ -429,31 +327,45 @@ button:active { transform: scale(0.96); }
 
 .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
 .cal-wk { font-size: 12px; color: var(--text-3); padding: 4px 0; }
-.cal-cell { position: relative; padding: 6px 2px 7px; border-radius: 13px; display: flex; flex-direction: column; align-items: center; cursor: pointer; min-height: 60px; }
+.cal-cell { position: relative; padding: 5px 1px 6px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; cursor: pointer; min-height: 66px; }
 .cal-cell.other { opacity: 0.25; }
 .cal-cell.selected { background: var(--primary); color: var(--primary-fg); }
 .cal-cell.today:not(.selected) { background: var(--accent-soft); }
 .cal-cell.good-match:not(.selected) { box-shadow: inset 0 0 0 1.4px var(--accent); }
-.cal-day-num { font-size: 15px; font-weight: 600; line-height: 1.25; }
-.cal-gz-mini { font-size: 10.5px; color: var(--text-2); margin-top: 2px; font-weight: 500; }
-.cal-cell.selected .cal-gz-mini { color: var(--primary-fg); opacity: 0.88; }
-.cal-jq-mini { font-size: 9.5px; color: var(--seal); font-weight: 600; margin-top: 1px; }
-.cal-cell.selected .cal-jq-mini { color: var(--primary-fg); }
+.cal-day-num { font-size: 14.5px; font-weight: 700; line-height: 1.2; }
+.cal-gz-mini { font-size: 10px; color: var(--text-2); margin-top: 2px; font-weight: 500; }
+.cal-lunar-mini { font-size: 9.5px; color: var(--text-3); margin-top: 1px; }
+.cal-lunar-mini.jq { color: var(--seal); font-weight: 600; }
+.cal-cell.selected .cal-gz-mini, .cal-cell.selected .cal-lunar-mini { color: var(--primary-fg); opacity: 0.88; }
 .cal-dots { display: flex; gap: 3px; margin-top: 2px; height: 4px; }
 .dot-study { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
 .dot-flag { width: 4px; height: 4px; border-radius: 50%; background: var(--seal); }
 
 .pillars-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; margin-top: 10px; }
-.pillar-col { background: var(--bg); border-radius: 15px; padding: 11px 5px; }
+.pillar-col { background: var(--bg); border-radius: 15px; padding: 10px 5px; }
 .pillar-lbl { font-size: 11.5px; color: var(--text-3); margin-bottom: 4px; }
-.pillar-gz { font-family: "Songti SC", serif; font-size: 22px; font-weight: 700; line-height: 1.28; }
+.pillar-gz { font-family: "Songti SC", serif; font-size: 21px; font-weight: 700; line-height: 1.26; }
 .nine-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 8px; }
 .nine-cell { background: var(--bg); border-radius: 13px; padding: 9px 6px; text-align: center; font-size: 12.5px; line-height: 1.45; }
-.qimen-cell { background: var(--bg); border-radius: 13px; padding: 8px 6px; font-size: 11.5px; line-height: 1.45; display: flex; flex-direction: column; justify-content: space-between; min-height: 96px; border: 1px solid var(--border); }
+.qimen-cell { background: var(--bg); border-radius: 13px; padding: 8px 6px; font-size: 11.5px; line-height: 1.45; display: flex; flex-direction: column; justify-content: space-between; min-height: 98px; border: 1px solid var(--border); }
 .qimen-cell.nianming { border-color: var(--seal); background: var(--seal-soft); }
 .qimen-row { display: flex; justify-content: space-between; align-items: center; }
 
-/* 参悟大白话聊天 */
+/* 独立水墨电子罗盘与节气倒计时 */
+.compass-dial-wrap { position: relative; width: 256px; height: 256px; margin: 12px auto 16px; display: flex; align-items: center; justify-content: center; }
+.compass-needle-fixed { position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 2px; height: 28px; background: var(--seal); z-index: 6; border-radius: 2px; }
+.compass-wheel { width: 244px; height: 244px; border-radius: 50%; border: 2px solid var(--text); background: radial-gradient(circle, var(--surface) 42%, var(--surface-2) 100%); position: relative; transition: transform 0.12s linear; box-shadow: var(--shadow-md); }
+.compass-wheel::after { content: ""; position: absolute; inset: 34px; border-radius: 50%; border: 1px dashed var(--border); }
+.compass-dir-mark { position: absolute; font-family: "Songti SC", serif; font-weight: 700; font-size: 15px; }
+.fest-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; border-radius: 17px; background: var(--surface); border: 1px solid var(--border); margin-bottom: 9px; cursor: pointer; }
+.fest-days { font-family: "Songti SC", serif; font-size: 18px; font-weight: 700; color: var(--accent); text-align: right; }
+
+/* 分组拖拽手柄 */
+.drag-group-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; border-radius: 13px; background: var(--bg); margin-bottom: 8px; touch-action: none; user-select: none; border: 1px solid var(--border); transition: transform 0.15s, box-shadow 0.15s; }
+.drag-group-row.dragging { background: var(--surface); box-shadow: var(--shadow-md); border-color: var(--accent); opacity: 0.92; z-index: 5; }
+.drag-handle { color: var(--text-3); font-size: 17px; padding: 0 4px; cursor: grab; }
+
+/* 参悟聊天 + 图片上传预览 */
 .chat-wrap { flex: 1; position: relative; display: flex; flex-direction: column; overflow: hidden; }
 .chat-messages { flex: 1; overflow-y: auto; padding: 10px 18px 14px; -webkit-overflow-scrolling: touch; }
 .msg-row { margin-bottom: 14px; display: flex; flex-direction: column; }
@@ -463,88 +375,84 @@ button:active { transform: scale(0.96); }
 .msg-row.user .msg-bubble { background: var(--primary); color: var(--primary-fg); border-bottom-right-radius: 6px; }
 .msg-row.ai .msg-bubble { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm); border-bottom-left-radius: 6px; }
 .msg-bubble strong { font-weight: 700; background: linear-gradient(transparent 68%, var(--accent-soft) 68%); padding: 0 2px; }
+.msg-img-thumb { display: block; max-width: 210px; max-height: 220px; border-radius: 12px; margin-bottom: 8px; object-fit: cover; border: 1px solid rgba(255,255,255,0.2); }
 .ref-jump { display: inline-flex; padding: 2px 8px; margin: 0 2px; border-radius: 8px; font-size: 13px; font-weight: 600; background: var(--accent-soft); color: var(--accent); cursor: pointer; }
 .msg-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
 .msg-act-btn { padding: 5px 11px; border-radius: 999px; font-size: 12px; background: var(--btn-bg); color: var(--text-2); }
-.scroll-latest-btn { position: absolute; right: 18px; bottom: 142px; padding: 7px 13px; border-radius: 999px; background: var(--primary); color: var(--primary-fg); font-size: 12.5px; font-weight: 600; box-shadow: var(--shadow-md); opacity: 0; pointer-events: none; transition: all 0.2s; z-index: 15; }
+.scroll-latest-btn { position: absolute; right: 18px; bottom: 146px; padding: 7px 13px; border-radius: 999px; background: var(--primary); color: var(--primary-fg); font-size: 12.5px; font-weight: 600; box-shadow: var(--shadow-md); opacity: 0; pointer-events: none; transition: all 0.2s; z-index: 15; }
 .scroll-latest-btn.show { opacity: 1; pointer-events: auto; }
-.chat-input-bar { padding: 6px 16px calc(var(--safe-bottom) + 84px); background: transparent; display: flex; align-items: flex-end; gap: 8px; }
-.chat-input { flex: 1; min-height: 42px; max-height: 112px; padding: 10px 15px; border-radius: 22px; border: 1px solid var(--border); background: var(--surface); font-size: 15px; line-height: 1.4; resize: none; box-shadow: var(--shadow-sm); }
-.send-btn { width: 42px; height: 42px; border-radius: 50%; background: var(--primary); color: var(--primary-fg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.chat-img-preview-bar { display: none; align-items: center; gap: 10px; padding: 6px 18px 2px; }
+.chat-img-preview-bar.show { display: flex; }
+.chat-img-preview-box { position: relative; display: inline-block; }
+.chat-img-preview-box img { width: 54px; height: 54px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border); }
+.chat-img-del { position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: var(--seal); color: #fff; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.chat-input-bar { padding: 6px 14px calc(var(--safe-bottom) + 84px); background: transparent; display: flex; align-items: flex-end; gap: 7px; }
+.chat-input { flex: 1; min-height: 42px; max-height: 112px; padding: 10px 14px; border-radius: 22px; border: 1px solid var(--border); background: var(--surface); font-size: 15px; line-height: 1.4; resize: none; box-shadow: var(--shadow-sm); }
+.send-btn { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: var(--primary-fg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
 /* 底部悬浮宣纸胶囊底座 */
-.bottom-nav-wrap {
-  position: fixed; bottom: calc(var(--safe-bottom) + 12px); left: 50%; transform: translateX(-50%);
-  width: calc(100% - 32px); max-width: 520px; z-index: 30; pointer-events: none;
-}
-.bottom-nav {
-  pointer-events: auto; height: 62px; padding: 5px 7px;
-  background: var(--dock-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
-  border-radius: 999px; border: 1px solid var(--border);
-  box-shadow: 0 12px 32px rgba(20, 22, 20, 0.10);
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
-}
-.nav-item {
-  display: flex; align-items: center; justify-content: center; gap: 5px;
-  border-radius: 999px; color: var(--text-2); font-size: 13.5px; font-weight: 500;
-  transition: all 0.24s var(--ease);
-}
+.bottom-nav-wrap { position: fixed; bottom: calc(var(--safe-bottom) + 12px); left: 50%; transform: translateX(-50%); width: calc(100% - 32px); max-width: 520px; z-index: 30; pointer-events: none; }
+.bottom-nav { pointer-events: auto; height: 62px; padding: 5px 7px; background: var(--dock-bg); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); border-radius: 999px; border: 1px solid var(--border); box-shadow: 0 12px 32px rgba(20, 22, 20, 0.10); display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.nav-item { display: flex; align-items: center; justify-content: center; gap: 5px; border-radius: 999px; color: var(--text-2); font-size: 13.5px; font-weight: 500; transition: all 0.24s var(--ease); }
 .nav-item svg { width: 19px; height: 19px; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-.nav-item.active {
-  background: var(--primary); color: var(--primary-fg); font-weight: 600;
-  box-shadow: 0 4px 14px rgba(20, 22, 20, 0.16);
-}
+.nav-item.active { background: var(--primary); color: var(--primary-fg); font-weight: 600; box-shadow: 0 4px 14px rgba(20, 22, 20, 0.16); }
 
-/* 全屏浮层与微信读书级水墨阅读器 */
+/* 全屏浮层与起点/微信读书级水墨阅读器 */
 .overlay-page { position: fixed; inset: 0; max-width: 560px; margin: 0 auto; background: var(--bg); z-index: 60; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s var(--ease); pointer-events: none; }
 .overlay-page.open { transform: translateX(0); pointer-events: auto; }
 
 .reader-shell { --r-bg: #F5F1E6; --r-fg: #26231F; --r-muted: #7C766B; --r-bar: #F5F1E6; background: var(--r-bg); color: var(--r-fg); }
 .reader-shell[data-paper="white"] { --r-bg: #FFFFFF; --r-fg: #1E1F20; --r-muted: #7B7E82; --r-bar: #FFFFFF; }
-.reader-shell[data-paper="green"] { --r-bg: #E5ECE5; --r-fg: #1F2D24; --r-muted: #5F7265; --r-bar: #E5ECE5; }
-.reader-shell[data-paper="night"] { --r-bg: #111312; --r-fg: #CFCBC0; --r-muted: #70746E; --r-bar: #151817; }
-.reader-shell[data-paper="warm"] #pdfCanvas { filter: sepia(0.12); }
-.reader-shell[data-paper="night"] #pdfCanvas { filter: invert(0.90) hue-rotate(180deg); }
+.reader-shell[data-paper="parchment"] { --r-bg: #EFE3C8; --r-fg: #34291A; --r-muted: #7B674E; --r-bar: #EFE3C8; }
+.reader-shell[data-paper="green"] { --r-bg: #E3ECE4; --r-fg: #1F2D24; --r-muted: #5F7265; --r-bar: #E3ECE4; }
+.reader-shell[data-paper="slate"] { --r-bg: #26292B; --r-fg: #D5D9DC; --r-muted: #868D92; --r-bar: #2B2F31; }
+.reader-shell[data-paper="night"] { --r-bg: #0D0F0E; --r-fg: #C4C0B5; --r-muted: #666A64; --r-bar: #131615; }
+.reader-shell[data-paper="warm"] #pdfCanvas, .reader-shell[data-paper="parchment"] #pdfCanvas { filter: sepia(0.14); }
+.reader-shell[data-paper="night"] #pdfCanvas, .reader-shell[data-paper="slate"] #pdfCanvas { filter: invert(0.90) hue-rotate(180deg); }
 
-.reader-topbar, .reader-botbar { position: absolute; left: 0; right: 0; background: var(--r-bar); z-index: 20; transition: transform 0.25s var(--ease), opacity 0.22s; }
-.reader-topbar { top: 0; padding: calc(var(--safe-top) + 10px) 14px 10px; border-bottom: 1px solid rgba(128,128,128,0.14); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.reader-botbar { bottom: 0; padding: 12px 16px calc(var(--safe-bottom) + 14px); border-top: 1px solid rgba(128,128,128,0.14); }
+.reader-dim-veil { position: absolute; inset: 0; background: #000; opacity: 0; pointer-events: none; z-index: 18; }
+.reader-topbar, .reader-botbar { position: absolute; left: 0; right: 0; background: var(--r-bar); z-index: 22; transition: transform 0.25s var(--ease), opacity 0.22s; }
+.reader-topbar { top: 0; padding: calc(var(--safe-top) + 10px) 12px 10px; border-bottom: 1px solid rgba(128,128,128,0.14); display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.reader-botbar { bottom: 0; padding: 11px 14px calc(var(--safe-bottom) + 12px); border-top: 1px solid rgba(128,128,128,0.14); }
 .reader-shell.bars-hidden .reader-topbar { transform: translateY(-110%); opacity: 0; pointer-events: none; }
 .reader-shell.bars-hidden .reader-botbar { transform: translateY(110%); opacity: 0; pointer-events: none; }
-.reader-content-wrap { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: calc(var(--safe-top) + 66px) 24px calc(var(--safe-bottom) + 76px); }
-.reader-para { margin: 0 0 1.05em; text-align: justify; border-radius: 10px; padding: 5px 7px; transition: background 0.18s; cursor: pointer; }
-.reader-para.orig-sub { font-size: 0.9em; color: var(--r-muted); margin-bottom: 0.4em; }
-.reader-para.active-tap { background: rgba(128, 128, 128, 0.12); }
-.reader-modern-block { margin: 0 0 1.35em; padding: 12px 15px; border-left: 3px solid var(--accent); background: rgba(128,128,128,0.07); border-radius: 0 12px 12px 0; font-size: 1em; line-height: 1.88; }
-.reader-insight-box { margin: 14px 0 18px; padding: 13px 15px; border-radius: 14px; background: rgba(184, 59, 42, 0.08); border-left: 3px solid var(--seal); font-size: 0.94em; line-height: 1.78; }
-.reader-mode-bar { display: inline-flex; background: rgba(128,128,128,0.13); border-radius: 999px; padding: 3px; gap: 2px; }
-.reader-mode-bar button { padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; color: inherit; opacity: 0.72; }
+.reader-content-wrap { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: calc(var(--safe-top) + 64px) 22px calc(var(--safe-bottom) + 74px); }
+.reader-para { margin: 0 0 1em; text-align: justify; border-radius: 10px; padding: 4px 6px; transition: background 0.18s; cursor: pointer; }
+.reader-para.orig-sub { font-size: 0.88em; color: var(--r-muted); margin-bottom: 0.35em; }
+.reader-para.active-tap { background: rgba(128, 128, 128, 0.14); }
+.reader-modern-block { margin: 0 0 1.25em; padding: 11px 14px; border-left: 3px solid var(--accent); background: rgba(128,128,128,0.075); border-radius: 0 12px 12px 0; font-size: 1em; line-height: 1.85; }
+.reader-insight-box { margin: 12px 0 18px; padding: 12px 14px; border-radius: 14px; background: rgba(184, 59, 42, 0.08); border-left: 3px solid var(--seal); font-size: 0.92em; line-height: 1.76; }
+.reader-chapter-divider { margin: 26px 0 18px; padding-top: 16px; border-top: 1px dashed rgba(128,128,128,0.28); text-align: center; font-family: "Songti SC", serif; font-size: 1.05em; font-weight: 700; opacity: 0.85; }
+.reader-mode-bar { display: inline-flex; background: rgba(128,128,128,0.14); border-radius: 999px; padding: 3px; gap: 2px; }
+.reader-mode-bar button { padding: 4.5px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; color: inherit; opacity: 0.72; }
 .reader-mode-bar button.active { background: var(--primary); color: var(--primary-fg); opacity: 1; }
-.reader-mini-foot { position: fixed; bottom: calc(var(--safe-bottom) + 8px); left: 22px; right: 22px; max-width: 516px; margin: 0 auto; display: flex; justify-content: space-between; font-size: 11.5px; color: var(--r-muted); pointer-events: none; z-index: 5; }
-.sel-popover { position: fixed; bottom: calc(var(--safe-bottom) + 92px); left: 50%; transform: translateX(-50%); background: var(--primary); color: var(--primary-fg); border-radius: 999px; padding: 6px 10px; display: none; align-items: center; gap: 7px; box-shadow: var(--shadow-md); z-index: 75; white-space: nowrap; }
+.reader-mini-foot { position: fixed; bottom: calc(var(--safe-bottom) + 8px); left: 20px; right: 20px; max-width: 520px; margin: 0 auto; display: flex; justify-content: space-between; font-size: 11px; color: var(--r-muted); pointer-events: none; z-index: 5; }
+.sel-popover { position: fixed; bottom: calc(var(--safe-bottom) + 116px); left: 50%; transform: translateX(-50%); background: var(--primary); color: var(--primary-fg); border-radius: 999px; padding: 6px 10px; display: none; align-items: center; gap: 6px; box-shadow: var(--shadow-md); z-index: 75; white-space: nowrap; }
 .sel-popover.show { display: flex; }
-.sel-popover button { color: inherit; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,0.15); font-size: 12.5px; }
+.sel-popover button { color: inherit; padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,0.16); font-size: 12px; }
 
 /* 底部抽屉与表单 */
-.sheet-backdrop { position: fixed; inset: 0; background: rgba(16, 18, 16, 0.4); z-index: 105; opacity: 0; pointer-events: none; transition: opacity 0.22s; display: flex; align-items: flex-end; justify-content: center; }
+.sheet-backdrop { position: fixed; inset: 0; background: rgba(16, 18, 16, 0.42); z-index: 105; opacity: 0; pointer-events: none; transition: opacity 0.22s; display: flex; align-items: flex-end; justify-content: center; }
 .sheet-backdrop.open { opacity: 1; pointer-events: auto; }
 .sheet-panel { width: 100%; max-width: 560px; max-height: 86vh; background: var(--surface); color: var(--text); border-radius: 26px 26px 0 0; padding: 12px 18px calc(var(--safe-bottom) + 24px); overflow-y: auto; transform: translateY(100%); transition: transform 0.28s var(--ease); }
 .sheet-backdrop.open .sheet-panel { transform: translateY(0); }
 .sheet-handle { width: 38px; height: 4px; border-radius: 999px; background: var(--border); margin: 0 auto 14px; }
 .form-field { margin-bottom: 12px; }
 .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
-.form-input, .form-textarea, .form-select { width: 100%; padding: 11px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 15px; }
-.form-textarea { min-height: 82px; resize: vertical; line-height: 1.58; }
-.paper-dot { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border); }
+.form-input, .form-textarea, .form-select { width: 100%; padding: 10.5px 13px; border-radius: 13px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14.5px; }
+.form-textarea { min-height: 78px; resize: vertical; line-height: 1.58; }
+.paper-dot { width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; }
+.paper-dot.active { border-color: var(--seal); transform: scale(1.1); }
+.dt-cols { display: grid; grid-template-columns: 1.2fr 1fr 1fr 0.9fr 0.9fr; gap: 6px; margin: 14px 0; }
 
-.toast { position: fixed; top: calc(var(--safe-top) + 18px); left: 50%; transform: translate(-50%, -18px); background: var(--primary); color: var(--primary-fg); padding: 11px 18px; border-radius: 999px; font-size: 14px; font-weight: 500; box-shadow: var(--shadow-md); opacity: 0; pointer-events: none; z-index: 140; transition: all 0.24s var(--ease); max-width: 88vw; text-align: center; }
+.toast { position: fixed; top: calc(var(--safe-top) + 18px); left: 50%; transform: translate(-50%, -18px); background: var(--primary); color: var(--primary-fg); padding: 11px 18px; border-radius: 999px; font-size: 14px; font-weight: 500; box-shadow: var(--shadow-md); opacity: 0; pointer-events: none; z-index: 150; transition: all 0.24s var(--ease); max-width: 88vw; text-align: center; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 </style>
 </head>
 <body>
 <div class="app-shell" id="appShell" data-realm="六爻">
 
-  <!-- 左侧极简水墨抽屉 -->
+  <!-- 左侧极简水墨抽屉（新增电子罗盘 + 节日节气倒计时 + 排盘历史） -->
   <div class="drawer-backdrop" id="sideDrawerBackdrop" onclick="closeSideDrawer()"></div>
   <aside class="side-drawer" id="sideDrawer">
     <div class="drawer-head">
@@ -569,9 +477,10 @@ button:active { transform: scale(0.96); }
         <span class="drawer-txt">实战档案库</span>
         <span class="drawer-badge" id="drawerArchCount">0</span>
       </button>
-      <button class="drawer-item" onclick="closeSideDrawer();openCalendarOverlay()">
-        <span class="drawer-ico"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="16" rx="3"></rect><line x1="8" y1="2.5" x2="8" y2="6.5"></line><line x1="16" y1="2.5" x2="16" y2="6.5"></line><line x1="3.5" y1="10" x2="20.5" y2="10"></line></svg></span>
-        <span class="drawer-txt">万年干支历</span>
+      <button class="drawer-item" onclick="closeSideDrawer();openHistoryOverlay()">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15.5 14"></polyline></svg></span>
+        <span class="drawer-txt">排盘历史记录</span>
+        <span class="drawer-badge" id="drawerHistCount">0</span>
       </button>
       <button class="drawer-item" onclick="closeSideDrawer();openGlobalSearch()">
         <span class="drawer-ico"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
@@ -579,7 +488,23 @@ button:active { transform: scale(0.96); }
       </button>
     </div>
 
-    <div class="drawer-section-lbl" style="margin-top:20px;">外观与数据备份</div>
+    <div class="drawer-section-lbl">天时与罗盘工具</div>
+    <div class="drawer-menu">
+      <button class="drawer-item" onclick="closeSideDrawer();openCalendarOverlay()">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="16" rx="3"></rect><line x1="8" y1="2.5" x2="8" y2="6.5"></line><line x1="16" y1="2.5" x2="16" y2="6.5"></line><line x1="3.5" y1="10" x2="20.5" y2="10"></line></svg></span>
+        <span class="drawer-txt">万年干支历</span>
+      </button>
+      <button class="drawer-item" onclick="closeSideDrawer();openCompassOverlay()">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg></span>
+        <span class="drawer-txt">电子罗盘</span>
+      </button>
+      <button class="drawer-item" onclick="closeSideDrawer();openFestivalsOverlay()">
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.05" y2="7.05"></line><line x1="16.95" y1="16.95" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="22" y2="12"></line></svg></span>
+        <span class="drawer-txt">节日节气倒计时</span>
+      </button>
+    </div>
+
+    <div class="drawer-section-lbl">外观 · 模型与备份</div>
     <div class="drawer-menu">
       <button class="drawer-item" onclick="togglePrivacyBlur()">
         <span class="drawer-ico"><svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
@@ -587,8 +512,8 @@ button:active { transform: scale(0.96); }
         <span class="drawer-badge" id="drawerPrivState">关</span>
       </button>
       <button class="drawer-item" onclick="closeSideDrawer();openSettings()">
-        <span class="drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
-        <span class="drawer-txt">主题 · 密钥 · 备份</span>
+        <span class="drawer-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.85 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
+        <span class="drawer-txt">多AI模型 · 书站 · 备份</span>
       </button>
     </div>
   </aside>
@@ -606,10 +531,11 @@ button:active { transform: scale(0.96); }
             <div class="brand-wrap"><span class="brand-name">藏往</span><span class="brand-seal"></span></div>
           </div>
           <div class="header-actions">
+            <button class="pill-mini xs" onclick="openHistoryOverlay()">历史</button>
+            <button class="pill-mini xs" onclick="openArchivesOverlay()">档案<span id="archFollowBadge" style="display:none;color:var(--seal);"></span></button>
             <button class="icon-btn" onclick="openCalendarOverlay()" title="万年干支历">
               <svg viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="16" rx="3"></rect><line x1="8" y1="2.5" x2="8" y2="6.5"></line><line x1="16" y1="2.5" x2="16" y2="6.5"></line><line x1="3.5" y1="10" x2="20.5" y2="10"></line></svg>
             </button>
-            <button class="pill-mini" onclick="openArchivesOverlay()">档案</button>
             <button class="icon-btn" onclick="openGlobalSearch()" aria-label="搜索">
               <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             </button>
@@ -625,24 +551,25 @@ button:active { transform: scale(0.96); }
       <div class="scroll-area" id="divineScrollArea"></div>
     </section>
 
-    <!-- 2. 书房（藏书阁 + 术数古文精译） -->
+    <!-- 2. 书房（清爽纯书架 + 双通道找书 + 译一段收纳到右上角） -->
     <section class="view-page" id="view-library">
       <header class="top-header">
         <div class="header-row">
           <div class="header-left">
             <button class="icon-btn" onclick="openSideDrawer()"><svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="14" y2="17"></line></svg></button>
             <span class="brand-name">书房</span>
-            <span class="brand-sub">藏书与古文精译</span>
           </div>
           <div class="header-actions">
-            <button class="pill-mini accent" onclick="openSheet('sheet-import')">+ 上传新书</button>
+            <button class="pill-mini xs" onclick="openSheet('sheet-quick-trans')">译一段</button>
+            <button class="pill-mini xs accent" onclick="openOnlineBookSheet()">在线找书</button>
+            <button class="pill-mini xs" onclick="openSheet('sheet-import')">+ 导入</button>
           </div>
         </div>
       </header>
       <div class="scroll-area" id="libraryScrollArea"></div>
     </section>
 
-    <!-- 3. 研习（基础进阶知识库 + 实战练习） -->
+    <!-- 3. 研习（七门阶梯知识库 + 实战练习） -->
     <section class="view-page" id="view-study">
       <header class="top-header">
         <div class="header-row">
@@ -651,30 +578,30 @@ button:active { transform: scale(0.96); }
             <span class="brand-name">研习</span>
           </div>
           <div class="header-actions">
-            <button class="pill-mini accent" onclick="openSheet('sheet-ai-dict')">+ AI 扩充词条</button>
+            <button class="pill-mini accent" onclick="openSheet('sheet-ai-dict')">+ AI 扩充专题</button>
           </div>
         </div>
         <div class="seg-wrap">
           <div class="seg-slider" id="studySlider"></div>
-          <button class="seg-btn active" data-ssub="kb" onclick="switchStudySub('kb')">基础进阶库</button>
+          <button class="seg-btn active" data-ssub="kb" onclick="switchStudySub('kb')">阶梯知识库</button>
           <button class="seg-btn" data-ssub="practice" onclick="switchStudySub('practice')">实战练习</button>
         </div>
       </header>
       <div class="scroll-area" id="studyScrollArea"></div>
     </section>
 
-    <!-- 4. 参悟（大白话私人术数教练） -->
+    <!-- 4. 参悟（多 AI 切换 + 支持上传照片识图 + 大白话教练） -->
     <section class="view-page" id="view-canwu">
       <header class="top-header">
         <div class="header-row">
           <div class="header-left">
             <button class="icon-btn" onclick="openSideDrawer()"><svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="17" x2="14" y2="17"></line></svg></button>
             <span class="brand-name">参悟</span>
-            <span class="brand-sub" id="canwuHeaderSub">六爻问答</span>
+            <button class="pill-mini xs accent" id="canwuModelBadge" onclick="openSettings()">模型</button>
           </div>
           <div class="header-actions">
-            <button class="pill-mini" onclick="openThreadDrawer()">记录</button>
-            <button class="pill-mini accent" onclick="openMemoSheet()">AI 备忘</button>
+            <button class="pill-mini xs" onclick="openThreadDrawer()">记录</button>
+            <button class="pill-mini xs accent" onclick="openMemoSheet()">备忘</button>
             <button class="icon-btn" onclick="startNewChatThread()" title="新对话">
               <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
             </button>
@@ -685,11 +612,22 @@ button:active { transform: scale(0.96); }
       <div class="chat-wrap">
         <div class="chat-messages" id="chatMessages"></div>
         <button class="scroll-latest-btn" id="scrollLatestBtn" onclick="scrollChatToBottom(true)">↓ 回到底部</button>
+        <div class="chat-img-preview-bar" id="chatImgPreviewBar">
+          <div class="chat-img-preview-box">
+            <img id="chatImgPreviewEl" src="" alt="待发送图片" />
+            <button class="chat-img-del" onclick="clearPendingChatImage()">×</button>
+          </div>
+          <span style="font-size:12px;color:var(--text-3);" id="chatImgModeHint">已附照片 · 发送时自动识图分析</span>
+        </div>
         <div class="chat-input-bar">
+          <input type="file" id="chatImgInput" accept="image/*" style="display:none;" onchange="handleChatImageSelect(event)" />
+          <button class="icon-btn" onclick="document.getElementById('chatImgInput').click()" title="上传照片">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"></rect><circle cx="8.5" cy="9.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          </button>
           <button class="icon-btn" onclick="startVoiceInput('chatInput')" title="语音输入">
             <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line></svg>
           </button>
-          <textarea class="chat-input" id="chatInput" rows="1" placeholder="说人话问参悟：查书、断卦、考我一题..." oninput="autoResizeInput(this)"></textarea>
+          <textarea class="chat-input" id="chatInput" rows="1" placeholder="问断法、发照片看盘或考我一题..." oninput="autoResizeInput(this)"></textarea>
           <button class="send-btn" id="sendBtn" onclick="sendCanwuMessage()" aria-label="发送">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           </button>
@@ -721,6 +659,58 @@ button:active { transform: scale(0.96); }
   </div>
 </div>
 
+<!-- 浮层：排盘历史记录（永久留存、多选/全选/单删，完全独立于档案库） -->
+<div class="overlay-page" id="historyOverlay">
+  <header class="top-header">
+    <div class="header-row">
+      <button class="btn-ghost" onclick="closeOverlay('historyOverlay')">‹ 返回</button>
+      <span class="overlay-title">排盘历史记录</span>
+      <div style="display:flex;gap:6px;">
+        <button class="pill-mini xs" id="histMultiBtn" onclick="toggleHistoryMultiMode()">多选</button>
+        <button class="pill-mini xs seal" id="histBatchDelBtn" style="display:none;" onclick="deleteSelectedHistory()">删所选</button>
+      </div>
+    </div>
+    <div class="cat-strip" id="histFilterStrip"></div>
+  </header>
+  <div class="scroll-area" id="historyScrollArea" style="padding-bottom:36px;"></div>
+</div>
+
+<!-- 浮层：实战档案库（支持关键词/盘面特征搜索 + 分组拖拽） -->
+<div class="overlay-page" id="archivesOverlay">
+  <header class="top-header">
+    <div class="header-row">
+      <button class="btn-ghost" onclick="closeOverlay('archivesOverlay')">‹ 返回</button>
+      <span class="overlay-title" id="archHeaderSub">实战档案库</span>
+      <div style="display:flex;gap:6px;">
+        <button class="pill-mini xs" id="baziCompareBtn" style="display:none;" onclick="openBaziCompare()">合盘</button>
+        <button class="pill-mini xs accent" onclick="openGroupEditor()">管理分组</button>
+      </div>
+    </div>
+    <div style="margin-top:8px;">
+      <input type="text" id="archSearchInput" class="form-input" style="padding:8px 13px;font-size:13.5px;" placeholder="搜问题、人名、卦名或特征（如 月破、暗动、化退神）..." oninput="state.archSearch=this.value;renderArchivesView()" />
+    </div>
+    <div class="cat-strip" id="archCatStrip"></div>
+    <div class="cat-strip" id="archGroupStrip" style="padding-top:3px;"></div>
+  </header>
+  <div class="scroll-area" id="archivesScrollArea" style="padding-bottom:36px;"></div>
+</div>
+
+<!-- 浮层：断事结果卷宗（新增复制盘面 + 存档案选分组） -->
+<div class="overlay-page" id="resultOverlay">
+  <header class="top-header">
+    <div class="header-row">
+      <button class="btn-ghost" onclick="closeOverlay('resultOverlay')">‹ 返回</button>
+      <span class="overlay-title" id="resOverlayTitle">断事卷宗</span>
+      <div style="display:flex;gap:5px;">
+        <button class="pill-mini xs" onclick="copyCurrentChartText()">复制盘面</button>
+        <button class="pill-mini xs" onclick="exportResultPoster()">长图</button>
+        <button class="pill-mini xs accent" onclick="openSaveArchiveSheet()">存档案</button>
+      </div>
+    </div>
+  </header>
+  <div class="scroll-area" id="resultOverlayBody" style="padding-bottom:36px;"></div>
+</div>
+
 <!-- 浮层：万年干支历 -->
 <div class="overlay-page" id="calendarOverlay">
   <header class="top-header">
@@ -728,44 +718,37 @@ button:active { transform: scale(0.96); }
       <button class="btn-ghost" onclick="closeOverlay('calendarOverlay')">‹ 返回</button>
       <span class="overlay-title">万年干支历</span>
       <div style="display:flex;gap:6px;">
-        <button class="pill-mini" onclick="openCalJumpSheet()">选年月</button>
-        <button class="pill-mini accent" onclick="calGoToday()">今日</button>
+        <button class="pill-mini xs" onclick="openFestivalsOverlay()">节气</button>
+        <button class="pill-mini xs" onclick="openCalJumpSheet()">选年月</button>
+        <button class="pill-mini xs accent" onclick="calGoToday()">今日</button>
       </div>
     </div>
   </header>
   <div class="scroll-area" id="calendarScrollArea" style="padding-bottom:36px;"></div>
 </div>
 
-<!-- 浮层：实战档案库 -->
-<div class="overlay-page" id="archivesOverlay">
+<!-- 浮层：独立水墨电子罗盘 -->
+<div class="overlay-page" id="compassOverlay">
   <header class="top-header">
     <div class="header-row">
-      <button class="btn-ghost" onclick="closeOverlay('archivesOverlay')">‹ 返回</button>
-      <span class="overlay-title" id="archHeaderSub">实战档案库</span>
-      <div style="display:flex;gap:6px;">
-        <button class="pill-mini" id="baziCompareBtn" style="display:none;" onclick="openBaziCompare()">合盘</button>
-        <button class="pill-mini accent" onclick="openGroupEditor()">分组</button>
-      </div>
+      <button class="btn-ghost" onclick="closeOverlay('compassOverlay')">‹ 返回</button>
+      <span class="overlay-title">水墨电子罗盘</span>
+      <button class="pill-mini xs accent" onclick="enableLiveCompass()">开启陀螺仪</button>
     </div>
-    <div class="cat-strip" id="archCatStrip"></div>
-    <div class="cat-strip" id="archGroupStrip" style="padding-top:4px;"></div>
   </header>
-  <div class="scroll-area" id="archivesScrollArea" style="padding-bottom:36px;"></div>
+  <div class="scroll-area" id="compassScrollArea" style="padding-bottom:36px;"></div>
 </div>
 
-<!-- 浮层：断事结果卷宗 -->
-<div class="overlay-page" id="resultOverlay">
+<!-- 浮层：节日与二十四节气倒计时 -->
+<div class="overlay-page" id="festivalsOverlay">
   <header class="top-header">
     <div class="header-row">
-      <button class="btn-ghost" onclick="closeOverlay('resultOverlay')">‹ 返回</button>
-      <span class="overlay-title" id="resOverlayTitle">断事卷宗</span>
-      <div style="display:flex;gap:6px;">
-        <button class="pill-mini" onclick="exportResultPoster()">存长图</button>
-        <button class="pill-mini accent" onclick="saveCurrentResultToArchive()">存档案</button>
-      </div>
+      <button class="btn-ghost" onclick="closeOverlay('festivalsOverlay')">‹ 返回</button>
+      <span class="overlay-title">节日与节气倒计时</span>
+      <span class="pill-mini xs accent" id="festTodayTag">今日</span>
     </div>
   </header>
-  <div class="scroll-area" id="resultOverlayBody" style="padding-bottom:36px;"></div>
+  <div class="scroll-area" id="festivalsScrollArea" style="padding-bottom:36px;"></div>
 </div>
 
 <!-- 浮层：满屏知识精读页 -->
@@ -774,14 +757,15 @@ button:active { transform: scale(0.96); }
     <div class="header-row">
       <button class="btn-ghost" onclick="closeOverlay('articleOverlay')">‹ 返回</button>
       <span class="overlay-title" id="articleOverlayTitle">知识点精讲</span>
-      <button class="pill-mini" onclick="saveActiveArticleToNote()">存笔记</button>
+      <button class="pill-mini xs" onclick="saveActiveArticleToNote()">存笔记</button>
     </div>
   </header>
   <div class="scroll-area" id="articleOverlayBody" style="padding-bottom:44px;"></div>
 </div>
 
-<!-- 浮层：三态精读阅读器 -->
+<!-- 浮层：起点/微信读书级三态阅读器（上下连滑 + 左右翻页 + 批量翻白话 + 听书 + 古例排活盘） -->
 <div class="overlay-page reader-shell" id="readerOverlay" data-paper="warm">
+  <div class="reader-dim-veil" id="readerDimVeil"></div>
   <div class="reader-topbar">
     <button class="btn-ghost" onclick="closeReader()">‹ 返回</button>
     <div class="reader-mode-bar" id="readerModePill">
@@ -789,36 +773,40 @@ button:active { transform: scale(0.96); }
       <button data-rm="both" onclick="setReaderReadMode('both')">古今对照</button>
       <button data-rm="orig" class="active" onclick="setReaderReadMode('orig')">纯原文</button>
     </div>
-    <button class="pill-mini" id="readerPdfToggleBtn" style="display:none;" onclick="toggleReaderPdfMode()">原PDF</button>
+    <div style="display:flex;gap:4px;">
+      <button class="pill-mini xs seal" id="readerOcrBtn" style="display:none;" onclick="ocrAndTranslateCurrentPdfPage()">识图译</button>
+      <button class="pill-mini xs" id="readerPdfToggleBtn" style="display:none;" onclick="toggleReaderPdfMode()">原PDF</button>
+    </div>
   </div>
-  <div class="reader-content-wrap" id="readerContentWrap" onclick="handleReaderTap(event)">
+  <div class="reader-content-wrap" id="readerContentWrap">
     <div id="readerPdfStage" style="display:none;text-align:center;">
       <canvas id="pdfCanvas" style="max-width:100%;height:auto;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,0.08);"></canvas>
       <div id="pdfPageHint" style="font-size:12px;opacity:0.65;margin-top:10px;"></div>
     </div>
     <div id="readerTextStage"></div>
-    <div style="display:flex;justify-content:space-between;gap:12px;margin-top:26px;padding-bottom:26px;">
+    <div id="readerPagerBtns" style="display:flex;justify-content:space-between;gap:12px;margin-top:26px;padding-bottom:26px;">
       <button class="btn-secondary" style="flex:1;" onclick="readerStep(-1)">上一页</button>
       <button class="btn-secondary" style="flex:1;" onclick="readerStep(1)">下一页</button>
     </div>
   </div>
   <div class="reader-mini-foot"><span id="readerFootLeft"></span><span id="readerFootRight"></span></div>
   <div class="reader-botbar">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
       <span id="readerBookTitle" style="font-size:12px;opacity:0.75;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
       <input type="range" id="readerRange" min="1" max="1" value="1" style="flex:1;accent-color:var(--accent);" oninput="readerJump(Number(this.value))" />
-      <span id="readerRangeText" style="font-size:12px;opacity:0.75;min-width:44px;text-align:right;">1/1</span>
+      <span id="readerRangeText" style="font-size:11.5px;opacity:0.75;min-width:44px;text-align:right;">1/1</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-      <button class="btn-secondary" style="padding:8px 2px;font-size:12.5px;" onclick="openReaderToc()">目录</button>
-      <button class="btn-secondary" style="padding:8px 2px;font-size:12.5px;" onclick="openSheet('sheet-typo')">排版纸色</button>
-      <button class="btn-secondary" style="padding:8px 2px;font-size:12.5px;" onclick="retranslateCurrentPage()">重新精译</button>
-      <button class="btn-secondary" style="padding:8px 2px;font-size:12.5px;" onclick="askCanwuFromReader()">问参悟</button>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;">
+      <button class="btn-secondary" style="padding:7.5px 2px;font-size:11.5px;" onclick="openReaderToc()">目录</button>
+      <button class="btn-secondary" style="padding:7.5px 2px;font-size:11.5px;" onclick="openTypoSheet()">设置</button>
+      <button class="btn-secondary" style="padding:7.5px 2px;font-size:11.5px;" onclick="openBatchTransSheet()">批译</button>
+      <button class="btn-secondary" style="padding:7.5px 2px;font-size:11.5px;" onclick="openTtsSheet()">听书</button>
+      <button class="btn-secondary" style="padding:7.5px 2px;font-size:11.5px;color:var(--accent);font-weight:600;" onclick="castCaseFromReaderPage()">排活盘</button>
     </div>
   </div>
   <div class="sel-popover" id="selPopover">
-    <button onclick="paraActionSimple()">换更通俗讲法</button>
-    <button onclick="paraActionAsk()">就这段问参悟</button>
+    <button onclick="paraActionSimple()">更通俗讲</button>
+    <button onclick="paraActionAsk()">问参悟</button>
     <button onclick="paraActionNote()">存笔记</button>
   </div>
 </div>
@@ -830,15 +818,15 @@ button:active { transform: scale(0.96); }
       <button class="btn-ghost" onclick="closeNoteEditor()">‹ 完成</button>
       <span style="font-size:14px;font-weight:600;color:var(--text-2);" id="noteEditorMeta">六爻笔记</span>
       <div style="display:flex;gap:6px;">
-        <button class="pill-mini" id="notePinBtn" onclick="toggleCurrentNotePin()">置顶</button>
-        <button class="pill-mini" onclick="deleteCurrentNote()">删除</button>
+        <button class="pill-mini xs" id="notePinBtn" onclick="toggleCurrentNotePin()">置顶</button>
+        <button class="pill-mini xs" onclick="deleteCurrentNote()">删除</button>
       </div>
     </div>
   </header>
   <div class="note-toolbar">
-    <button class="pill-mini" onclick="noteInsertChecklist()">+ 待办</button>
-    <button class="pill-mini" onclick="noteInsertGanZhi()">+ 干支</button>
-    <button class="pill-mini" onclick="startVoiceInput('noteBodyArea')">语音</button>
+    <button class="pill-mini xs" onclick="noteInsertChecklist()">+ 待办</button>
+    <button class="pill-mini xs" onclick="noteInsertGanZhi()">+ 干支</button>
+    <button class="pill-mini xs" onclick="startVoiceInput('noteBodyArea')">语音</button>
     <select id="noteFolderSelect" class="form-select" style="width:auto;padding:4px 8px;font-size:12.5px;" onchange="changeCurrentNoteFolder(this.value)"></select>
   </div>
   <div class="note-paper">
@@ -853,26 +841,210 @@ button:active { transform: scale(0.96); }
 </div>
 
 <div class="overlay-page" id="baziCompareOverlay">
-  <header class="top-header"><div class="header-row"><button class="btn-ghost" onclick="closeOverlay('baziCompareOverlay')">‹ 返回</button><span class="overlay-title">八字合盘对比</span><button class="pill-mini accent" onclick="analyzeBaziCompareWithAI()">AI 合盘</button></div></header>
+  <header class="top-header"><div class="header-row"><button class="btn-ghost" onclick="closeOverlay('baziCompareOverlay')">‹ 返回</button><span class="overlay-title">八字合盘对比</span><button class="pill-mini xs accent" onclick="analyzeBaziCompareWithAI()">AI 合盘</button></div></header>
   <div class="scroll-area" id="baziCompareBody" style="padding-bottom:36px;"></div>
 </div>
 
-<!-- 底部抽屉们 -->
+<!-- ==================== 底部抽屉们 ==================== -->
+
+<!-- 1. 公历 / 农历双切换时间选择器 -->
+<div class="sheet-backdrop" id="sheet-dt-picker" onclick="backdropClose(event,'sheet-dt-picker')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <div class="mini-switch">
+        <button id="dtModeSolarBtn" class="active" onclick="setDtPickerMode('solar')">公历</button>
+        <button id="dtModeLunarBtn" onclick="setDtPickerMode('lunar')">农历</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="pill-mini xs" onclick="dtPickerSetNow()">此时</button>
+        <button class="pill-mini accent" onclick="confirmDtPicker()">确定</button>
+      </div>
+    </div>
+    <div id="dtPickerPreview" style="text-align:center;font-size:13px;color:var(--accent);padding:6px 0;font-weight:600;"></div>
+    <div class="dt-cols">
+      <div><label class="form-label" style="text-align:center;">年</label><select id="dtSelYear" class="form-select" style="padding:9px 4px;text-align:center;" onchange="refreshDtPickerDays()"></select></div>
+      <div><label class="form-label" style="text-align:center;">月</label><select id="dtSelMonth" class="form-select" style="padding:9px 4px;text-align:center;" onchange="refreshDtPickerDays()"></select></div>
+      <div><label class="form-label" style="text-align:center;">日</label><select id="dtSelDay" class="form-select" style="padding:9px 4px;text-align:center;" onchange="updateDtPickerPreview()"></select></div>
+      <div><label class="form-label" style="text-align:center;">时</label><select id="dtSelHour" class="form-select" style="padding:9px 4px;text-align:center;" onchange="updateDtPickerPreview()"></select></div>
+      <div><label class="form-label" style="text-align:center;">分</label><select id="dtSelMin" class="form-select" style="padding:9px 4px;text-align:center;" onchange="updateDtPickerPreview()"></select></div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. 六爻「点选」四象弹窗 -->
+<div class="sheet-backdrop" id="sheet-yao-pick" onclick="backdropClose(event,'sheet-yao-pick')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <h3 style="margin:0 0 14px;font-size:17px;text-align:center;" id="yaoPickTitle">选择本爻阴阳动静</h3>
+    <button class="yao-pick-opt" onclick="pickSlotYaoVal(7)"><span class="yao-pick-lbl">少阳</span><span class="ink-stroke yang"></span><span class="yao-pick-sym"></span></button>
+    <button class="yao-pick-opt" onclick="pickSlotYaoVal(8)"><span class="yao-pick-lbl">少阴</span><span class="ink-stroke yin"></span><span class="yao-pick-sym"></span></button>
+    <button class="yao-pick-opt" onclick="pickSlotYaoVal(9)"><span class="yao-pick-lbl">老阳</span><span class="ink-stroke yang mov"></span><span class="yao-pick-sym">○</span></button>
+    <button class="yao-pick-opt" onclick="pickSlotYaoVal(6)"><span class="yao-pick-lbl">老阴</span><span class="ink-stroke yin mov"></span><span class="yao-pick-sym">×</span></button>
+  </div>
+</div>
+
+<!-- 3. 存档案分组确认抽屉 -->
+<div class="sheet-backdrop" id="sheet-save-archive" onclick="backdropClose(event,'sheet-save-archive')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <h3 style="margin:0 0 12px;font-size:17px;">存入实战档案库</h3>
+    <div class="form-field"><label class="form-label">卷宗标题</label><input type="text" id="saveArchTitleInput" class="form-input" /></div>
+    <div class="form-field"><label class="form-label">选择归属分组</label><div id="saveArchGroupChips" style="display:flex;flex-wrap:wrap;gap:8px;"></div></div>
+    <button class="btn-primary" style="width:100%;margin-top:8px;" onclick="confirmSaveArchiveWithGroup()">确认存入档案库</button>
+  </div>
+</div>
+
+<!-- 4. 在线找书（维基文库公版纯文字直搜 + 自定义外部书站） -->
+<div class="sheet-backdrop" id="sheet-online-books" onclick="backdropClose(event,'sheet-online-books')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <h3 style="margin:0 0 10px;font-size:17px;">双通道找书 · 告别扫描版烦恼</h3>
+    <div class="card" style="padding:13px;">
+      <div style="font-size:13.5px;font-weight:700;margin-bottom:6px;">通道一：经典公版古籍直搜（100% 纯文字一键入架）</div>
+      <div style="display:flex;gap:7px;margin-bottom:8px;">
+        <input type="text" id="onlineBookQuery" class="form-input" placeholder="搜书名：如 增删卜易、滴天髓、子平真诠..." />
+        <button class="btn-primary" style="padding:8px 14px;flex-shrink:0;" id="wikiSearchBtn" onclick="searchWikisourceBooks()">搜索</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+        <button class="chip" style="padding:4px 9px;font-size:12px;" onclick="document.getElementById('onlineBookQuery').value='增删卜易';searchWikisourceBooks()">增删卜易</button><button class="chip" style="padding:4px 9px;font-size:12px;" onclick="document.getElementById('onlineBookQuery').value='卜筮正宗';searchWikisourceBooks()">卜筮正宗</button><button class="chip" style="padding:4px 9px;font-size:12px;" onclick="document.getElementById('onlineBookQuery').value='滴天髓';searchWikisourceBooks()">滴天髓</button><button class="chip" style="padding:4px 9px;font-size:12px;" onclick="document.getElementById('onlineBookQuery').value='子平真诠';searchWikisourceBooks()">子平真诠</button><button class="chip" style="padding:4px 9px;font-size:12px;" onclick="document.getElementById('onlineBookQuery').value='渊海子平';searchWikisourceBooks()">渊海子平</button><button class="chip" style="padding:4px 9px;font-size:12px;" onclick="document.getElementById('onlineBookQuery').value='梅花易数';searchWikisourceBooks()">梅花易数</button><button class="chip" style="padding:4px 9px;font-size:12px;" onclick="document.getElementById('onlineBookQuery').value='周易';searchWikisourceBooks()">周易</button>
+      </div>
+      <div id="wikiSearchResults" style="max-height:220px;overflow-y:auto;"></div>
+    </div>
+    <div class="card" style="padding:13px;margin-bottom:0;">
+      <div style="font-size:13.5px;font-weight:700;margin-bottom:5px;">通道二：直达我的外部书站（适合现代新书，优先下 EPUB/TXT）</div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:8px;">在设置里可随时更新你的 Z-Library 等外部书站域名；下载 EPUB/TXT 后点书房右上角「+ 导入」即可全本翻白话。</div>
+      <div style="display:flex;gap:7px;">
+        <input type="text" id="extBookQuery" class="form-input" placeholder="输入现代书名或作者（如 古筮真诠）" />
+        <button class="btn-secondary" style="flex-shrink:0;color:var(--accent);font-weight:600;" onclick="launchExternalBookSite()">去书站搜 ↗</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. 随手译一段（从书房主页收纳进抽屉） -->
+<div class="sheet-backdrop" id="sheet-quick-trans" onclick="backdropClose(event,'sheet-quick-trans')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <h3 style="margin:0;font-size:17px;">随手译古文（术数专精白话）</h3>
+      <select id="quickTransBookSel" class="form-select" style="width:auto;padding:4px 8px;font-size:12px;max-width:145px;" onchange="state.quickTransBook=this.value"></select>
+    </div>
+    <textarea id="quickTransArea" class="form-textarea" style="min-height:92px;" placeholder="粘贴任意一段看不懂的古文、卦例或口诀，保留原汁原味专业术语，直接翻成通透大白话 + 实战点破..." oninput="state.quickTransInput=this.value"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn-primary" style="flex:1;padding:11px;" id="quickTransBtn" onclick="runQuickTranslate()">立即精译成大白话</button>
+      <button class="btn-secondary" onclick="state.quickTransInput='';state.quickTransOut='';document.getElementById('quickTransArea').value='';document.getElementById('quickTransOutBox').innerHTML=''">清空</button>
+    </div>
+    <div id="quickTransOutBox" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<!-- 6. 导入本地电子书（支持 EPUB / TXT / MD / PDF + 「其他」分类） -->
 <div class="sheet-backdrop" id="sheet-import" onclick="backdropClose(event,'sheet-import')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 12px;font-size:17px;">上传典籍到书房</h3>
+    <h3 style="margin:0 0 12px;font-size:17px;">导入电子书到书房</h3>
     <div class="form-field"><label class="form-label">归属门类</label>
       <select id="importCatSelect" class="form-select">
         <option value="六爻">六爻</option><option value="八字">八字</option><option value="奇门">奇门</option>
-        <option value="梅花">梅花</option><option value="六壬">六壬</option><option value="紫微">紫微</option><option value="风水">风水</option>
+        <option value="梅花">梅花</option><option value="六壬">六壬</option><option value="紫微">紫微</option>
+        <option value="风水">风水</option><option value="其他">其他（杂书/通用古籍）</option>
       </select>
     </div>
-    <div class="form-field"><label class="form-label">选择本地 PDF / TXT / MD 文件（导入自动排版清洗，支持纯白话与古今对照）</label><input type="file" id="bookFileInput" accept=".pdf,.txt,.md" class="form-input" onchange="handleBookFileSelect(event)" /></div>
+    <div class="form-field"><label class="form-label">选择本地 EPUB / TXT / MD / PDF（推荐 EPUB 或 TXT，全本自动翻白话最快最准）</label><input type="file" id="bookFileInput" accept=".epub,.pdf,.txt,.md" class="form-input" onchange="handleBookFileSelect(event)" /></div>
     <div style="text-align:center;font-size:12.5px;color:var(--text-3);margin:10px 0;">— 或直接粘贴书稿全文 —</div>
     <div class="form-field"><input type="text" id="pasteBookTitle" class="form-input" placeholder="书名（如：增删卜易、古筮真诠）" /></div>
     <div class="form-field"><textarea id="pasteBookContent" class="form-textarea" placeholder="粘贴全文内容..."></textarea></div>
     <button class="btn-primary" style="width:100%;" onclick="importPastedBook()">存入书房</button>
+  </div>
+</div>
+
+<!-- 7. 阅读器完整排版设置（起点/微信读书级） -->
+<div class="sheet-backdrop" id="sheet-typo" onclick="backdropClose(event,'sheet-typo')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="margin:0;font-size:17px;">阅读排版与翻页设置</h3>
+      <button class="pill-mini xs accent" onclick="toggleCurrentPageBookmark()">+ 存书签</button>
+    </div>
+    <div class="form-field"><label class="form-label">翻页手势模式</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <button class="btn-secondary" id="pmScrollBtn" onclick="updateTypo('pageMode','scroll')">上下无缝连滑</button>
+        <button class="btn-secondary" id="pmSwipeBtn" onclick="updateTypo('pageMode','swipe')">左右滑/点两侧翻页</button>
+      </div>
+    </div>
+    <div class="form-field"><label class="form-label">亮度调节：<span id="typoBrightVal">100</span>%</label><input type="range" min="35" max="100" step="5" id="typoBrightRange" style="width:100%;accent-color:var(--accent);" oninput="updateTypo('brightness', Number(this.value))" /></div>
+    <div class="form-field"><label class="form-label">字号：<span id="typoSizeVal">17.5</span> px</label><input type="range" min="14" max="24" step="0.5" id="typoSizeRange" style="width:100%;accent-color:var(--accent);" oninput="updateTypo('fontSize', Number(this.value))" /></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-field"><label class="form-label">行间距</label><select id="typoLineSel" class="form-select" onchange="updateTypo('lineHeight', Number(this.value))"><option value="1.68">紧凑</option><option value="1.92">适中</option><option value="2.22">宽松</option></select></div>
+      <div class="form-field"><label class="form-label">页边距</label><select id="typoPadSel" class="form-select" onchange="updateTypo('padX', Number(this.value))"><option value="14">窄</option><option value="22">适中</option><option value="32">宽</option></select></div>
+    </div>
+    <div class="form-field"><label class="form-label">字体</label>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <button class="btn-secondary" onclick="updateTypo('fontFam','serif')">书宋</button>
+        <button class="btn-secondary" onclick="updateTypo('fontFam','kai')">楷体</button>
+        <button class="btn-secondary" onclick="updateTypo('fontFam','sans')">黑体</button>
+      </div>
+    </div>
+    <div class="form-field"><label class="form-label">6 种护眼纸色</label>
+      <div style="display:flex;justify-content:space-between;padding:4px 4px;">
+        <button class="paper-dot" data-p="warm" style="background:#F5F1E6;" onclick="updateTypo('paper','warm')" title="宣纸"></button>
+        <button class="paper-dot" data-p="white" style="background:#FFFFFF;" onclick="updateTypo('paper','white')" title="素白"></button>
+        <button class="paper-dot" data-p="parchment" style="background:#EFE3C8;" onclick="updateTypo('paper','parchment')" title="羊皮"></button>
+        <button class="paper-dot" data-p="green" style="background:#E3ECE4;" onclick="updateTypo('paper','green')" title="竹青"></button>
+        <button class="paper-dot" data-p="slate" style="background:#26292B;" onclick="updateTypo('paper','slate')" title="深岩"></button>
+        <button class="paper-dot" data-p="night" style="background:#0D0F0E;" onclick="updateTypo('paper','night')" title="夜墨"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8. 全本一键批量翻白话抽屉 -->
+<div class="sheet-backdrop" id="sheet-batch-trans" onclick="backdropClose(event,'sheet-batch-trans')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <h3 style="margin:0 0 8px;font-size:17px;">全本自动翻译成白话文</h3>
+    <div style="font-size:13px;color:var(--text-2);line-height:1.65;margin-bottom:12px;">翻译好的章节永久保存在本地，以后离线也能秒开；平时翻书时系统也会自动在后台提前译好后面 2 页。</div>
+    <div id="batchTransStatus" style="padding:12px;border-radius:14px;background:var(--bg);font-size:13.5px;margin-bottom:12px;">准备就绪</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+      <button class="btn-primary" onclick="startBatchTranslate(20)">续译后面 20 页</button>
+      <button class="btn-secondary" style="color:var(--accent);font-weight:600;" onclick="startBatchTranslate(9999)">译完剩余全书</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <button class="btn-secondary" onclick="retranslateCurrentPage();closeSheet('sheet-batch-trans')">重译当前页</button>
+      <button class="btn-secondary" style="color:var(--seal);" onclick="stopBatchTranslate()">暂停批量翻译</button>
+    </div>
+  </div>
+</div>
+
+<!-- 9. 听书朗读抽屉 -->
+<div class="sheet-backdrop" id="sheet-tts" onclick="backdropClose(event,'sheet-tts')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <h3 style="margin:0 0 12px;font-size:17px;">听书朗读（支持白话文连播）</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <button class="btn-primary" id="ttsPlayBtn" onclick="toggleReaderTts()">开始朗读本页</button>
+      <button class="btn-secondary" onclick="stopReaderTts()">停止朗读</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="form-field"><label class="form-label">语速</label><select id="ttsRateSel" class="form-select"><option value="0.85">0.85x 舒缓</option><option value="1" selected>1.0x 正常</option><option value="1.25">1.25x 较快</option><option value="1.5">1.5x 极速</option></select></div>
+      <div class="form-field"><label class="form-label">定时关闭</label><select id="ttsTimerSel" class="form-select" onchange="setTtsSleepTimer(Number(this.value))"><option value="0">不定时</option><option value="15">15 分钟后</option><option value="30">30 分钟后</option><option value="60">60 分钟后</option></select></div>
+    </div>
+  </div>
+</div>
+
+<!-- 10. 目录与书签 / 管理典籍 / AI扩充 / 遇象即查 / 选年月 / 分组拖拽 / 对话记录 / AI备忘 -->
+<div class="sheet-backdrop" id="sheet-toc" onclick="backdropClose(event,'sheet-toc')">
+  <div class="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <h3 style="margin:0;font-size:17px;">目录与书签</h3>
+      <div class="mini-switch">
+        <button id="tocTabCh" class="active" onclick="renderReaderToc('ch')">目录</button>
+        <button id="tocTabBm" onclick="renderReaderToc('bm')">书签</button>
+      </div>
+    </div>
+    <div id="readerTocList"></div>
   </div>
 </div>
 
@@ -881,15 +1053,14 @@ button:active { transform: scale(0.96); }
 <div class="sheet-backdrop" id="sheet-ai-dict" onclick="backdropClose(event,'sheet-ai-dict')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 12px;font-size:17px;">AI 自动编写深度知识点</h3>
-    <div class="form-field"><label class="form-label">放入分类</label>
+    <h3 style="margin:0 0 12px;font-size:17px;">AI 自动编写深度专题</h3>
+    <div class="form-field"><label class="form-label">放入门类</label>
       <select id="aiDictGroupSelect" class="form-select">
-        <option value="六爻基础">六爻基础</option><option value="六爻进阶">六爻进阶</option>
-        <option value="八字基础">八字基础</option><option value="八字进阶">八字进阶</option>
-        <option value="奇门梅花">奇门梅花</option><option value="自扩专题" selected>自扩专题</option>
+        <option value="六爻">六爻</option><option value="八字">八字</option><option value="奇门">奇门</option>
+        <option value="梅花">梅花</option><option value="六壬">六壬</option><option value="紫微">紫微</option><option value="风水">风水</option>
       </select>
     </div>
-    <div class="form-field"><label class="form-label">想深挖的专题</label><input type="text" id="aiDictTopicInput" class="form-input" placeholder="如：六爻测合伙生意、八字看大运引动、奇门看伏吟反吟" /></div>
+    <div class="form-field"><label class="form-label">想深挖的专题</label><input type="text" id="aiDictTopicInput" class="form-input" placeholder="如：六爻测合伙生意、八字看伤官见官、奇门伏吟反吟" /></div>
     <button class="btn-primary" style="width:100%;" id="aiDictGenBtn" onclick="generateAndSaveDictTopic()">生成三层干货并永久存入</button>
   </div>
 </div>
@@ -899,23 +1070,11 @@ button:active { transform: scale(0.96); }
     <div class="sheet-handle"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
       <h3 style="margin:0;font-size:18px;font-family:'Songti SC',serif;" id="tagTipTitle">遇象即查</h3>
-      <button class="pill-mini accent" onclick="closeSheet('sheet-tag-tip');askCanwuFromTagTip()">深问参悟</button>
+      <button class="pill-mini xs accent" onclick="closeSheet('sheet-tag-tip');askCanwuFromTagTip()">深问参悟</button>
     </div>
     <div id="tagTipBody" style="font-size:15px;line-height:1.82;color:var(--text-2);"></div>
   </div>
 </div>
-
-<div class="sheet-backdrop" id="sheet-typo" onclick="backdropClose(event,'sheet-typo')">
-  <div class="sheet-panel">
-    <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 14px;font-size:17px;">阅读排版与护眼纸色</h3>
-    <div class="form-field"><label class="form-label">字号：<span id="typoSizeVal">17.5</span> px</label><input type="range" min="14" max="24" step="0.5" id="typoSizeRange" style="width:100%;accent-color:var(--accent);" oninput="updateTypo('fontSize', Number(this.value))" /></div>
-    <div class="form-field"><label class="form-label">字体</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><button class="btn-secondary" onclick="updateTypo('fontFam','serif')">经典书宋</button><button class="btn-secondary" onclick="updateTypo('fontFam','sans')">现代黑体</button></div></div>
-    <div class="form-field"><label class="form-label">护眼纸色</label><div style="display:flex;justify-content:space-around;padding:4px 0;"><button class="paper-dot" style="background:#F5F1E6;" onclick="updateTypo('paper','warm')" title="宣纸"></button><button class="paper-dot" style="background:#FFFFFF;" onclick="updateTypo('paper','white')" title="素白"></button><button class="paper-dot" style="background:#E5ECE5;" onclick="updateTypo('paper','green')" title="竹青"></button><button class="paper-dot" style="background:#111312;" onclick="updateTypo('paper','night')" title="夜墨"></button></div></div>
-  </div>
-</div>
-
-<div class="sheet-backdrop" id="sheet-toc" onclick="backdropClose(event,'sheet-toc')"><div class="sheet-panel"><div class="sheet-handle"></div><h3 style="margin:0 0 10px;font-size:17px;">本书目录</h3><div id="readerTocList"></div></div></div>
 
 <div class="sheet-backdrop" id="sheet-cal-jump" onclick="backdropClose(event,'sheet-cal-jump')">
   <div class="sheet-panel">
@@ -929,15 +1088,17 @@ button:active { transform: scale(0.96); }
 </div>
 
 <div class="sheet-backdrop" id="sheet-groups" onclick="backdropClose(event,'sheet-groups')">
-  <div class="sheet-panel"><div class="sheet-handle"></div><h3 style="margin:0 0 10px;font-size:17px;">管理档案分组</h3>
-    <div style="display:flex;gap:8px;margin-bottom:12px;"><input type="text" id="newGroupInput" class="form-input" placeholder="输入新分组名" /><button class="btn-primary" style="flex-shrink:0;" onclick="addArchiveGroup()">添加</button></div>
+  <div class="sheet-panel"><div class="sheet-handle"></div>
+    <h3 style="margin:0 0 4px;font-size:17px;">管理档案分组</h3>
+    <div style="font-size:12.5px;color:var(--text-3);margin-bottom:12px;">长按左侧「≡」上下拖动可自由调换顺序</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;"><input type="text" id="newGroupInput" class="form-input" placeholder="输入新分组名" /><button class="btn-primary" style="padding:9px 16px;flex-shrink:0;" onclick="addArchiveGroup()">添加</button></div>
     <div id="groupEditList"></div>
   </div>
 </div>
 
 <div class="sheet-backdrop" id="sheet-threads" onclick="backdropClose(event,'sheet-threads')">
   <div class="sheet-panel"><div class="sheet-handle"></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><h3 style="margin:0;font-size:17px;">「<span id="threadRoomName">六爻</span>」历史记录</h3><button class="pill-mini accent" onclick="startNewChatThread();closeSheet('sheet-threads')">+ 新对话</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><h3 style="margin:0;font-size:17px;">「<span id="threadRoomName">六爻</span>」历史记录</h3><button class="pill-mini xs accent" onclick="startNewChatThread();closeSheet('sheet-threads')">+ 新对话</button></div>
     <div id="threadListBody"></div>
   </div>
 </div>
@@ -945,7 +1106,7 @@ button:active { transform: scale(0.96); }
 <div class="sheet-backdrop" id="sheet-memo" onclick="backdropClose(event,'sheet-memo')">
   <div class="sheet-panel"><div class="sheet-handle"></div>
     <h3 style="margin:0 0 6px;font-size:17px;">AI 备忘 · 让它更懂你的习惯</h3>
-    <div style="font-size:13px;color:var(--text-3);margin-bottom:12px;">写在这里的提醒，AI 每次回答和断盘都会牢记；刷题时答错的盲区也会自动记在下面。</div>
+    <div style="font-size:13px;color:var(--text-3);margin-bottom:12px;">写在这里的提醒，AI 每次回答和断盘都会牢记；刷题盲区与事后反推教训也会自动汇总在下方。</div>
     <div class="form-field"><label class="form-label">给「<span id="memoCatTag">六爻</span>」AI 加一条习惯提醒</label>
       <div style="display:flex;gap:8px;"><input type="text" id="newMemoInput" class="form-input" placeholder="如：回答尽量通俗，先给结论，不准讲废话" /><button class="btn-primary" style="padding:8px 14px;flex-shrink:0;" onclick="addManualMemory()">记下</button></div>
     </div>
@@ -957,10 +1118,11 @@ button:active { transform: scale(0.96); }
   </div>
 </div>
 
+<!-- 11. 综合设置抽屉（多 AI 模型自由切换 + 视觉识图模型 + 外部书站域名 + 备份） -->
 <div class="sheet-backdrop" id="sheet-settings" onclick="backdropClose(event,'sheet-settings')">
   <div class="sheet-panel">
     <div class="sheet-handle"></div>
-    <h3 style="margin:0 0 14px;font-size:18px;">水墨外观 · 密钥与数据备份</h3>
+    <h3 style="margin:0 0 14px;font-size:18px;">外观 · 多AI模型 · 书站与备份</h3>
     <div class="card">
       <div class="form-label">水墨主题风格</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
@@ -970,20 +1132,54 @@ button:active { transform: scale(0.96); }
       </div>
       <label style="display:flex;align-items:center;gap:8px;font-size:14px;"><input type="checkbox" id="cfgCoinSound" /> 开启灵石落盘清脆玉音</label>
     </div>
+
     <div class="card">
-      <div class="form-label">AI 接口配置</div>
-      <div class="form-field"><input type="password" id="cfgApiKey" class="form-input" placeholder="DeepSeek API Key（sk-...）" /></div>
-      <div class="form-field"><input type="text" id="cfgBaseUrl" class="form-input" placeholder="https://api.deepseek.com" /></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-        <input type="text" id="cfgFlashModel" class="form-input" placeholder="deepseek-chat" />
-        <input type="text" id="cfgProModel" class="form-input" placeholder="deepseek-reasoner" />
+      <div class="card-head" style="margin-bottom:8px;">
+        <span class="card-title">多 AI 引擎（哪个厉害连哪个，随时切换）</span>
       </div>
-      <div class="form-field"><label class="form-label">对话档位</label><select id="cfgUseTier" class="form-select"><option value="flash">极速省钱档（日常推荐）</option><option value="pro">深度思考档（复杂卦例）</option></select></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">
+        <button class="chip" onclick="applyAiPreset('deepseek')">DeepSeek</button>
+        <button class="chip" onclick="applyAiPreset('qwen')">通义千问</button>
+        <button class="chip" onclick="applyAiPreset('zhipu')">智谱清言</button>
+        <button class="chip" onclick="applyAiPreset('kimi')">Kimi</button>
+        <button class="chip" onclick="applyAiPreset('gemini_oai')">中转/Gemini</button>
+      </div>
+      <div class="form-field"><label class="form-label">主力文字模型（可配多个方案一键切换）</label>
+        <select id="cfgActiveProfile" class="form-select" onchange="switchAiProfileInUI(this.value)"></select>
+      </div>
+      <div class="form-field"><input type="text" id="cfgProfName" class="form-input" placeholder="方案名（如：DeepSeek主力 / 千问Max）" /></div>
+      <div class="form-field"><input type="password" id="cfgApiKey" class="form-input" placeholder="API Key（sk-...）" /></div>
+      <div class="form-field"><input type="text" id="cfgBaseUrl" class="form-input" placeholder="接口地址（如 https://api.deepseek.com）" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <input type="text" id="cfgFlashModel" class="form-input" placeholder="日常极速模型" />
+        <input type="text" id="cfgProModel" class="form-input" placeholder="深度推理模型" />
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:12px;">
+        <select id="cfgUseTier" class="form-select"><option value="flash">日常极速档（翻译/日常）</option><option value="pro">深度推理档（复杂卦例）</option></select>
+        <button class="btn-secondary" onclick="addNewAiProfile()">+ 存为新方案</button>
+      </div>
+
+      <div style="padding-top:10px;border-top:1px dashed var(--border);">
+        <div class="form-label" style="color:var(--accent);">照片识图专配模型（发照片给参悟 / 扫描PDF识字）</div>
+        <div style="font-size:12px;color:var(--text-3);margin-bottom:8px;">选填：推荐填智谱免费识图 glm-4v-flash 或千问 qwen-vl-plus；留空则自动用本地文字识别兜底。</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <button class="chip" onclick="applyVisionPreset('zhipu_v')">填智谱免费识图</button>
+          <button class="chip" onclick="applyVisionPreset('qwen_v')">填通义千问识图</button>
+        </div>
+        <div class="form-field"><input type="password" id="cfgVisKey" class="form-input" placeholder="识图 API Key（同主力接口可留空复用）" /></div>
+        <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:8px;margin-bottom:8px;">
+          <input type="text" id="cfgVisBaseUrl" class="form-input" placeholder="识图接口 Base URL" />
+          <input type="text" id="cfgVisModel" class="form-input" placeholder="模型名如 glm-4v-flash" />
+        </div>
+      </div>
+
       <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin:8px 0;"><input type="checkbox" id="cfgRedactNames" /> 发给 AI 前自动隐藏真实姓名与手机号</label>
       <div class="form-field"><label class="form-label">本命日柱（日历天时共振提示，选填）</label><input type="text" id="cfgMyDayPillar" class="form-input" placeholder="如：甲子、丙午" /></div>
-      <button class="btn-primary" style="width:100%;" onclick="saveGeneralSettings()">保存设置</button>
+      <div class="form-field"><label class="form-label">我的外部找书网站模板（{q} 代表书名，随时可换新域名）</label><input type="text" id="cfgExtBookUrl" class="form-input" placeholder="https://z-lib.gs/s/{q}" /></div>
+      <button class="btn-primary" style="width:100%;" onclick="saveGeneralSettings()">保存全部设置</button>
       <div id="costStatsBox" style="margin-top:8px;font-size:12px;color:var(--text-3);"></div>
     </div>
+
     <div class="card">
       <div class="form-label">一键备份到手机 iCloud / 文件（换手机防丢）</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
@@ -993,6 +1189,7 @@ button:active { transform: scale(0.96); }
       <button class="btn-secondary" style="width:100%;" onclick="document.getElementById('importBackupFile').click()">从文件恢复备份</button>
       <input type="file" id="importBackupFile" accept=".json" style="display:none;" onchange="importLocalBackup(event)" />
     </div>
+
     <div class="card">
       <div class="form-label">Cloudflare D1 云同步（进阶选配）</div>
       <div class="form-field"><input type="url" id="cfgSyncUrl" class="form-input" placeholder="Worker 同步地址（选填）" /></div>
@@ -1004,16 +1201,14 @@ button:active { transform: scale(0.96); }
       </div>
       <div id="cloudSyncStatus" style="font-size:12px;color:var(--text-3);"></div>
     </div>
-    <div class="card">
-      <div id="storageStatsBox" style="font-size:13px;color:var(--text-2);line-height:1.6;"></div>
-    </div>
+    <div class="card"><div id="storageStatsBox" style="font-size:13px;color:var(--text-2);line-height:1.6;"></div></div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script src="./engine.js?v=9"></script>
-<script src="./study.js?v=9"></script>
-<script src="./app.js?v=9"></script>
+<script src="./engine.js?v=10"></script>
+<script src="./study.js?v=10"></script>
+<script src="./app.js?v=10"></script>
 </body>
 </html>
